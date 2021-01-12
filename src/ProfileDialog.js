@@ -77,6 +77,7 @@ class ProfileDialog extends React.Component {
     }
 
     handleSaveLogin(data){
+        if(data==null)return;
         let newLogin = data.login;
         const requestOptions = {
             method: 'POST',
@@ -106,6 +107,7 @@ class ProfileDialog extends React.Component {
 
 
     handleSaveStatus(data){
+        if(data==null)return;
         let newStatus = data.status;
         this.setState({statusFormOpen:false});
         const requestOptions = {
@@ -133,8 +135,8 @@ class ProfileDialog extends React.Component {
     }
 
     handleSavePassword(data){
-        this.setState({passFormOpen:false});
         if(data == null)return;
+        this.setState({passFormOpen:false});
         let prevPass = data.prev_password;
         let newPass = data.new_password;
         const requestOptions = {

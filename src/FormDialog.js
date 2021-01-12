@@ -22,7 +22,7 @@ class FormDialog extends React.Component {
     }
     render() {
 
-        return (<Dialog open={this.props.open} onClose={this.props.onClose} aria-labelledby="form-dialog-title">
+        return (<Dialog maxWidth="sm" fullWidth open={this.props.open} onClose={this.props.onClose} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">{this.props.text}</DialogTitle>
 
             <DialogContent>
