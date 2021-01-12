@@ -26,17 +26,6 @@ export class App extends React.Component{
                 },
             },
         });
-        this.lightTheme = createMuiTheme({
-            palette: {
-                type: 'light',
-                primary: {
-                    main: "#ff5722",
-                },
-                secondary: {
-                    main: "#ff5722",
-                },
-            },
-        });
 
         const cookies = new Cookies();
         const token = cookies.get("token");
