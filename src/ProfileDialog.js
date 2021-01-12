@@ -57,7 +57,7 @@ class ProfileDialog extends React.Component {
             },
             body: "token="+this.context.token+"&server_id="+this.state.serverId
         };
-        fetch("http://rp-ruler.ru/api/get_profile.php",requestOptions).then(response => response.json())
+        fetch("https://rp-ruler.ru/api/get_profile.php",requestOptions).then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
                     this.setState({...data.user})
@@ -85,7 +85,7 @@ class ProfileDialog extends React.Component {
             },
             body: "token="+this.context.token+"&login="+newLogin
         };
-        fetch("http://rp-ruler.ru/api/save_profile.php",requestOptions).then(response => response.json())
+        fetch("https://rp-ruler.ru/api/save_profile.php",requestOptions).then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
                     this.setState({snackBarOpen:true,
@@ -115,7 +115,7 @@ class ProfileDialog extends React.Component {
             },
             body: "token="+this.context.token+"&status="+newStatus
         };
-        fetch("http://rp-ruler.ru/api/save_profile.php",requestOptions).then(response => response.json())
+        fetch("https://rp-ruler.ru/api/save_profile.php",requestOptions).then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
                     this.setState({snackBarOpen:true,
@@ -144,7 +144,7 @@ class ProfileDialog extends React.Component {
             },
             body: "token="+this.context.token+"&prev_pass="+prevPass+"&new_pass="+newPass
         };
-        fetch("http://rp-ruler.ru/api/save_profile.php",requestOptions).then(response => response.json())
+        fetch("https://rp-ruler.ru/api/save_profile.php",requestOptions).then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
                     this.setState({snackBarOpen:true,
@@ -173,7 +173,7 @@ class ProfileDialog extends React.Component {
                 method: 'POST',
                 body: formData
             };
-            fetch("http://rp-ruler.ru/api/upload_avatar.php",requestOptions).then(response => response.json())
+            fetch("https://rp-ruler.ru/api/upload_avatar.php",requestOptions).then(response => response.json())
                 .then((data)=>{
                     this.setState({avatar:data.avatar});
                 });

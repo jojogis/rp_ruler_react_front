@@ -57,7 +57,7 @@ class Chat extends React.Component{
             },
             body: "token="+this.context.token+"&room_id="+this.state.roomId+"&ts="+this.lastUpdateTs
         };
-        fetch("http://rp-ruler.ru/api/get_updates.php",requestOptions)
+        fetch("https://rp-ruler.ru/api/get_updates.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
@@ -104,7 +104,7 @@ class Chat extends React.Component{
             },
             body: "token="+this.context.token+"&server_id="+this.state.serverId
         };
-        fetch("http://rp-ruler.ru/api/disconnect_from_server.php",requestOptions).then(response => response.json())
+        fetch("https://rp-ruler.ru/api/disconnect_from_server.php",requestOptions).then(response => response.json())
             .then(()=>{
                 this.loadServers();
             });
@@ -141,7 +141,7 @@ class Chat extends React.Component{
             },
             body: "token="+this.context.token+"&server_id="+this.state.serverId
         };
-        fetch("http://rp-ruler.ru/api/get_rooms.php",requestOptions)
+        fetch("https://rp-ruler.ru/api/get_rooms.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
@@ -163,7 +163,7 @@ class Chat extends React.Component{
             },
             body: "token="+this.context.token
         };
-        fetch("http://rp-ruler.ru/api/get_users_servers.php",requestOptions)
+        fetch("https://rp-ruler.ru/api/get_users_servers.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
@@ -184,7 +184,7 @@ class Chat extends React.Component{
             },
             body: "token="+this.context.token+"&room_id="+this.state.roomId
         };
-        fetch("http://rp-ruler.ru/api/get_users_in_room.php",requestOptions)
+        fetch("https://rp-ruler.ru/api/get_users_in_room.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
@@ -201,7 +201,7 @@ class Chat extends React.Component{
             },
             body: "token="+this.context.token+"&room_id="+this.state.roomId
         };
-        fetch("http://rp-ruler.ru/api/get_messages.php",requestOptions)
+        fetch("https://rp-ruler.ru/api/get_messages.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
@@ -227,7 +227,7 @@ class Chat extends React.Component{
                 },
                 body: "token=" + this.context.token + "&room_id=" + this.state.roomId + "&msg_id=" + id
             };
-            fetch("http://rp-ruler.ru/api/read_message.php", requestOptions)
+            fetch("https://rp-ruler.ru/api/read_message.php", requestOptions)
                 .then(response => response.json())
                 .then((data) => {
                 })
@@ -276,7 +276,7 @@ class Chat extends React.Component{
             },
             body: "token="+this.context.token+"&msg_id="+id
         };
-        fetch("http://rp-ruler.ru/api/remove_message.php",requestOptions)
+        fetch("https://rp-ruler.ru/api/remove_message.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{})
     }
@@ -295,7 +295,7 @@ class Chat extends React.Component{
                     },
                     body: "token=" + this.context.token + "&room_id=" + this.state.roomId + "&text=" + msgText + "&reply_id=" + this.state.replyTo
                 };
-                fetch("http://rp-ruler.ru/api/send_message.php", requestOptions)
+                fetch("https://rp-ruler.ru/api/send_message.php", requestOptions)
                     .then(response => response.json())
                     .then((data) => {
                         let newMessages = [...this.state.messages];

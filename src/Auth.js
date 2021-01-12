@@ -56,7 +56,7 @@ class Auth extends React.Component{
             },
             body: "login="+this.state.login+"&pass="+this.state.pass
         };
-        fetch("http://rp-ruler.ru/api/login.php",requestOptions)
+        fetch("https://rp-ruler.ru/api/login.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{
                 if(data["token"] !== undefined){

@@ -51,7 +51,7 @@ class Reg extends React.Component{
             },
             body: "login="+this.state.login+"&pass="+this.state.pass+"&email="+this.state.email
         };
-        fetch("http://rp-ruler.ru/api/registration.php",requestOptions)
+        fetch("https://rp-ruler.ru/api/registration.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{
                 if(data["token"] !== undefined){

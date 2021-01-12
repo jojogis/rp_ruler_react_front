@@ -32,7 +32,7 @@ class ServersDialog extends React.Component {
     }
 
     componentDidMount() {
-        fetch("http://rp-ruler.ru/api/get_servers.php").then(response => response.json())
+        fetch("https://rp-ruler.ru/api/get_servers.php").then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
                     this.setState({...data})
@@ -52,7 +52,7 @@ class ServersDialog extends React.Component {
             },
             body: "token="+this.context.token+"&server_id="+id
         };
-        fetch("http://rp-ruler.ru/api/connect_to_server.php",requestOptions).then(response => response.json())
+        fetch("https://rp-ruler.ru/api/connect_to_server.php",requestOptions).then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
                     this.handleClose();
