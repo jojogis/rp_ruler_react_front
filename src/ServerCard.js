@@ -14,7 +14,7 @@ class ServerCard extends React.Component{
     render() {
         const {classes} = this.props;
         return (
-            <Card className={classes.root}>
+            <Card elevation={4} className={classes.root}>
                 <CardActionArea>
                     <CardMedia
                         className={classes.media}

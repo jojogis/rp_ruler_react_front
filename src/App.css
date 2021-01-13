@@ -23,3 +23,7 @@ input:-webkit-autofill:focus,
 input:-webkit-autofill:active  {
     -webkit-box-shadow: 0 0 0 30px rgba(0,0,0,0.60) inset !important;
 }
+*::selection{
+    background: #ff5722;
+    color: white;
+}

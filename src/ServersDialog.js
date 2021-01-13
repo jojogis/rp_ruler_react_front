@@ -64,7 +64,7 @@ class ServersDialog extends React.Component {
     render() {
         const {classes} = this.props;
         return (
-            <Dialog  fullScreen open={this.props.open} onClose={this.handleClose} TransitionComponent={Transition}>
+            <Dialog fullScreen open={this.props.open} onClose={this.handleClose} TransitionComponent={Transition}>
                 <AppBar>
                     <Toolbar>
                         <IconButton edge="start" color="inherit" onClick={this.handleClose} aria-label="close">

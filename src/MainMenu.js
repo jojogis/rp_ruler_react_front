@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Fab, List, ListItem,  withStyles} from "@material-ui/core";
-import {AssignmentInd, Add, Settings, Explore} from "@material-ui/icons";
+import {AssignmentInd, Add, Settings, Explore, Forum} from "@material-ui/icons";
 
 import {Divider} from "@material-ui/core";
 import AppContext from "./AppContext.js";
@@ -44,7 +44,11 @@ class MainMenu extends React.Component{
         const {classes} = this.props;
         return (<div><List><ListItem><Fab onClick={this.handleProfileDialogOpen} aria-label="add">
             <Settings />
-        </Fab></ListItem><Divider className={classes.divider}/>
+        </Fab></ListItem>
+                <ListItem><Fab aria-label="add">
+                    <Forum />
+                </Fab></ListItem>
+                <Divider className={classes.divider}/>
             {this.props.servers.map((item)=>(
                 <ListItem key={item.id}>
                     <Fab className={classes.serverElem}
