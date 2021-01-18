@@ -1,6 +1,6 @@
 import * as React from "react";
 import {
-    Avatar,
+    Avatar, Button,
     CssBaseline,
     Grid, List, ListItem, ListItemAvatar, ListItemText,
     Paper, TextField,
@@ -23,14 +23,15 @@ class Chat extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            serverId:null,
+            serverId:0,
             roomId:null,
             servers:[],
             rooms:[],
             messages:[],
             lastReadMsg:0,
             replyTo:null,
-            users:[]
+            users:[],
+            isChat:true
         }
         this.lastUpdateTs = new Date().getTime();
         this.handleChangeServer = this.handleChangeServer.bind(this);
@@ -46,7 +47,28 @@ class Chat extends React.Component{
         this.handleFocus = this.handleFocus.bind(this);
         this.handleCancelReply = this.handleCancelReply.bind(this);
         this.handleReplyChoose = this.handleReplyChoose.bind(this);
+        this.handleToChatClick = this.handleToChatClick.bind(this);
         this.handleServerDisconnect = this.handleServerDisconnect.bind(this);
+        this.handleWriteToUserClick = this.handleWriteToUserClick.bind(this);
+    }
+
+    handleWriteToUserClick(event,user_id){
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: "token="+this.context.token+"&user_id="+user_id
+        };
+        fetch("https://rp-ruler.ru/api/get_chat_with_user.php",requestOptions)
+            .then(response => response.json())
+            .then((data)=> {
+                if (data.error === undefined) {
+                    this.state.room_id = data.response;
+                    this.state.isChat = true;
+                    this.loadRooms();
+                }
+            });
     }
 
     updateChat(){
@@ -112,6 +134,7 @@ class Chat extends React.Component{
 
     handleChangeServer(serverId){
         this.state.serverId = serverId;//так надо
+        this.state.isChat = false;
         this.loadRooms();
     }
 
@@ -119,6 +142,12 @@ class Chat extends React.Component{
         this.state.roomId = roomId;//так надо
         this.loadMessages();
         this.loadUsers();
+    }
+
+    handleToChatClick(){
+        this.state.serverId = 0;//так надо
+        this.state.isChat = true;
+        this.loadRooms();
     }
 
 
@@ -134,12 +163,13 @@ class Chat extends React.Component{
 
 
     loadRooms(){
+        const serverId = this.state.isChat ? 0 : this.state.serverId;
         const requestOptions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: "token="+this.context.token+"&server_id="+this.state.serverId
+            body: "token="+this.context.token+"&server_id="+serverId
         };
         fetch("https://rp-ruler.ru/api/get_rooms.php",requestOptions)
             .then(response => response.json())
@@ -177,6 +207,10 @@ class Chat extends React.Component{
     }
 
     loadUsers(){
+        if(this.state.roomId == null){
+            this.setState({users:[]})
+            return;
+        }
         const requestOptions = {
             method: 'POST',
             headers: {
@@ -194,6 +228,10 @@ class Chat extends React.Component{
     }
 
     loadMessages(){
+        if(this.state.roomId == null){
+            this.setState({messages:[]});
+            return;
+        }
         const requestOptions = {
             method: 'POST',
             headers: {
@@ -217,7 +255,7 @@ class Chat extends React.Component{
     }
 
     readMessages(){
-        if(this.state.messages != null && this.state.lastReadMsg !== this.state.messages.slice(-1)[0].id) {
+        if(this.state.messages != null && this.state.messages.length !== 0 && this.state.lastReadMsg !== this.state.messages.slice(-1)[0].id) {
             const id = this.state.messages.slice(-1)[0].id;
             this.setState({lastReadMsg: id});
             const requestOptions = {
@@ -316,9 +354,13 @@ class Chat extends React.Component{
             serverName = curServer.name;
         }
         const room = this.getElById(this.state.rooms,this.state.roomId);
-        const roomName = (room !== null) ? room.name : "";
-        const labelText = this.state.replyTo==null ? "Написать в "+roomName.toLowerCase() :
-            "Написать в ответ "+this.getElById(this.state.messages,this.state.replyTo).login;
+        let labelText = "Писать некуда...";
+        let roomName = "";
+        if(room != null){
+            roomName = room.login != null ? room.login : room.name;
+            labelText = this.state.replyTo==null ? "Написать в "+roomName.toLowerCase() :
+                "Написать в ответ "+this.getElById(this.state.messages,this.state.replyTo).login;
+        }
         const replyText = this.state.replyTo==null ? null : this.getElById(this.state.messages,this.state.replyTo).text;
         const replyLogin = this.state.replyTo==null ? null : this.getElById(this.state.messages,this.state.replyTo).login;
         return(
@@ -326,14 +368,17 @@ class Chat extends React.Component{
             <Grid className={classes.wrap} container spacing={1} onContextMenu={(event) => {event.preventDefault()}}>
                 <CssBaseline />
                 <Grid justify="center" container item xs={1} spacing={0}>
-                    <MainMenu servers={this.state.servers} onServerConnect={this.loadServers} onChangeServer={this.handleChangeServer}/>
+                    <MainMenu servers={this.state.servers}
+                              onServerConnect={this.loadServers}
+                              onChangeServer={this.handleChangeServer}
+                              onToChatClick={this.handleToChatClick}
+                    />
                 </Grid>
                 <Grid justify="center" container item xs={2} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1} >
-                        <ServerName name={serverName} onServerDisconnect={this.handleServerDisconnect}/>
+                        <ServerName isChat={this.state.isChat} name={serverName} onServerDisconnect={this.handleServerDisconnect}/>
                         {(this.state.rooms !== undefined) ?
                             <RoomsList rooms={this.state.rooms} onChangeRoom={this.handleChangeRoom}/> : ""}
-
                     </Paper>
                 </Grid>
                 <Grid justify="center" container item xs={7} spacing={0}>
@@ -368,9 +413,13 @@ class Chat extends React.Component{
 
                 <Grid justify="center" container item xs={2} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1} >
-                        <UsersList users={this.state.users}/>
+                        <Button fullWidth aria-controls="fade-menu" aria-haspopup="true">
+                            Пользователи в комнате
+                        </Button>
+                        <UsersList onWriteToUser={this.handleWriteToUserClick} users={this.state.users}/>
                     </Paper>
                 </Grid>
+
             </Grid>
         );
     }

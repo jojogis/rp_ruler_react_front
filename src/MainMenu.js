@@ -27,6 +27,7 @@ class MainMenu extends React.Component{
         this.props.onChangeServer(id,name);
     }
 
+
     handleProfileDialogClose(){
         this.setState({profileDialogOpen:false})
     }
@@ -45,7 +46,7 @@ class MainMenu extends React.Component{
         return (<div><List><ListItem><Fab onClick={this.handleProfileDialogOpen} aria-label="add">
             <Settings />
         </Fab></ListItem>
-                <ListItem><Fab aria-label="add">
+                <ListItem><Fab onClick={this.props.onToChatClick} aria-label="add">
                     <Forum />
                 </Fab></ListItem>
                 <Divider className={classes.divider}/>

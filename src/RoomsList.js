@@ -1,6 +1,6 @@
 import * as React from "react";
 import AppContext from "./AppContext";
-import {List, ListItem, ListItemIcon, ListItemText, withStyles} from "@material-ui/core";
+import {List, ListItem, ListItemIcon, ListItemText, Typography, withStyles} from "@material-ui/core";
 import {AlternateEmail, Language} from "@material-ui/icons";
 
 
@@ -13,19 +13,23 @@ class RoomsList extends React.Component{
     render() {
 
         const {classes} = this.props;
-        return(<List>
-            {this.props.rooms.map((item)=>(
-                <ListItem onClick={() => this.handleRoomClick(item.id)} key={item.id} button>
-                    <ListItemIcon>
-                        {item.is_global === 1 ? <Language /> : <AlternateEmail/>}
-                    </ListItemIcon>
-                    <ListItemText >
-                        <span className={classes.room}>{item.name}</span>
-                    </ListItemText>
-                </ListItem>
-            ))}
+        if(this.props.rooms == null || this.props.rooms.length === 0){
+            return(<Typography variant="subtitle2" align="center">Комнат пока нет...</Typography>);
+        }else {
+            return (<List>
+                {this.props.rooms.map((item) => (
+                    <ListItem onClick={() => this.handleRoomClick(item.id)} key={item.id} button>
+                        <ListItemIcon>
+                            {item.is_global === 1 ? <Language/> : <AlternateEmail/>}
+                        </ListItemIcon>
+                        <ListItemText>
+                            <span className={classes.room}>{item.login != null ? item.login : item.name}</span>
+                        </ListItemText>
+                    </ListItem>
+                ))}
 
-        </List>);
+            </List>);
+        }
     }
 
 }

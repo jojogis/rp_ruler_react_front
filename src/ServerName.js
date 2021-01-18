@@ -27,29 +27,37 @@ class ServerName extends React.Component{
 
     render() {
         const {classes} = this.props;
-        return(<div><Button fullWidth onContextMenu={this.handleServerMenuClick} onClick={this.handleServerMenuClick}
-                       aria-controls="fade-menu" aria-haspopup="true">
-            {this.props.name}<ExpandMore/>
-        </Button><Menu
-            transformOrigin={{
-                vertical: 'top',
-                horizontal: 'center',
-            }}
-            anchorOrigin={{
-                vertical:"bottom",
-                horizontal: 'center',
-            }}
-            getContentAnchorEl={null}
-            anchorEl={this.state.anchorEl}
-            keepMounted
-            className={classes.paperWrap}
-            open={Boolean(this.state.anchorEl)}
-            onClose={this.handleServerMenuClose}
-        >
-            <MenuItem className={classes.exitServer} onClick={this.handleServerDisconnectClick}>
-                Покинуть сервер <ExitToApp/></MenuItem>
+        if(this.props.isChat){
+            return(<div><Button fullWidth onContextMenu={this.handleServerMenuClick} onClick={this.handleServerMenuClick}
+                                aria-controls="fade-menu" aria-haspopup="true">
+                личка
+            </Button></div>);
+        }else {
+            return (
+                <div><Button fullWidth onContextMenu={this.handleServerMenuClick} onClick={this.handleServerMenuClick}
+                             aria-controls="fade-menu" aria-haspopup="true">
+                    {this.props.name}<ExpandMore/>
+                </Button><Menu
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'center',
+                    }}
+                    anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: 'center',
+                    }}
+                    getContentAnchorEl={null}
+                    anchorEl={this.state.anchorEl}
+                    keepMounted
+                    className={classes.paperWrap}
+                    open={Boolean(this.state.anchorEl)}
+                    onClose={this.handleServerMenuClose}
+                >
+                    <MenuItem className={classes.exitServer} onClick={this.handleServerDisconnectClick}>
+                        Покинуть сервер <ExitToApp/></MenuItem>
 
-        </Menu></div>);
+                </Menu></div>);
+        }
     }
 }
 

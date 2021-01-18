@@ -24,7 +24,7 @@ class UserPopover extends React.Component {
             <Avatar className={classes.avatar} alt={this.props.user.login} src={"https://rp-ruler.ru/upload/"+this.props.user.avatar}/>
             <Typography variant="h6">{this.props.user.login}</Typography>
             <Typography paragraph={true} variant="caption" >{this.props.user.status}</Typography>
-                <Button variant="contained" color="primary">
+                <Button onClick={this.props.onWriteToUser} variant="contained" color="primary">
                     Написать
                 </Button>
             </div>

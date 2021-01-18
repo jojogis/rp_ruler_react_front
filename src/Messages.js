@@ -4,7 +4,7 @@ import {
     Avatar, IconButton, List,
     ListItem,
     ListItemAvatar, ListItemIcon,
-    ListItemText, Menu, MenuItem,
+    ListItemText, Menu, MenuItem, Typography,
 
     withStyles
 } from "@material-ui/core";
