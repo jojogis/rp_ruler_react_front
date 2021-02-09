@@ -18,7 +18,7 @@ class RoomsList extends React.Component{
         }else {
             return (<List>
                 {this.props.rooms.map((item) => (
-                    <ListItem onClick={() => this.handleRoomClick(item.id)} key={item.id} button>
+                    <ListItem selected={this.props.currentRoom === item.id} onClick={() => this.handleRoomClick(item.id)} key={item.id} button>
                         <ListItemIcon>
                             {item.is_global === 1 ? <Language/> : <AlternateEmail/>}
                         </ListItemIcon>

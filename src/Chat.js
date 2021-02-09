@@ -2,7 +2,7 @@ import * as React from "react";
 import {
     Avatar, Button,
     CssBaseline,
-    Grid, List, ListItem, ListItemAvatar, ListItemText,
+    Grid, LinearProgress, List, ListItem, ListItemAvatar, ListItemText,
     Paper, TextField,
     withStyles,
 } from "@material-ui/core";
@@ -31,9 +31,11 @@ class Chat extends React.Component{
             lastReadMsg:0,
             replyTo:null,
             users:[],
-            isChat:true
+            isChat:false,
+            isLoading:true
         }
         this.lastUpdateTs = new Date().getTime();
+        this.isLoadingMessages = false;
         this.handleChangeServer = this.handleChangeServer.bind(this);
         this.handleChangeRoom = this.handleChangeRoom.bind(this);
         this.loadRooms = this.loadRooms.bind(this);
@@ -50,6 +52,7 @@ class Chat extends React.Component{
         this.handleToChatClick = this.handleToChatClick.bind(this);
         this.handleServerDisconnect = this.handleServerDisconnect.bind(this);
         this.handleWriteToUserClick = this.handleWriteToUserClick.bind(this);
+        this.handleLoadMoreMessages = this.handleLoadMoreMessages.bind(this);
     }
 
     handleWriteToUserClick(event,user_id){
@@ -64,9 +67,10 @@ class Chat extends React.Component{
             .then(response => response.json())
             .then((data)=> {
                 if (data.error === undefined) {
-                    this.state.room_id = data.response;
+                    this.state.room_id = data.result;
                     this.state.isChat = true;
-                    this.loadRooms();
+                    console.log(data.result);
+                    this.loadRooms(data.result);
                 }
             });
     }
@@ -141,7 +145,7 @@ class Chat extends React.Component{
     handleChangeRoom(roomId){
         this.state.roomId = roomId;//так надо
         this.loadMessages();
-        this.loadUsers();
+        if(!this.state.isChat)this.loadUsers();
     }
 
     handleToChatClick(){
@@ -162,8 +166,10 @@ class Chat extends React.Component{
 
 
 
-    loadRooms(){
+    loadRooms(choosedRoom){
         const serverId = this.state.isChat ? 0 : this.state.serverId;
+        if(serverId === null)return;
+        this.setState({isLoading:true});
         const requestOptions = {
             method: 'POST',
             headers: {
@@ -177,7 +183,12 @@ class Chat extends React.Component{
                 if(data.error === undefined){
                     let roomId = null;
                     if(data.length > 0)roomId = data[0].id;
-                    this.setState({rooms:data,roomId:roomId});
+
+                    if(choosedRoom == null){
+                        this.setState({rooms:data,roomId:roomId,isLoading:false});
+                    }else{
+                        this.setState({rooms:data,roomId:choosedRoom,isLoading:false});
+                    }
                     this.loadMessages();
                     this.loadUsers();
                 }
@@ -227,24 +238,37 @@ class Chat extends React.Component{
             })
     }
 
-    loadMessages(){
+    handleLoadMoreMessages(){
+        if(!this.isLoadingMessages)this.loadMessages(this.state.messages.length);
+    }
+
+    loadMessages(offset = 0){
         if(this.state.roomId == null){
             this.setState({messages:[]});
             return;
         }
+        this.isLoadingMessages = true;
+        this.setState({isLoading:true});
         const requestOptions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: "token="+this.context.token+"&room_id="+this.state.roomId
+            body: "token="+this.context.token+"&room_id="+this.state.roomId+"&offset="+offset
         };
         fetch("https://rp-ruler.ru/api/get_messages.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
                     let newReplyTo = null;
-                    this.setState({messages:data.messages,lastReadMsg:data.last_read,replyTo:newReplyTo});
+                    if(offset != 0){
+                        let newMessages = this.state.messages;
+                        newMessages.unshift(...data.messages);
+                        this.setState({messages:newMessages,lastReadMsg:data.last_read,replyTo:newReplyTo,isLoading:false});
+                    }else{
+                        this.setState({messages:data.messages,lastReadMsg:data.last_read,replyTo:newReplyTo,isLoading:false});
+                    }
+                    this.isLoadingMessages = false;
                 }
 
             })
@@ -346,8 +370,10 @@ class Chat extends React.Component{
 
 
 
+
     render() {
         const {classes} = this.props;
+
         const curServer = this.getElById(this.state.servers,this.state.serverId);
         let serverName = "";
         if(curServer != null){
@@ -357,8 +383,9 @@ class Chat extends React.Component{
         let labelText = "Писать некуда...";
         let roomName = "";
         if(room != null){
+            let writeTo = this.state.isChat ? "Написать " : "Написать в ";
             roomName = room.login != null ? room.login : room.name;
-            labelText = this.state.replyTo==null ? "Написать в "+roomName.toLowerCase() :
+            labelText = this.state.replyTo==null ? writeTo + roomName.toLowerCase() :
                 "Написать в ответ "+this.getElById(this.state.messages,this.state.replyTo).login;
         }
         const replyText = this.state.replyTo==null ? null : this.getElById(this.state.messages,this.state.replyTo).text;
@@ -366,8 +393,11 @@ class Chat extends React.Component{
         return(
 
             <Grid className={classes.wrap} container spacing={1} onContextMenu={(event) => {event.preventDefault()}}>
+
                 <CssBaseline />
+                {this.state.isLoading ? <LinearProgress className={classes.loading}/> : ""}
                 <Grid justify="center" container item xs={1} spacing={0}>
+
                     <MainMenu servers={this.state.servers}
                               onServerConnect={this.loadServers}
                               onChangeServer={this.handleChangeServer}
@@ -378,10 +408,10 @@ class Chat extends React.Component{
                     <Paper className={classes.paperWrap} elevation={1} >
                         <ServerName isChat={this.state.isChat} name={serverName} onServerDisconnect={this.handleServerDisconnect}/>
                         {(this.state.rooms !== undefined) ?
-                            <RoomsList rooms={this.state.rooms} onChangeRoom={this.handleChangeRoom}/> : ""}
+                            <RoomsList currentRoom={this.state.roomId} rooms={this.state.rooms} onChangeRoom={this.handleChangeRoom}/> : ""}
                     </Paper>
                 </Grid>
-                <Grid justify="center" container item xs={7} spacing={0}>
+                <Grid justify="center" container item xs={this.state.isChat ? 9 : 7} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1} >
 
                         <RoomAppBar name={roomName}/>
@@ -390,6 +420,7 @@ class Chat extends React.Component{
                                   onRemoveMessage={this.handleRemoveMessage}
                                   onReplyChoose={this.handleReplyChoose}
                                   replyTo={this.state.replyTo}
+                                  loadMoreMessages={this.handleLoadMoreMessages}
                                   lastRead={this.state.lastReadMsg}/>
                         <Paper elevation={4} className={classes.messageInputWrap}>
                             <InputReplyMessage onCancel={this.handleCancelReply} replyText={replyText} replyLogin={replyLogin}/>
@@ -410,15 +441,12 @@ class Chat extends React.Component{
                     </Paper>
 
                 </Grid>
-
-                <Grid justify="center" container item xs={2} spacing={0}>
+                {!this.state.isChat ? <Grid justify="center" container item xs={2} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1} >
-                        <Button fullWidth aria-controls="fade-menu" aria-haspopup="true">
-                            Пользователи в комнате
-                        </Button>
                         <UsersList onWriteToUser={this.handleWriteToUserClick} users={this.state.users}/>
                     </Paper>
-                </Grid>
+                </Grid> : ""}
+
 
             </Grid>
         );
@@ -427,6 +455,11 @@ class Chat extends React.Component{
 
 
 const styles = {
+    loading:{
+        width:"100%",
+        position:"fixed",
+        top:"0"
+    },
     wrap: {
         padding:"10px 5px",
         width:"100vw",

@@ -59,6 +59,7 @@ class UsersList extends React.Component{
                      onWriteToUser={(event)=>this.handleWriteClick(event,this.state.clickedUser.id)}
                      anchorEl={this.state.anchorEl}
                      user={this.state.clickedUser}
+                     doWrite={this.state.clickedUser != null && this.context.user_id != this.state.clickedUser.id}
         />
         </div>)
     }

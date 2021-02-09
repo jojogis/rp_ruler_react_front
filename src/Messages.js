@@ -1,7 +1,7 @@
 import * as React from "react";
 import {
 
-    Avatar, IconButton, List,
+    Avatar, IconButton, LinearProgress, List,
     ListItem,
     ListItemAvatar, ListItemIcon,
     ListItemText, Menu, MenuItem, Typography,
@@ -27,6 +27,7 @@ class Messages extends React.Component{
         this.handleDeleteMsg = this.handleDeleteMsg.bind(this);
         this.handleReply = this.handleReply.bind(this);
         this.handleContextClick = this.handleContextClick.bind(this);
+        this.handleScroll = this.handleScroll.bind(this);
     }
 
     handleContextClick(event,message_id){
@@ -77,14 +78,21 @@ class Messages extends React.Component{
         this.props.onRemoveMessage(this.state.menuMessageId);
         this.handleCloseMenu(event);
     }
+    handleScroll(event){
+        if(event.target.scrollTop < 400 && this.props.messages.length % 60 === 0){
+            this.props.loadMoreMessages();
+        }
+
+    }
 
     render(){
         const {classes} = this.props;
-        return(<List className={classes.messagesWrap}>
+        return(<List onScroll={this.handleScroll} className={classes.messagesWrap}>
+
             {this.props.messages.map((item)=>(
             <ListItem button key={item.id}
                       className={(item.id > this.props.lastRead ? classes.unreadMessage : "")+" "+
-                      (item.id==this.props.replyTo ? classes.replyTo : "")}
+                      (item.id == this.props.replyTo ? classes.replyTo : "")}
                       onContextMenu={(event) => this.handleContextClick(event,item.id)}>
                 <ListItemAvatar>
                     <Avatar alt={item.login} src={"https://rp-ruler.ru/upload/"+item.avatar}/>
@@ -151,7 +159,8 @@ const styles = {
         "background-color":"#ff572209"
     },
     login:{
-        color:"#ff5722"
+        color:"#ff5722",
+        "font-weight":"400"
     }}
 
 ;

@@ -77,14 +77,15 @@ class ServersDialog extends React.Component {
                 </AppBar>
                 <br/><br/><br/>
                 <div style={{ padding: 20 }}>
-                <Grid container spacing={2}>
+                <Grid container direction="row" spacing={2} justify="center">
                     {this.state.servers.map((item)=>(
-                    <Grid item xs={3} key={item.id}>
+                    <Grid item xs key={item.id} className={classes.serverCard}>
                         <ServerCard
                             name={item.name}
                             avatar={item.avatar}
                             description={item.description}
                             players={item.count}
+                            className={classes.serverCard}
                             onConnect={() => this.handleConnect(item.id)}
                         />
                     </Grid>
@@ -97,6 +98,8 @@ class ServersDialog extends React.Component {
     }
 }
 const styles = {
-
+    serverCard:{
+        "width":"400px"
+    }
 };
 export default withStyles(styles)(ServersDialog);
