@@ -106,7 +106,7 @@ export class App extends React.Component{
                         <Reg onReg={this.handleLogin}/>
                     </Route>
                     <PrivateRoute token={this.state.token} path="/">
-                        <Chat/>
+                        <Chat isDarkTheme={this.state.isDarkTheme}/>
                     </PrivateRoute>
                 </Switch>
             </Router>

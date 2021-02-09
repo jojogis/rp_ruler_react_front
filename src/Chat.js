@@ -8,13 +8,16 @@ import {
 } from "@material-ui/core";
 import MainMenu from "./MainMenu";
 import TokenContext from "./AppContext";
-import {ExitToApp, ExpandMore, Language, Message} from "@material-ui/icons";
+import { Picker } from 'emoji-mart'
+import 'emoji-mart/css/emoji-mart.css'
 import RoomsList from "./RoomsList";
 import ServerName from "./ServerName";
 import RoomAppBar from "./RoomAppBar";
 import Messages from "./Messages";
 import InputReplyMessage from "./InputReplyMessage";
 import UsersList from "./UsersList";
+import Emoji from "./Emoji";
+import {Mood, SentimentSatisfied} from "@material-ui/icons";
 
 
 class Chat extends React.Component{
@@ -32,8 +35,10 @@ class Chat extends React.Component{
             replyTo:null,
             users:[],
             isChat:false,
-            isLoading:true
+            isLoading:true,
+            messageText:""
         }
+        this.messageInput = React.createRef();
         this.lastUpdateTs = new Date().getTime();
         this.isLoadingMessages = false;
         this.handleChangeServer = this.handleChangeServer.bind(this);
@@ -53,6 +58,7 @@ class Chat extends React.Component{
         this.handleServerDisconnect = this.handleServerDisconnect.bind(this);
         this.handleWriteToUserClick = this.handleWriteToUserClick.bind(this);
         this.handleLoadMoreMessages = this.handleLoadMoreMessages.bind(this);
+        this.handleSelectEmoji = this.handleSelectEmoji.bind(this);
     }
 
     handleWriteToUserClick(event,user_id){
@@ -368,7 +374,10 @@ class Chat extends React.Component{
         }
     }
 
-
+    handleSelectEmoji(emoji){
+        this.messageInput.current.value += emoji.native;
+        this.messageInput.current.click();
+    }
 
 
     render() {
@@ -436,8 +445,11 @@ class Chat extends React.Component{
                             color="black"
                             className={classes.messageInput}
                             variant="filled"
+                            inputRef={this.messageInput}
                         />
+                            <Emoji isDarkTheme={this.props.isDarkTheme} onSelect={this.handleSelectEmoji}/>
                         </Paper>
+
                     </Paper>
 
                 </Grid>
@@ -455,6 +467,7 @@ class Chat extends React.Component{
 
 
 const styles = {
+
     loading:{
         width:"100%",
         position:"fixed",

@@ -27,3 +27,32 @@ input:-webkit-autofill:active  {
     background: #ff5722;
     color: white;
 }
+.emoji-mart{
+    border:0 !important;
+}
+.emoji-mart-dark,.emoji-mart-dark .emoji-mart-category-label span,.emoji-mart-dark .emoji-mart-search input{
+    background-color: #424242 !important;
+    color:rgba(255, 255, 255, 0.7) !important;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-weight:400;
+    font-size:15px;
+}
+.emoji-mart .emoji-mart-emoji:focus{
+    outline:none;
+}
+.emoji-mart .emoji-mart-emoji span,.emoji-mart .emoji-mart-emoji{
+    cursor: pointer !important;
+}
+.emoji-mart-dark .emoji-mart-category .emoji-mart-emoji:hover:before{
+    background-color:transparent !important;
+
+}
+.emoji-mart .emoji-mart-emoji{
+    transition: .2s;
+}
+.emoji-mart .emoji-mart-emoji:hover{
+    text-shadow: 0 0 7px #222;
+}
+.emoji-mart-anchor{
+    cursor:pointer !important;
+}
