@@ -56,3 +56,6 @@ input:-webkit-autofill:active  {
 .emoji-mart-anchor{
     cursor:pointer !important;
 }
+.emoji-mart-category .emoji-mart-emoji:hover:before{
+    background-color: transparent !important;
+}

@@ -5,21 +5,17 @@ import {
     Container,
     CssBaseline,
     Grid,
-    Link,
+    Link, Paper,
     TextField,
-    Typography, withStyles,Paper
+    Typography, withStyles
 } from "@material-ui/core";
 import { Link as RouterLink } from 'react-router-dom';
 import {Copyright} from "./Copyright";
 import {withRouter} from "react-router-dom";
-import ParticlesBg from 'particles-bg'
 
 
 
-
-
-
-class Auth extends React.Component{
+class Restore extends React.Component{
 
     routingFunction = () => {
         this.props.history.push("/");
@@ -30,8 +26,7 @@ class Auth extends React.Component{
 
         this.state = {
             login:"",
-            pass:"",
-            wrongLoginPass:false
+            wrongLogin:false
         };
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -44,7 +39,7 @@ class Auth extends React.Component{
 
         this.setState({
             [name]: value,
-            wrongLoginPass:false
+            wrongLogin:false
         });
     }
 
@@ -55,16 +50,16 @@ class Auth extends React.Component{
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: "login="+this.state.login+"&pass="+this.state.pass
+            body: "login="+this.state.login
         };
-        fetch("https://rp-ruler.ru/api/login.php",requestOptions)
+        fetch("https://rp-ruler.ru/api/restore_send.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{
                 if(data["token"] !== undefined){
                     this.props.onLogin(data["token"],data["user_id"]);
                     this.routingFunction();
-                }else if( data["error"] === 1){
-                    this.setState({wrongLoginPass:true});
+                }else if( data["success"] != 1){
+                    this.setState({wrongLogin:true});
                 }
             })
     }
@@ -72,44 +67,28 @@ class Auth extends React.Component{
     render() {
         const {classes} = this.props;
 
-
         return(<Container component="main" maxWidth="xs">
             <CssBaseline />
-
             <Paper elevation={6} className={classes.paper}>
                 <Typography component="h1" variant="h5">
-                    Добро пожаловать. Снова.
+                    Восстановление пароля. Снова...
                 </Typography>
                 <form className={classes.form} noValidate
                       onSubmit={this.handleSubmit} >
                     <TextField
                         variant="outlined"
                         margin="normal"
-                        error={this.state.wrongLoginPass}
+                        error={this.state.wrongLogin}
                         required
                         fullWidth
                         id="login"
                         label="Логин или E-mail"
                         name="login"
-                        helperText={this.state.wrongLoginPass ? "Неверный логин или пароль" : ""}
+                        helperText={this.state.wrongLogin ? "Пользователь не найден" : ""}
                         autoComplete="login"
                         onChange = {this.handleInputChange}
                         value={this.state.login}
                         autoFocus
-                    />
-                    <TextField
-                        variant="outlined"
-                        margin="normal"
-                        required
-                        error={this.state.wrongLoginPass}
-                        fullWidth
-                        onChange = {this.handleInputChange}
-                        name="pass"
-                        label="Пароль"
-                        type="password"
-                        value={this.state.password}
-                        id="pass"
-                        autoComplete="current-password"
                     />
                     <Button
                         type="submit"
@@ -118,12 +97,12 @@ class Auth extends React.Component{
                         color="primary"
                         className={classes.submit}
                     >
-                        Войти
+                        Отправить письмо
                     </Button>
                     <Grid container>
                         <Grid item xs>
-                            <Link href="#" variant="body2" to="/restore" component={RouterLink}>
-                                Забыли пароль?
+                            <Link href="#" variant="body2" to="/login" component={RouterLink}>
+                                Войти
                             </Link>
                         </Grid>
                         <Grid item>
@@ -144,7 +123,7 @@ class Auth extends React.Component{
 
 
 
-Auth.propTypes = {
+Restore.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
@@ -167,4 +146,4 @@ const styles = {
 };
 
 
-export default withStyles(styles)(withRouter(Auth));
+export default withStyles(styles)(withRouter(Restore));

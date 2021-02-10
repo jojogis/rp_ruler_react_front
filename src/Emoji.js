@@ -88,7 +88,7 @@ class Emoji extends React.Component {
 const styles = {
     emojiButton:{
         position:"absolute",
-        top:"10px",
+        bottom:"10px",
         right:"5px",
         opacity:0.7
     },

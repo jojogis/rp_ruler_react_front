@@ -6,12 +6,13 @@ import {
     CssBaseline,
     FormControlLabel,
     Grid,
-    Link,
+    Link, Paper,
     TextField,
     Typography, withStyles
 } from "@material-ui/core";
 import {Copyright} from "./Copyright";
 import {Link as RouterLink, withRouter} from 'react-router-dom';
+import ParticlesBg from "particles-bg";
 
 
 
@@ -69,7 +70,8 @@ class Reg extends React.Component{
         const {classes} = this.props;
         return ( <Container component="main" maxWidth="xs">
             <CssBaseline />
-            <div className={classes.paper}>
+
+            <Paper elevation={6} className={classes.paper}>
                 <Typography component="h1" variant="h5">
                     Добро пожаловать.
                 </Typography>
@@ -130,7 +132,7 @@ class Reg extends React.Component{
                     </Button>
                     <Grid container justify="flex-end">
                         <Grid item xs>
-                            <Link href="#" variant="body2">
+                            <Link href="#" variant="body2" component={RouterLink} to="/restore" >
                                 Забыли пароль?
                             </Link>
                         </Grid>
@@ -141,17 +143,20 @@ class Reg extends React.Component{
                         </Grid>
                     </Grid>
                 </form>
-            </div>
-            <Box mt={5}>
-                <Copyright />
-            </Box>
+                <Box mt={5}>
+                    <Copyright />
+                </Box>
+            </Paper>
+
         </Container>);
     }
 }
 
 const styles = {
     paper: {
-        marginTop: "80px",
+        marginTop: "160px",
+        padding:"60px",
+        width:"500px",
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',

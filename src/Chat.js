@@ -36,7 +36,8 @@ class Chat extends React.Component{
             users:[],
             isChat:false,
             isLoading:true,
-            messageText:""
+            messageText:"",
+            inputFocused:false
         }
         this.messageInput = React.createRef();
         this.lastUpdateTs = new Date().getTime();
@@ -59,6 +60,7 @@ class Chat extends React.Component{
         this.handleWriteToUserClick = this.handleWriteToUserClick.bind(this);
         this.handleLoadMoreMessages = this.handleLoadMoreMessages.bind(this);
         this.handleSelectEmoji = this.handleSelectEmoji.bind(this);
+        this.handleBlur = this.handleBlur.bind(this);
     }
 
     handleWriteToUserClick(event,user_id){
@@ -282,6 +284,7 @@ class Chat extends React.Component{
 
     handleFocus(){
         this.readMessages();
+        this.setState({inputFocused:true});
     }
 
     readMessages(){
@@ -353,7 +356,7 @@ class Chat extends React.Component{
         this.readMessages();
         if(event.key === "Enter" && !event.shiftKey){
             event.preventDefault();
-            const msgText = event.target.value;
+            const msgText = encodeURIComponent(event.target.value);
             event.target.value = null;
             if(msgText.length > 0) {
                 const requestOptions = {
@@ -376,7 +379,15 @@ class Chat extends React.Component{
 
     handleSelectEmoji(emoji){
         this.messageInput.current.value += emoji.native;
-        this.messageInput.current.click();
+
+        this.setState({inputFocused:true});
+    }
+
+    handleBlur(){
+        if(this.messageInput.current.value.length === 0){
+            ///this.setState({inputFocused:null});
+        }
+        this.setState({inputFocused:null});
     }
 
 
@@ -441,6 +452,8 @@ class Chat extends React.Component{
                             multiline
                             onFocus={this.handleFocus}
                             fullWidth
+                            onBlur={this.handleBlur}
+                            focused={this.state.inputFocused}
                             rowsMax={8}
                             color="black"
                             className={classes.messageInput}
