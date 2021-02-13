@@ -44,13 +44,12 @@ class AddServerDialog extends React.Component {
                 method: 'POST',
                 body: formData
             };
-            fetch("https://rp-ruler.ru/api/upload_avatar.php",requestOptions).then(response => response.json())
+            fetch("https://rp-ruler.ru/api/upload_file.php",requestOptions).then(response => response.json())
                 .then((data)=>{
-                    console.log(event.target.name);
                     if(event.target.name=="bg"){
-                        this.setState({bg:data.avatar});
+                        this.setState({bg:data.filename});
                     }else{
-                        this.setState({avatar:data.avatar});
+                        this.setState({avatar:data.filename});
                     }
 
                 });
