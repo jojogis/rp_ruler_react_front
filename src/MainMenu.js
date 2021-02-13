@@ -20,14 +20,16 @@ class MainMenu extends React.Component{
             addServerDialogOpen:false
         };
 
-
+        this.handleServerCreate = this.handleServerCreate.bind(this);
     }
     handleServerClick(id,name){
         this.props.onChangeServer(id,name);
     }
 
-
-
+    handleServerCreate(id,name){
+        this.props.onServerConnect();
+        this.props.onChangeServer(id,name);
+    }
 
     render() {
         const {classes} = this.props;
@@ -51,7 +53,7 @@ class MainMenu extends React.Component{
 
             </List><ProfileDialog open={this.state.profileDialogOpen} onClose={() =>this.setState({profileDialogOpen:false})}/>
                     <ServersDialog open={this.state.serversDialogOpen} onServerConnect={this.props.onServerConnect} onClose={() => this.setState({serversDialogOpen:false})}/>
-                    <AddServerDialog open={this.state.addServerDialogOpen} onClose={() => this.setState({addServerDialogOpen:false})}/>
+                    <AddServerDialog open={this.state.addServerDialogOpen} onCreate={this.handleServerCreate} onClose={() => this.setState({addServerDialogOpen:false})}/>
         </div>
         );
     }
