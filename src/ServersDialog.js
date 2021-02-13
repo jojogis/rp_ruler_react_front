@@ -82,7 +82,7 @@ class ServersDialog extends React.Component {
                     <Grid item xs key={item.id} className={classes.serverCard}>
                         <ServerCard
                             name={item.name}
-                            avatar={item.avatar}
+                            avatar={item.card_bg}
                             description={item.description}
                             players={item.count}
                             className={classes.serverCard}
