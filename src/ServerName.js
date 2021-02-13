@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Button, Menu, MenuItem, Paper, withStyles} from "@material-ui/core";
-import {ExitToApp, ExpandMore} from "@material-ui/icons";
+import {Edit, ExitToApp, ExpandMore} from "@material-ui/icons";
 
 class ServerName extends React.Component{
     constructor(props) {
@@ -54,7 +54,9 @@ class ServerName extends React.Component{
                     onClose={this.handleServerMenuClose}
                 >
                     <MenuItem className={classes.exitServer} onClick={this.handleServerDisconnectClick}>
-                        Покинуть сервер <ExitToApp/></MenuItem>
+                        Покинуть сервер <ExitToApp className={classes.icon}/></MenuItem>
+                    {this.props.admin ? <MenuItem className={classes.edit} onClick={this.handleServerDisconnectClick}>
+                        Редактировать <Edit className={classes.icon}/></MenuItem> : ""}
 
                 </Menu></div>);
         }
@@ -67,8 +69,17 @@ const styles = {
 
     },
     exitServer:{
-        color:"red"
+        color:"#f50057",
+        "padding-right":"50px"
+    },
+    edit:{
+        color:"#ffc107"
+    },
+    icon:{
+        position:"absolute",
+        right:"10px"
     }
+
 
 };
 

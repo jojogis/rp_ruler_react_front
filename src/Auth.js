@@ -73,10 +73,10 @@ class Auth extends React.Component{
         const {classes} = this.props;
 
 
-        return(<Container component="main" maxWidth="xs">
+        return(<Grid container justify="center">
             <CssBaseline />
 
-            <Paper elevation={6} className={classes.paper}>
+            <Paper elevation={6} className={classes.paper} item>
                 <Typography component="h1" variant="h5">
                     Добро пожаловать. Снова.
                 </Typography>
@@ -138,7 +138,7 @@ class Auth extends React.Component{
                 </Box>
             </Paper>
 
-        </Container>);
+        </Grid>);
     }
 }
 

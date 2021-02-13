@@ -28,20 +28,36 @@ export class App extends React.Component{
                 },
             },
         });
+        let lightTheme = createMuiTheme({
+            palette: {
+                type: 'light',
+                primary: {
+                    main: "#ff5722",
+                },
+                secondary: {
+                    main: "#ff5722",
+                },
+            },
+        });
 
         const cookies = new Cookies();
         const token = cookies.get("token");
         const user_id = cookies.get("user_id");
+        const isDarkTheme = cookies.get("is_dark_theme") == "1";
         this.handleLogin = this.handleLogin.bind(this);
         this.toggleTheme = this.toggleTheme.bind(this);
         this.logout = this.logout.bind(this);
         this.state = {
             token:token,
             user_id:user_id,
-            isDarkTheme:true,
+            isDarkTheme:isDarkTheme,
             toggleTheme:this.toggleTheme,
             logout:this.logout,
-            theme:darkTheme
+            isAnimationEnable:true,
+            toggleAnimation: () => {this.setState(
+                (state)=>{return {isAnimationEnable:!state.isAnimationEnable}
+                })},
+            theme:isDarkTheme ? darkTheme : lightTheme
         };
 
     }
@@ -60,9 +76,6 @@ export class App extends React.Component{
         this.setState({token:token,user_id:id});
     }
 
-    handleRestore(){
-
-    }
 
 
     toggleTheme () {
@@ -91,7 +104,11 @@ export class App extends React.Component{
         this.setState(state => ({
             theme:state.isDarkTheme ? lightTheme : darkTheme,
             isDarkTheme: !state.isDarkTheme
-            }),() => this.forceUpdate()
+            }),() => {
+                this.forceUpdate();
+                const cookies = new Cookies();
+                cookies.set("is_dark_theme",this.state.isDarkTheme ? "1" : "0");
+        }
         );
 
     }
@@ -99,6 +116,7 @@ export class App extends React.Component{
 
 
     render() {
+        /*
         let randIndex = Math.floor(Math.random()*4);
         let effect = null;
         switch(randIndex){
@@ -114,26 +132,23 @@ export class App extends React.Component{
             case 3:
                 effect = <ParticlesBg color="#ff5722" num={20} type="polygon"  bg={true} />;
                 break;
-        }
+        }*/
         return(
             <TokenContext.Provider value={this.state}>
                 <ThemeProvider theme={this.state.theme}>
             <Router>
+                {this.state.isAnimationEnable ? <ParticlesBg color="#ff5722" num={200} type="cobweb"  bg={true} /> : ""}
                 <Switch>
                     <Route path="/login">
-                        {effect}
                         <Auth onLogin={this.handleLogin}/>
                     </Route>
                     <Route path="/registration">
-                        {effect}
                         <Reg onReg={this.handleLogin}/>
                     </Route>
                     <Route path="/restore">
-                        {effect}
                         <Restore/>
                     </Route>
                     <PrivateRoute token={this.state.token} path="/">
-                        <ParticlesBg color="#ff5722" num={200} type="cobweb"  bg={true} />
                         <Chat isDarkTheme={this.state.isDarkTheme}/>
                     </PrivateRoute>
                 </Switch>

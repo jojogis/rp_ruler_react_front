@@ -17,7 +17,6 @@ import Messages from "./Messages";
 import InputReplyMessage from "./InputReplyMessage";
 import UsersList from "./UsersList";
 import Emoji from "./Emoji";
-import {Mood, SentimentSatisfied} from "@material-ui/icons";
 
 
 class Chat extends React.Component{
@@ -42,6 +41,7 @@ class Chat extends React.Component{
         this.messageInput = React.createRef();
         this.lastUpdateTs = new Date().getTime();
         this.isLoadingMessages = false;
+        this.updateInterval = 1000;
         this.handleChangeServer = this.handleChangeServer.bind(this);
         this.handleChangeRoom = this.handleChangeRoom.bind(this);
         this.loadRooms = this.loadRooms.bind(this);
@@ -61,6 +61,7 @@ class Chat extends React.Component{
         this.handleLoadMoreMessages = this.handleLoadMoreMessages.bind(this);
         this.handleSelectEmoji = this.handleSelectEmoji.bind(this);
         this.handleBlur = this.handleBlur.bind(this);
+        this.setUpdateInterval = this.setUpdateInterval.bind(this);
     }
 
     handleWriteToUserClick(event,user_id){
@@ -77,7 +78,6 @@ class Chat extends React.Component{
                 if (data.error === undefined) {
                     this.state.room_id = data.result;
                     this.state.isChat = true;
-                    console.log(data.result);
                     this.loadRooms(data.result);
                 }
             });
@@ -94,8 +94,9 @@ class Chat extends React.Component{
         fetch("https://rp-ruler.ru/api/get_updates.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{
-                if(data.error === undefined){
 
+                if(data.error === undefined){
+                    let isNewData = false;
                     if(data.messages.length > 0){
                         this.lastUpdateTs = new Date().getTime();
                         let newMessages = [...this.state.messages];
@@ -105,25 +106,42 @@ class Chat extends React.Component{
                             }
                         })
                         this.setState({messages: newMessages});
+                        isNewData = true;
                     }
+                    let newUsers = [...this.state.users];
                     if(data.joined_users.length > 0){
                         this.lastUpdateTs = new Date().getTime();
-                        let newUsers = [...this.state.users];
-                        data.joined_users.forEach((item)=>{
-                            if(this.getElById(this.state.users,item.id) == null){
-                                newUsers.push(item);
+                        data.joined_users.forEach((user)=>{
+                            if(this.getElById(this.state.users,user.id) == null){
+                                newUsers.unshift(user);
                             }
                         })
-                        this.setState({users: newUsers});
+                        isNewData = true;
                     }
                     if(data.left_users.length > 0){
                         this.lastUpdateTs = new Date().getTime();
-                        let newUsers = [...this.state.users];
-                        data.left_users.forEach((item)=>{
-                            this.removeElById(newUsers,item.id);
+                        data.left_users.forEach((user)=>{
+                            this.removeElById(newUsers,user.id);
                         })
-                        this.setState({users: newUsers});
                     }
+                    if(data.online.length > 0) {
+                        newUsers.forEach((user) => {
+                            if (data.online.indexOf(user.id) !== -1) {
+                                user.online = 1;
+                            } else {
+                                user.online = 0;
+                            }
+                        })
+                        isNewData = true;
+                    }
+                    if(isNewData && this.updateInterval !== 1000){
+                        this.setUpdateInterval(1000);
+                    }else if(this.updateInterval < 5000){
+                        this.updateInterval += 1000;
+                        this.setUpdateInterval(this.updateInterval);
+                    }
+                    this.setState({users: newUsers});
+
                 }
 
             })
@@ -305,16 +323,22 @@ class Chat extends React.Component{
         }
     }
 
+    setUpdateInterval(interval){
+        this.updateInterval = interval;
+        clearInterval(this.timerChat);
+        this.timerChat = setInterval(this.updateChat,interval);
+
+    }
+
     componentDidMount() {
         this.loadServers();
         this.loadRooms();
-        this.timerChat = setInterval(this.updateChat,1000);
+        this.timerChat = setInterval(this.updateChat,this.updateInterval);
 
     }
 
     componentWillUnmount() {
         clearInterval(this.timerChat);
-
     }
 
     removeElById(arr,id){
@@ -396,8 +420,10 @@ class Chat extends React.Component{
 
         const curServer = this.getElById(this.state.servers,this.state.serverId);
         let serverName = "";
+        let adminId = null;
         if(curServer != null){
             serverName = curServer.name;
+            adminId = curServer.admin_id;
         }
         const room = this.getElById(this.state.rooms,this.state.roomId);
         let labelText = "Писать некуда...";
@@ -426,7 +452,7 @@ class Chat extends React.Component{
                 </Grid>
                 <Grid justify="center" container item xs={2} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1} >
-                        <ServerName isChat={this.state.isChat} name={serverName} onServerDisconnect={this.handleServerDisconnect}/>
+                        <ServerName isChat={this.state.isChat} name={serverName} admin={adminId == this.context.user_id*1} onServerDisconnect={this.handleServerDisconnect}/>
                         {(this.state.rooms !== undefined) ?
                             <RoomsList currentRoom={this.state.roomId} rooms={this.state.rooms} onChangeRoom={this.handleChangeRoom}/> : ""}
                     </Paper>

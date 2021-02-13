@@ -1,7 +1,36 @@
 import * as React from "react";
 import TokenContext from "./AppContext";
-import {Avatar, List, ListItem, ListItemAvatar, ListItemText, withStyles} from "@material-ui/core";
+import {Avatar, Badge, List, ListItem, ListItemAvatar, ListItemText, withStyles} from "@material-ui/core";
 import UserPopover from "./UserPopover";
+
+const StyledBadge = withStyles((theme) => ({
+    badge: {
+        backgroundColor: '#44b700',
+        color: '#44b700',
+        boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+        '&::after': {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            animation: '$ripple 1.2s infinite ease-in-out',
+            border: '1px solid currentColor',
+            content: '""',
+        },
+    },
+    '@keyframes ripple': {
+        '0%': {
+            transform: 'scale(.8)',
+            opacity: 1,
+        },
+        '100%': {
+            transform: 'scale(2.4)',
+            opacity: 0,
+        },
+    },
+}))(Badge);
 
 class UsersList extends React.Component{
     static contextType = TokenContext;
@@ -48,7 +77,15 @@ class UsersList extends React.Component{
             <ListItem button key={user.id} onClick={(event)=>this.handleClick(event,user.id)}
                       onContextMenu={(event)=>this.handleClick(event,user.id)}>
                 <ListItemAvatar>
-                    <Avatar alt={user.login} src={"https://rp-ruler.ru/upload/"+user.avatar} />
+                    <StyledBadge variant="dot"
+                                 anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'right',
+                                 }}
+                                 overlap="circle"
+                                 invisible={user.online !== 1}>
+                        <Avatar alt={user.login} src={"https://rp-ruler.ru/upload/"+user.avatar} />
+                    </StyledBadge>
                 </ListItemAvatar>
                 <ListItemText primary={user.login}/>
             </ListItem>

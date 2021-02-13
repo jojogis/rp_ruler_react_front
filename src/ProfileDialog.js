@@ -215,6 +215,13 @@ class ProfileDialog extends React.Component {
                             />
                         </ListItem>
                         <Divider />
+                        <ListItem button>
+                            <FormControlLabel
+                                control={<Switch checked={this.context.isAnimationEnable} onChange={this.context.toggleAnimation} />}
+                                label="Анимация фона"
+                            />
+                        </ListItem>
+                        <Divider />
                     </List>
                 </AccordionDetails>
             </Accordion>
