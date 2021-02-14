@@ -42,8 +42,8 @@ class MainMenu extends React.Component{
                 <Divider className={classes.divider}/>
             {this.props.servers.map((item)=>(
                 <ListItem key={item.id}>
-                    <Avatar className={classes.avatar} onClick={() => this.handleServerClick(item.id)} src={"https://rp-ruler.ru/upload/"+item.avatar}>
-                        <Fab className={classes.serverElem}>{item.name.substr(0,2)}</Fab>
+                    <Avatar className={classes.avatar + (this.props.currentServer===item.id ? " " + classes.current : "")} onClick={() => this.handleServerClick(item.id)} src={"https://rp-ruler.ru/upload/"+item.avatar}>
+                        <Fab className={classes.serverElem + (this.props.currentServer===item.id ? " "+classes.current : "")}>{item.name.substr(0,2)}</Fab>
                     </Avatar></ListItem>
             ))}
             <ListItem><Fab color="primary" className={classes.serverElem} onClick={() => this.setState({addServerDialogOpen:true})}>
@@ -64,14 +64,19 @@ const styles = {
 
         padding:"1px"
     },
+    current:{
+        "border-radius":"30%"
+    },
     avatar:{
         width:"56px",
         height:"56px",
         "background-color":"#e0e0e0",
-        "cursor":"pointer"
+        "cursor":"pointer",
+        transition:".1s"
     },
     serverElem:{
-        "font-size":"20px"
+        "font-size":"20px",
+        transition:".1s"
     }
 };
 export default withStyles(styles)(MainMenu);
