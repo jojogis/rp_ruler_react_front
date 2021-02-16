@@ -11,6 +11,7 @@ import {BrowserRouter as Router} from "react-router-dom";
 import TokenContext from "./AppContext";
 import Restore from "./Restore";
 import ParticlesBg from "particles-bg";
+import {useEffect} from "react";
 
 
 export class App extends React.Component{
@@ -40,6 +41,10 @@ export class App extends React.Component{
             },
         });
 
+
+
+
+
         const cookies = new Cookies();
         const token = cookies.get("token");
         const user_id = cookies.get("user_id");
@@ -59,6 +64,24 @@ export class App extends React.Component{
                 })},
             theme:isDarkTheme ? darkTheme : lightTheme
         };
+        if(this.state.token != null){
+            const requestOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: "token="+this.state.token
+            };
+            fetch("https://rp-ruler.ru/api/check_token.php",requestOptions)
+                .then(response => response.json())
+                .then((data)=>{
+                    if(data["correct"] == 0){
+                        this.logout();
+                    }
+                })
+        }
+
+
 
     }
 
