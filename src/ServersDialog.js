@@ -14,7 +14,7 @@ import {Close, Search} from "@material-ui/icons";
 import clsx from "clsx";
 import ServerCard from "./ServerCard";
 import TokenContext from "./AppContext";
-
+import Masonry from 'react-masonry-css'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="right" ref={ref} {...props} />;
@@ -77,9 +77,16 @@ class ServersDialog extends React.Component {
                 </AppBar>
                 <br/><br/><br/>
                 <div style={{ padding: 20 }}>
-                <Grid container direction="row" spacing={2} justify="center">
+                <Masonry breakpointCols={{
+                    default: 5,
+                    1650: 4,
+                    1200: 3,
+                    900: 2
+                }}
+                         className="my-masonry-grid"
+                         columnClassName="my-masonry-grid_column"
+                >
                     {this.state.servers.map((item)=>(
-                    <Grid item xs key={item.id} className={classes.serverCard}>
                         <ServerCard
                             name={item.name}
                             avatar={item.card_bg}
@@ -88,10 +95,9 @@ class ServersDialog extends React.Component {
                             className={classes.serverCard}
                             onConnect={() => this.handleConnect(item.id)}
                         />
-                    </Grid>
                     ))}
 
-                </Grid>
+                </Masonry>
                 </div>
             </Dialog>
         );
