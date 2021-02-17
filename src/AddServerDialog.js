@@ -18,7 +18,7 @@ class AddServerDialog extends React.Component {
     static contextType = TokenContext;
     constructor(props) {
         super(props);
-        this.tags = ["Аниме","Хентай","Фури"];
+        this.tags = ["Аниме","Хентай","Фури","Ужасы"];
         this.state = {
             tags:"",
             name:"",

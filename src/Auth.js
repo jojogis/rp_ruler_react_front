@@ -12,7 +12,6 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import {Copyright} from "./Copyright";
 import {withRouter} from "react-router-dom";
-import ParticlesBg from 'particles-bg'
 
 
 
@@ -120,6 +119,7 @@ class Auth extends React.Component{
                     >
                         Войти
                     </Button>
+
                     <Grid container>
                         <Grid item xs>
                             <Link href="#" variant="body2" to="/restore" component={RouterLink}>

@@ -17,6 +17,7 @@ import Messages from "./Messages";
 import InputReplyMessage from "./InputReplyMessage";
 import UsersList from "./UsersList";
 import Emoji from "./Emoji";
+import {Send} from "@material-ui/icons";
 
 
 class Chat extends React.Component{
@@ -34,7 +35,7 @@ class Chat extends React.Component{
             replyTo:null,
             users:[],
             isChat:false,
-            isLoading:true,
+            isLoading:false,
             messageText:"",
             inputFocused:false
         }
@@ -381,24 +382,28 @@ class Chat extends React.Component{
         if(event.key === "Enter" && !event.shiftKey){
             event.preventDefault();
             const msgText = encodeURIComponent(event.target.value);
-            event.target.value = null;
             if(msgText.length > 0) {
-                const requestOptions = {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: "token=" + this.context.token + "&room_id=" + this.state.roomId + "&text=" + msgText + "&reply_id=" + this.state.replyTo
-                };
-                fetch("https://rp-ruler.ru/api/send_message.php", requestOptions)
-                    .then(response => response.json())
-                    .then((data) => {
-                        let newMessages = [...this.state.messages];
-                        newMessages.push(data);
-                        this.setState({lastReadMsg: data.id,messages: newMessages,  replyTo: null});
-                    })
+                this.sendMessage(msgText);
             }
         }
+    }
+
+    sendMessage(msg){
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: "token=" + this.context.token + "&room_id=" + this.state.roomId + "&text=" + msg + "&reply_id=" + this.state.replyTo
+        };
+        fetch("https://rp-ruler.ru/api/send_message.php", requestOptions)
+            .then(response => response.json())
+            .then((data) => {
+                let newMessages = [...this.state.messages];
+                newMessages.push(data);
+                this.setState({lastReadMsg: data.id,messages: newMessages,  replyTo: null});
+                this.messageInput.current.value = null;
+            })
     }
 
     handleSelectEmoji(emoji){
@@ -448,6 +453,7 @@ class Chat extends React.Component{
                               onServerConnect={this.loadServers}
                               onChangeServer={this.handleChangeServer}
                               onToChatClick={this.handleToChatClick}
+                              currentServer={this.state.serverId}
                     />
                 </Grid>
                 <Grid justify="center" container item xs={2} spacing={0}>
@@ -487,6 +493,7 @@ class Chat extends React.Component{
                             inputRef={this.messageInput}
                         />
                             <Emoji isDarkTheme={this.props.isDarkTheme} onSelect={this.handleSelectEmoji}/>
+                            <Button onClick={() => {if(this.messageInput.current)this.sendMessage(this.messageInput.current.value)}} className={classes.sendBtn}><Send/></Button>
                         </Paper>
 
                     </Paper>
@@ -506,7 +513,12 @@ class Chat extends React.Component{
 
 
 const styles = {
-
+    sendBtn:{
+        position:"absolute",
+        bottom:"10px",
+        right:"5px",
+        opacity:0.7
+    },
     loading:{
         width:"100%",
         position:"fixed",
