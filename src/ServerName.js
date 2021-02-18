@@ -1,11 +1,18 @@
 import * as React from "react";
-import {Button, Menu, MenuItem, Paper, withStyles} from "@material-ui/core";
-import {Edit, ExitToApp, ExpandMore} from "@material-ui/icons";
+import {Button, Dialog, DialogActions, DialogTitle, Menu, MenuItem, Paper, withStyles} from "@material-ui/core";
+import {Add, Delete, Edit, ExitToApp, ExpandMore, Remove} from "@material-ui/icons";
+import AddRoomDialog from "./AddRoomDialog";
+import TokenContext from "./AppContext";
 
 class ServerName extends React.Component{
+    static contextType = TokenContext;
     constructor(props) {
         super(props);
-        this.state = {anchorEl:null};
+        this.state = {
+            anchorEl:null,
+            isAddRoomOpen:false,
+            isConfirmDeleteOpen:false
+        };
         this.handleServerMenuClick       = this.handleServerMenuClick.bind(this);
         this.handleServerMenuClose       = this.handleServerMenuClose.bind(this);
         this.handleServerDisconnectClick = this.handleServerDisconnectClick.bind(this);
@@ -23,6 +30,21 @@ class ServerName extends React.Component{
     handleServerDisconnectClick(){
         this.handleServerMenuClose();
         this.props.onServerDisconnect();
+    }
+    deleteServer(){
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: "token="+this.context.token+"&server_id="+this.props.serverId
+        };
+        fetch("https://rp-ruler.ru/api/delete_server.php",requestOptions)
+            .then(response => response.json())
+            .then((data)=>{
+                this.setState({isConfirmDeleteOpen:false});
+                this.props.onServerDelete();
+            })
     }
 
     render() {
@@ -57,13 +79,37 @@ class ServerName extends React.Component{
                         Покинуть сервер <ExitToApp className={classes.icon}/></MenuItem>
                     {this.props.admin ? <MenuItem className={classes.edit} onClick={this.handleServerDisconnectClick}>
                         Редактировать <Edit className={classes.icon}/></MenuItem> : ""}
-
-                </Menu></div>);
+                    {this.props.admin ? <MenuItem className={classes.add} onClick={() => this.setState({isAddRoomOpen:true,anchorEl:false})}>
+                        Добавить комнату <Add className={classes.icon}/></MenuItem> : ""}
+                    {this.props.admin ? <MenuItem className={classes.exitServer} onClick={() => this.setState({isConfirmDeleteOpen:true,anchorEl:false})}>
+                        Удалить сервер <Delete className={classes.icon}/></MenuItem> : ""}
+                </Menu>
+                <AddRoomDialog
+                    open={this.state.isAddRoomOpen}
+                    serverId={this.props.serverId}
+                    onCreate={this.props.onRoomCreate}
+                    onClose={() => this.setState({isAddRoomOpen:false})}
+                />
+                    <Dialog open={this.state.isConfirmDeleteOpen} onClose={() => this.setState({isConfirmDeleteOpen:false})}>
+                        <DialogTitle>Вы уверены?</DialogTitle>
+                        <DialogActions>
+                            <Button onClick={() => this.setState({isConfirmDeleteOpen:false})} color="primary">
+                                Отменить
+                            </Button>
+                            <Button onClick={() => this.deleteServer()} color="primary" autoFocus>
+                                Удалить сервер
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                </div>);
         }
     }
 }
 
 const styles = {
+    add:{
+        color:"#00e676"
+    },
     paperWrap:{
         width:"100%",
 
