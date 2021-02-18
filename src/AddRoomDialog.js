@@ -11,9 +11,11 @@ class AddRoomDialog extends React.Component {
         this.name = React.createRef();
         this.state = {
             name: "",
-            isGlobal:false
+            isGlobal:false,
+            bg:null
         }
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleFileUploaded = this.handleFileUploaded.bind(this);
     }
 
     handleSubmit(){
@@ -22,7 +24,7 @@ class AddRoomDialog extends React.Component {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: "token="+this.context.token+"&name="+this.state.name+"&server_id="+this.props.serverId+"&is_global="+this.state.isGlobal
+            body: "token="+this.context.token+"&name="+this.state.name+"&server_id="+this.props.serverId+"&is_global="+this.state.isGlobal+"&bg="+this.state.bg
         };
         fetch("https://rp-ruler.ru/api/add_room.php",requestOptions)
             .then(response => response.json())
@@ -30,6 +32,25 @@ class AddRoomDialog extends React.Component {
                 this.props.onCreate();
                 this.props.onClose();
             })
+    }
+    handleFileUploaded(event){
+        if(event.target.files != null && event.target.files.length != 0){
+            let file = event.target.files[0];
+            const formData = new FormData();
+            formData.append('avatar', file);
+            formData.append("token",this.context.token);
+            const requestOptions = {
+                method: 'POST',
+                body: formData
+            };
+            fetch("https://rp-ruler.ru/api/upload_file.php",requestOptions).then(response => response.json())
+                .then((data)=>{
+                        this.setState({bg:data.filename});
+
+                });
+
+        }
+
     }
 
     render() {
@@ -40,6 +61,16 @@ class AddRoomDialog extends React.Component {
                 Добавление комнаты
             </DialogTitleWithClose>
             <DialogContent dividers>
+                <Grid container alignItems="center" direction="column">
+                    <img className={classes.bg} src={this.state.bg === null ? null : "https://rp-ruler.ru/upload/"+this.state.bg}/>
+                    <br/>
+                    <input onChange={this.handleFileUploaded} name="bg" accept="image/*" className={classes.inputFile} id="bg-file" type="file"/>
+                    <label htmlFor="bg-file">
+                        <Button variant="contained" color="primary" component="span">
+                            Загрузить фон комнаты.
+                        </Button>
+                    </label>
+                </Grid>
                 <TextField
                     variant="outlined"
                     margin="normal"
@@ -50,6 +81,7 @@ class AddRoomDialog extends React.Component {
                     autoFocus
                     inputRef={this.name}
                 />
+
                 <FormControlLabel
                     control={
                         <Switch
@@ -72,7 +104,9 @@ class AddRoomDialog extends React.Component {
     }
 }
 const styles = {
-
+    inputFile:{
+        display: 'none',
+    },
 
 };
 
