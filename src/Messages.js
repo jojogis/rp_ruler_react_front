@@ -88,7 +88,7 @@ class Messages extends React.Component{
     render(){
         const {classes} = this.props;
         return(<List onScroll={this.handleScroll} className={classes.messagesWrap}>
-
+            <div className={classes.roomBg} style={{"background-image":this.props.bg}}/>
             {this.props.messages.map((item)=>(
             <ListItem button key={item.id}
                       className={(item.id > this.props.lastRead ? classes.unreadMessage : "")+" "+
@@ -143,6 +143,16 @@ class Messages extends React.Component{
 
 
 const styles = {
+    roomBg:{
+        position:"absolute",
+        top:0,
+        "background-position":"center",
+        "background-size":"cover",
+        left:0,
+        width:"100%",
+        height:"100%",
+        opacity: 0.3
+    },
     messagesWrap:{
         height:"calc(100vh - 147px)",
         "overflow":"auto"

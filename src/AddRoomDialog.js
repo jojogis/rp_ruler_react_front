@@ -107,6 +107,9 @@ const styles = {
     inputFile:{
         display: 'none',
     },
+    bg:{
+        "max-width":"200px"
+    },
 
 };
 
