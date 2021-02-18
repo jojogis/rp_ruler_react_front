@@ -466,7 +466,12 @@ class Chat extends React.Component{
                                     admin={adminId == this.context.user_id*1}
                                     onServerDisconnect={this.handleServerDisconnect}/>
                         {(this.state.rooms !== undefined) ?
-                            <RoomsList currentRoom={this.state.roomId} rooms={this.state.rooms} onChangeRoom={this.handleChangeRoom}/> : ""}
+                            <RoomsList admin={adminId == this.context.user_id*1}
+                                       currentRoom={this.state.roomId}
+                                       rooms={this.state.rooms}
+                                       onRoomDelete={this.loadRooms}
+                                       serverId={this.state.serverId}
+                                       onChangeRoom={this.handleChangeRoom}/> : ""}
                     </Paper>
                 </Grid>
                 <Grid justify="center" container item xs={this.state.isChat ? 9 : 7} spacing={0}>
