@@ -1,7 +1,8 @@
 import * as React from "react";
 import AppContext from "./AppContext";
 import {List, ListItem, ListItemIcon, ListItemText, Menu, MenuItem, Typography, withStyles} from "@material-ui/core";
-import {AlternateEmail, Delete, ExitToApp, Language} from "@material-ui/icons";
+import {AlternateEmail, Delete, Edit, ExitToApp, Language} from "@material-ui/icons";
+import AddRoomDialog from "./AddRoomDialog";
 
 
 class RoomsList extends React.Component{
@@ -10,9 +11,11 @@ class RoomsList extends React.Component{
         super(props);
         this.state = {
             anchorEl:null,
-            clickedRoomId:null
+            clickedRoomId:null,
+            isEditOpen:false,
+            clickedRoom:null
         };
-        this.handleServerContext = this.handleServerContext.bind(this);
+        this.handleRoomContext = this.handleRoomContext.bind(this);
         this.deleteRoom = this.deleteRoom.bind(this);
     }
     handleRoomClick(roomId){
@@ -30,12 +33,28 @@ class RoomsList extends React.Component{
             .then(response => response.json())
             .then((data)=>{
                 this.setState({anchorEl:null,clickedRoomId:null});
-                this.props.onRoomDelete();
+                this.props.onRoomsUpdate();
             })
     }
-    handleServerContext(event,id){
-        if(this.props.admin)this.setState({anchorEl:event.currentTarget,clickedRoomId:id});
 
+    handleRoomContext(event,id){
+        if(this.props.admin){
+            let clickedRoom = this.getElById(this.props.rooms,id);
+            this.setState({
+                anchorEl:event.currentTarget,
+                clickedRoomId:id,
+                clickedRoom:clickedRoom
+            });
+
+        }
+
+    }
+    getElById(arr,id){
+        if(arr === undefined)return null;
+        for(let i=0;i<arr.length;i++){
+            if(arr[i].id === id)return arr[i];
+        }
+        return null;
     }
     render() {
 
@@ -45,7 +64,7 @@ class RoomsList extends React.Component{
         }else {
             return (<List>
                 {this.props.rooms.map((item) => (
-                    <ListItem onContextMenu={(event) =>  this.handleServerContext(event,item.id)}
+                    <ListItem onContextMenu={(event) =>  this.handleRoomContext(event,item.id)}
                               selected={this.props.currentRoom === item.id} onClick={() => this.handleRoomClick(item.id)} key={item.id} button>
                         <ListItemIcon>
                             {item.is_global === 1 ? <Language/> : <AlternateEmail/>}
@@ -70,7 +89,20 @@ class RoomsList extends React.Component{
                     open={Boolean(this.state.anchorEl)}
                     onClose={() => this.setState({anchorEl:null})}
                 ><MenuItem className={classes.delete} onClick={this.deleteRoom}>
-                    Удалить комнату<Delete className={classes.icon}/></MenuItem></Menu> : ""}
+                    Удалить комнату<Delete className={classes.icon}/></MenuItem>
+                    <MenuItem className={classes.edit} onClick={() => this.setState({isEditOpen:true,anchorEl:null})}>
+                        Редактировать <Edit className={classes.icon}/></MenuItem>
+                </Menu> : ""}
+                {this.state.clickedRoom != null ? <AddRoomDialog
+                    open={this.state.isEditOpen}
+                    serverId={this.props.serverId}
+                    onCreate={this.props.onRoomsUpdate}
+                    roomId={this.state.clickedRoomId}
+                    name={this.state.clickedRoom.name}
+                    bg={this.state.clickedRoom.bg}
+                    isGlobal={this.state.clickedRoom.is_global === 1}
+                    onClose={() => this.setState({isEditOpen:false})}
+                /> : ""}
 
             </List>);
         }
@@ -85,8 +117,9 @@ const styles = {
         "display":"block",
         "width":"100%",
         "overflow":"hidden"
-    },   add:{
-        color:"#00e676"
+    },
+    edit:{
+        color:"#ffc107"
     },
     delete:{
         color:"#f50057",

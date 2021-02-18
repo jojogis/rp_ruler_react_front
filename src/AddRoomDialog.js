@@ -8,25 +8,36 @@ class AddRoomDialog extends React.Component {
 
     constructor(props) {
         super(props);
-        this.name = React.createRef();
         this.state = {
-            name: "",
-            isGlobal:false,
-            bg:null
+            name: this.props.name,
+            isGlobal:this.props.isGlobal == null ? false : this.props.isGlobal,
+            bg:this.props.bg == null ? null : this.props.bg
         }
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleFileUploaded = this.handleFileUploaded.bind(this);
     }
-
+    componentDidUpdate(prevProps) {
+        if (prevProps.bg !== this.props.bg) {
+            this.setState({bg:this.props.bg})
+        }
+        if (prevProps.name !== this.props.name) {
+            this.setState({name:this.props.name});
+        }
+        if (prevProps.isGlobal !== this.props.isGlobal) {
+            this.setState({isGlobal:this.props.isGlobal});
+        }
+    }
     handleSubmit(){
+        let roomId = this.props.roomId == null ? "" : "&room_id="+this.props.roomId;
+        let url = this.props.roomId == null ? "https://rp-ruler.ru/api/add_room.php" : "https://rp-ruler.ru/api/edit_room.php";
         const requestOptions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: "token="+this.context.token+"&name="+this.state.name+"&server_id="+this.props.serverId+"&is_global="+this.state.isGlobal+"&bg="+this.state.bg
+            body: "token="+this.context.token+"&name="+this.state.name+"&server_id="+this.props.serverId+"&is_global="+this.state.isGlobal+"&bg="+this.state.bg+roomId
         };
-        fetch("https://rp-ruler.ru/api/add_room.php",requestOptions)
+        fetch(url,requestOptions)
             .then(response => response.json())
             .then((data)=>{
                 this.props.onCreate();
@@ -55,10 +66,12 @@ class AddRoomDialog extends React.Component {
 
     render() {
         const {classes} = this.props;
+        let title = this.props.roomId == null ? "Добавление комнаты" :  "Редактирование комнаты";
+        let btnText = this.props.roomId == null ? "Добавить комнату" :  "Сохранить";
         return (<Dialog maxWidth="sm" fullWidth open={this.props.open} onClose={this.props.onClose}
                         aria-labelledby="form-dialog-title">
             <DialogTitleWithClose id="customized-dialog-title" onClose={this.props.onClose}>
-                Добавление комнаты
+                {title}
             </DialogTitleWithClose>
             <DialogContent dividers>
                 <Grid container alignItems="center" direction="column">
@@ -79,7 +92,7 @@ class AddRoomDialog extends React.Component {
                     onChange={(e)=>this.setState({name:e.target.value})}
                     label="Название комнаты"
                     autoFocus
-                    inputRef={this.name}
+                    value={this.state.name}
                 />
 
                 <FormControlLabel
@@ -96,7 +109,7 @@ class AddRoomDialog extends React.Component {
 
                 <Grid container justify="center">
                     <Button variant="contained" color="primary" onClick={this.handleSubmit} component="span">
-                        Добавить комнату
+                        {btnText}
                     </Button>
                 </Grid>
             </DialogContent>

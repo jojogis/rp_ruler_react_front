@@ -471,7 +471,7 @@ class Chat extends React.Component{
                             <RoomsList admin={adminId == this.context.user_id*1}
                                        currentRoom={this.state.roomId}
                                        rooms={this.state.rooms}
-                                       onRoomDelete={this.loadRooms}
+                                       onRoomsUpdate={this.loadRooms}
                                        serverId={this.state.serverId}
                                        onChangeRoom={this.handleChangeRoom}/> : ""}
                     </Paper>
