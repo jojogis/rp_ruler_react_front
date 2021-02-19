@@ -79,11 +79,18 @@ class AddRoomDialog extends React.Component {
                     <br/>
                     <input onChange={this.handleFileUploaded} name="bg" accept="image/*" className={classes.inputFile} id="bg-file" type="file"/>
                     <label htmlFor="bg-file">
+                        {this.state.bg == null ?
                         <Button variant="contained" color="primary" component="span">
                             Загрузить фон комнаты.
-                        </Button>
+                        </Button> : ""}
                     </label>
                 </Grid>
+                {this.state.bg != null ? <Grid container alignItems="center" direction="column">
+                    <Button onClick={() => this.setState({bg:null})} variant="contained" color="primary" component="span">
+                        Удалить фон комнаты.
+                    </Button>
+                </Grid> : ""}
+
                 <TextField
                     variant="outlined"
                     margin="normal"
