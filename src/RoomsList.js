@@ -1,6 +1,16 @@
 import * as React from "react";
 import AppContext from "./AppContext";
-import {List, ListItem, ListItemIcon, ListItemText, Menu, MenuItem, Typography, withStyles} from "@material-ui/core";
+import {
+    Badge,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
+    Typography,
+    withStyles
+} from "@material-ui/core";
 import {AlternateEmail, Delete, Edit, ExitToApp, Language} from "@material-ui/icons";
 import AddRoomDialog from "./AddRoomDialog";
 
@@ -57,7 +67,6 @@ class RoomsList extends React.Component{
         return null;
     }
     render() {
-
         const {classes} = this.props;
         if(this.props.rooms == null || this.props.rooms.length === 0){
             return(<Typography variant="subtitle2" align="center">Комнат пока нет...</Typography>);
@@ -67,11 +76,17 @@ class RoomsList extends React.Component{
                     <ListItem onContextMenu={(event) =>  this.handleRoomContext(event,item.id)}
                               selected={this.props.currentRoom === item.id} onClick={() => this.handleRoomClick(item.id)} key={item.id} button>
                         <ListItemIcon>
+                            <Badge anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'left',
+                            }} color="primary" variant="dot" invisible={!item.is_unread}>
                             {item.is_global === 1 ? <Language/> : <AlternateEmail/>}
+                            </Badge>
                         </ListItemIcon>
                         <ListItemText>
                             <span className={classes.room}>{item.login != null ? item.login : item.name}</span>
                         </ListItemText>
+
                     </ListItem>
                 ))}
                 {this.props.admin ? <Menu

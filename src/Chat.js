@@ -135,6 +135,12 @@ class Chat extends React.Component{
                         })
                         isNewData = true;
                     }
+                    if(data.rooms_nu.length > 0) {
+                        data.rooms_nu.forEach((room) => {
+                            let cur_room =this.getElById(this.state.rooms,room.id);
+                            if(cur_room !== null)cur_room.is_unread = true;
+                        })
+                    }
                     if(isNewData && this.updateInterval !== 1000){
                         this.setUpdateInterval(1000);
                     }else if(this.updateInterval < 5000){
@@ -321,6 +327,7 @@ class Chat extends React.Component{
                 .then(response => response.json())
                 .then((data) => {
                 })
+            this.getElById(this.state.rooms,this.state.roomId).is_unread = false;
         }
     }
 
