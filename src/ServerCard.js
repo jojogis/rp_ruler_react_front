@@ -6,7 +6,7 @@ import {
     CardActionArea,
     CardActions,
     CardContent,
-    CardMedia, Fab,
+    CardMedia, Fab, Link,
     Typography,
     withStyles
 } from "@material-ui/core";
@@ -28,19 +28,26 @@ class ServerCard extends React.Component{
                         <Typography className={classes.serverName} gutterBottom variant="h5" component="h2">
                             {this.props.name}
                         </Typography>
+                        <Typography color="textSecondary">
+                            {this.props.tags.length !== 0 ? this.props.tags.split(",").map((tag)=>(
+                                <Link onClick={() => this.props.onFindTag(tag)}>{"#"+tag}</Link>
+                            )) : "" }
+
+                        </Typography>
                         <Typography variant="body2" color="textSecondary" component="p">
                             Игроков: {this.props.players}<br/><br/>
                             {this.props.description}
                         </Typography>
-                        <Typography color="textSecondary">
-                            {this.props.tags}
-                        </Typography>
+
                     </CardContent>
                 </CardActionArea>
                 <CardActions>
-                    <Button size="small" onClick={this.props.onConnect} color="primary">
+                    {this.props.isConnected ? <Button size="small" color="primary">
+                        Вы уже на этом сервере.
+                    </Button> : <Button size="small" onClick={this.props.onConnect} color="primary">
                         Подключиться
-                    </Button>
+                    </Button>}
+
                 </CardActions>
             </Card>
         );

@@ -52,7 +52,7 @@ class MainMenu extends React.Component{
                     <Explore/></Fab></ListItem>
 
             </List><ProfileDialog open={this.state.profileDialogOpen} onClose={() =>this.setState({profileDialogOpen:false})}/>
-                    <ServersDialog open={this.state.serversDialogOpen} onServerConnect={this.props.onServerConnect} onClose={() => this.setState({serversDialogOpen:false})}/>
+                    <ServersDialog open={this.state.serversDialogOpen} connectedServers={this.props.servers} onServerConnect={this.props.onServerConnect} onClose={() => this.setState({serversDialogOpen:false})}/>
                     <AddServerDialog open={this.state.addServerDialogOpen} onCreate={this.handleServerCreate} onClose={() => this.setState({addServerDialogOpen:false})}/>
         </div>
         );

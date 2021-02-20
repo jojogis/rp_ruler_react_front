@@ -28,14 +28,28 @@ class ServersDialog extends React.Component {
         super(props);
         this.handleClose = this.handleClose.bind(this);
         this.handleConnect = this.handleConnect.bind(this);
+        this.handleSearchChange = this.handleSearchChange.bind(this);
+        this.findTag = this.findTag.bind(this);
+
         this.state = {
-            servers:[]
+            servers:[],
+            search:""
         };
 
     }
 
+
+    getElById(arr,id){
+        if(arr === undefined)return null;
+        for(let i=0;i<arr.length;i++){
+            if(arr[i].id === id)return arr[i];
+        }
+        return null;
+    }
+
     componentDidUpdate(prevProps) {
         if(!prevProps.open && this.props.open){
+            this.setState({search:""})
             fetch("https://rp-ruler.ru/api/get_servers.php").then(response => response.json())
                 .then((data)=>{
                     if(data.error === undefined){
@@ -66,6 +80,41 @@ class ServersDialog extends React.Component {
             });
     }
 
+    handleSearchChange(event){
+        const search = event.target.value;
+        this.setState({search:search});
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: "s="+search
+        };
+        fetch("https://rp-ruler.ru/api/get_servers.php",requestOptions).then(response => response.json())
+            .then((data)=>{
+                if(data.error === undefined){
+                    this.setState({...data})
+                }
+            });
+    }
+
+    findTag(tag){
+        this.setState({search:"#"+tag});
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: "s=#"+tag
+        };
+        fetch("https://rp-ruler.ru/api/get_servers.php",requestOptions).then(response => response.json())
+            .then((data)=>{
+                if(data.error === undefined){
+                    this.setState({...data})
+                }
+            });
+    }
+
     render() {
         const {classes} = this.props;
 
@@ -84,6 +133,8 @@ class ServersDialog extends React.Component {
                                 <Search />
                             </div>
                             <InputBase
+                                onChange={this.handleSearchChange}
+                                value={this.state.search}
                                 placeholder="Поиск серверов…"
                                 classes={{
                                     root: classes.inputRoot,
@@ -111,8 +162,10 @@ class ServersDialog extends React.Component {
                             avatar={item.avatar}
                             bg={item.card_bg}
                             tags={item.tags}
+                            isConnected={this.getElById(this.props.connectedServers,item.id)}
                             description={item.description}
                             players={item.count}
+                            onFindTag={this.findTag}
                             className={classes.serverCard}
                             onConnect={() => this.handleConnect(item.id)}
                         />
