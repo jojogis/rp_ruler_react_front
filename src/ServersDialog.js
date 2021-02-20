@@ -89,7 +89,9 @@ class ServersDialog extends React.Component {
                     {this.state.servers.map((item)=>(
                         <ServerCard
                             name={item.name}
-                            avatar={item.card_bg}
+                            avatar={item.avatar}
+                            bg={item.card_bg}
+                            tags={item.tags}
                             description={item.description}
                             players={item.count}
                             className={classes.serverCard}

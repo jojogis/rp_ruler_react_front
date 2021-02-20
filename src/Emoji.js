@@ -89,7 +89,7 @@ const styles = {
     emojiButton:{
         position:"absolute",
         bottom:"10px",
-        right:"60px",
+        right:"69px",
         opacity:0.7
     },
 };

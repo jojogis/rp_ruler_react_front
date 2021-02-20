@@ -1,11 +1,12 @@
 import * as React from "react";
 import {
+    Avatar,
     Button,
     Card,
     CardActionArea,
     CardActions,
     CardContent,
-    CardMedia,
+    CardMedia, Fab,
     Typography,
     withStyles
 } from "@material-ui/core";
@@ -18,16 +19,21 @@ class ServerCard extends React.Component{
                 <CardActionArea>
                     <CardMedia
                         className={classes.media}
-                        image={"https://rp-ruler.ru/upload/"+this.props.avatar}
+                        image={"https://rp-ruler.ru/upload/"+this.props.bg}
                     />
+                    <Avatar className={classes.avatar}  src={"https://rp-ruler.ru/upload/"+this.props.avatar}>
+                        <Fab className={classes.serverElem}>{this.props.name.substr(0,2)}</Fab>
+                    </Avatar>
                     <CardContent>
-                        <Typography gutterBottom variant="h5" component="h2">
+                        <Typography className={classes.serverName} gutterBottom variant="h5" component="h2">
                             {this.props.name}
                         </Typography>
                         <Typography variant="body2" color="textSecondary" component="p">
                             Игроков: {this.props.players}<br/><br/>
                             {this.props.description}
-
+                        </Typography>
+                        <Typography color="textSecondary">
+                            {this.props.tags}
                         </Typography>
                     </CardContent>
                 </CardActionArea>
@@ -42,11 +48,26 @@ class ServerCard extends React.Component{
 }
 
 const styles = {
+    serverName:{
+        "padding-right":"50px"
+    },
     root: {
         maxWidth: 345,
     },
     media: {
-        height: 140,
+        height: 180,
     },
+    avatar:{
+        width:"56px",
+        height:"56px",
+        "background-color":"#e0e0e0",
+        position:"absolute",
+        right:"20px",
+        "margin-top":"-27px",
+        "box-shadow":"0 0 10px #333"
+    },
+    serverElem:{
+        "font-size":"20px"
+    }
 };
 export default withStyles(styles)(ServerCard);
