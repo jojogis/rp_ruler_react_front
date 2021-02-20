@@ -31,13 +31,15 @@ class ServersDialog extends React.Component {
         };
     }
 
-    componentDidMount() {
-        fetch("https://rp-ruler.ru/api/get_servers.php").then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    this.setState({...data})
-                }
-            });
+    componentDidUpdate(prevProps) {
+        if(!prevProps.open && this.props.open){
+            fetch("https://rp-ruler.ru/api/get_servers.php").then(response => response.json())
+                .then((data)=>{
+                    if(data.error === undefined){
+                        this.setState({...data})
+                    }
+                });
+        }
     }
 
     handleClose(){
