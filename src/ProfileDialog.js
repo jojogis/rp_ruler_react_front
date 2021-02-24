@@ -3,7 +3,7 @@ import {
     Accordion, AccordionDetails, AccordionSummary,
     AppBar, Avatar,
     Button,
-    Dialog, Divider, FormControlLabel,
+    Dialog, DialogActions, DialogTitle, Divider, FormControlLabel,
     IconButton,
     List,
     ListItem, ListItemAvatar,
@@ -39,7 +39,8 @@ class ProfileDialog extends React.Component {
             passFormOpen:false,
             snackBarText:null,
             snackBarOpen:false,
-            snackBarStatus:"success"
+            snackBarStatus:"success",
+            isConfirmDeleteOpen:false
         };
         this.handleAccordionChange = this.handleAccordionChange.bind(this);
         this.handleSaveLogin = this.handleSaveLogin.bind(this);
@@ -184,6 +185,22 @@ class ProfileDialog extends React.Component {
 
     }
 
+    handleAccountDelete(){
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: "token="+this.context.token
+        };
+        fetch("https://rp-ruler.ru/api/delete_account.php",requestOptions).then(response => response.json())
+            .then((data)=>{
+                if(data.error === undefined){
+                    this.context.logout();
+                }
+            });
+    }
+
     render(){
         const {classes} = this.props;
         return(<Dialog fullScreen open={this.props.open} onClose={this.handleClose} TransitionComponent={Transition}>
@@ -272,6 +289,13 @@ class ProfileDialog extends React.Component {
                         </ListItem>
 
                         <ListItem>
+                            <Button variant="contained" color="primary" onClick={() => this.setState({isConfirmDeleteOpen:true})} component="span">
+                                Удалить аккаунт
+                            </Button>
+                        </ListItem>
+
+
+                        <ListItem>
                             <Button variant="contained" color="primary" onClick={this.context.logout} component="span">
                                 Выйти
                             </Button>
@@ -292,6 +316,17 @@ class ProfileDialog extends React.Component {
                     {this.state.snackBarText}
                 </Alert>
             </Snackbar>
+            <Dialog open={this.state.isConfirmDeleteOpen} onClose={() => this.setState({isConfirmDeleteOpen:false})}>
+                <DialogTitle>Вы уверены?</DialogTitle>
+                <DialogActions>
+                    <Button onClick={() => this.setState({isConfirmDeleteOpen:false})} color="primary">
+                        Отменить
+                    </Button>
+                    <Button onClick={() => this.handleAccountDelete()} color="primary" autoFocus>
+                        Удалить аккаунт
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Dialog>)
     }
 

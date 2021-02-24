@@ -11,7 +11,8 @@ class AddRoomDialog extends React.Component {
         this.state = {
             name: this.props.name,
             isGlobal:this.props.isGlobal == null ? false : this.props.isGlobal,
-            bg:this.props.bg == null ? null : this.props.bg
+            bg:this.props.bg == null ? null : this.props.bg,
+            isNameError:""
         }
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleFileUploaded = this.handleFileUploaded.bind(this);
@@ -28,6 +29,14 @@ class AddRoomDialog extends React.Component {
         }
     }
     handleSubmit(){
+        if(this.state.name == null || this.state.name.length == 0){
+            this.setState({isNameError:"Введите название"});
+            return;
+        }
+        if(this.state.name.length > 50){
+            this.setState({isNameError:"Максимальная длина - 50 символов"});
+            return;
+        }
         let roomId = this.props.roomId == null ? "" : "&room_id="+this.props.roomId;
         let url = this.props.roomId == null ? "https://rp-ruler.ru/api/add_room.php" : "https://rp-ruler.ru/api/edit_room.php";
         const requestOptions = {
@@ -45,6 +54,7 @@ class AddRoomDialog extends React.Component {
             })
     }
     handleFileUploaded(event){
+
         if(event.target.files != null && event.target.files.length != 0){
             let file = event.target.files[0];
             const formData = new FormData();
@@ -96,6 +106,8 @@ class AddRoomDialog extends React.Component {
                     margin="normal"
                     required
                     fullWidth
+                    helperText={this.state.isNameError}
+                    error={this.state.isNameError.length != 0}
                     onChange={(e)=>this.setState({name:e.target.value})}
                     label="Название комнаты"
                     autoFocus

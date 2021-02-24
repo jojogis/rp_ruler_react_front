@@ -165,6 +165,7 @@ class Chat extends React.Component{
         };
         fetch("https://rp-ruler.ru/api/disconnect_from_server.php",requestOptions).then(response => response.json())
             .then(()=>{
+                this.setState({roomId:null,rooms:[],messages:[],users:[]});
                 this.loadServers();
             });
     }

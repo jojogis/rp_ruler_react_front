@@ -25,7 +25,8 @@ class AddServerDialog extends React.Component {
             avatar:null,
             isPrivate:false,
             age:"0",
-            bg:null
+            bg:null,
+            isNameError:""
         };
 
         this.name = React.createRef();
@@ -59,6 +60,14 @@ class AddServerDialog extends React.Component {
     }
 
     handleSubmit(){
+        if(this.state.name.length == 0){
+            this.setState({isNameError:"Введите название"});
+            return;
+        }
+        if(this.state.name.length > 50){
+            this.setState({isNameError:"Максимальная длина - 50 символов"});
+            return;
+        }
         const requestOptions = {
             method: 'POST',
             headers: {
@@ -99,19 +108,26 @@ class AddServerDialog extends React.Component {
                     <br/>
                     <input onChange={this.handleFileUploaded} name="bg" accept="image/*" className={classes.inputFile} id="bg-file" type="file"/>
                     <label htmlFor="bg-file">
-                        <Button variant="contained" color="primary" component="span">
+                        {this.state.bg === null ? <Button variant="contained" color="primary" component="span">
                             Загрузить фон карточки.
-                        </Button>
+                        </Button> : ""}
                     </label>
                 </Grid>
+                {this.state.bg != null ? <Grid container alignItems="center" direction="column">
+                    <Button onClick={() => this.setState({bg:null})} variant="contained" color="primary" component="span">
+                        Удалить фон карточки.
+                    </Button>
+                </Grid> : ""}
                 <TextField
                     variant="outlined"
                     margin="normal"
                     required
                     fullWidth
+                    helperText={this.state.isNameError}
                     onChange={(e)=>this.setState({name:e.target.value})}
                     label="Название сервера"
                     autoFocus
+                    error={this.state.isNameError.length != 0}
                     inputRef={this.name}
                 />
                 <TextField

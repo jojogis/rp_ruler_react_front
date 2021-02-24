@@ -73,3 +73,7 @@ input:-webkit-autofill:active  {
 .my-masonry-grid_column > div { /* change div to reference your elements you put in <Masonry> */
     margin-bottom: 30px;
 }
+.MuiPopover-paper {
+    backdrop-filter: blur(7px);
+    background: #4445;
+}
