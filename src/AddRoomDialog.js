@@ -12,7 +12,8 @@ class AddRoomDialog extends React.Component {
             name: this.props.name,
             isGlobal:this.props.isGlobal == null ? false : this.props.isGlobal,
             bg:this.props.bg == null ? null : this.props.bg,
-            isNameError:""
+            isNameError:"",
+            description:this.props.description
         }
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleFileUploaded = this.handleFileUploaded.bind(this);
@@ -23,6 +24,9 @@ class AddRoomDialog extends React.Component {
         }
         if (prevProps.name !== this.props.name) {
             this.setState({name:this.props.name});
+        }
+        if (prevProps.description !== this.props.description) {
+            this.setState({description:this.props.description});
         }
         if (prevProps.isGlobal !== this.props.isGlobal) {
             this.setState({isGlobal:this.props.isGlobal});
@@ -44,7 +48,8 @@ class AddRoomDialog extends React.Component {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: "token="+this.context.token+"&name="+this.state.name+"&server_id="+this.props.serverId+"&is_global="+this.state.isGlobal+"&bg="+this.state.bg+roomId
+            body: "token="+this.context.token+"&name="+this.state.name+"&server_id="+this.props.serverId+"&is_global="+this.state.isGlobal+"&bg="+this.state.bg+
+                "&desc="+this.state.description+roomId
         };
         fetch(url,requestOptions)
             .then(response => response.json())
@@ -112,6 +117,18 @@ class AddRoomDialog extends React.Component {
                     label="Название комнаты"
                     autoFocus
                     value={this.state.name}
+                />
+
+                <TextField
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    multiline
+                    rows={3}
+                    onChange={(e)=>this.setState({description:e.target.value})}
+                    label="Описание комнаты"
+                    autoFocus
+                    value={this.state.description}
                 />
 
                 <FormControlLabel
