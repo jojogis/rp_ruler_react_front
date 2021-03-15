@@ -1,8 +1,19 @@
 import * as React from "react";
-import {Button, Dialog, DialogActions, DialogTitle, Menu, MenuItem, Paper, withStyles} from "@material-ui/core";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogTitle,
+    Menu,
+    MenuItem,
+    Paper,
+    Snackbar,
+    withStyles
+} from "@material-ui/core";
 import {Add, Delete, Edit, ExitToApp, ExpandMore, Remove} from "@material-ui/icons";
 import AddRoomDialog from "./AddRoomDialog";
 import TokenContext from "./AppContext";
+import {Alert} from "@material-ui/lab";
 
 class ServerName extends React.Component{
     static contextType = TokenContext;
@@ -11,7 +22,8 @@ class ServerName extends React.Component{
         this.state = {
             anchorEl:null,
             isAddRoomOpen:false,
-            isConfirmDeleteOpen:false
+            isConfirmDeleteOpen:false,
+            snackBarOpen:false
         };
         this.handleServerMenuClick       = this.handleServerMenuClick.bind(this);
         this.handleServerMenuClose       = this.handleServerMenuClose.bind(this);
@@ -42,7 +54,7 @@ class ServerName extends React.Component{
         fetch("https://rp-ruler.ru/api/delete_server.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{
-                this.setState({isConfirmDeleteOpen:false});
+                this.setState({isConfirmDeleteOpen:false,snackBarOpen:true});
                 this.props.onServerDelete();
             })
     }
@@ -101,6 +113,11 @@ class ServerName extends React.Component{
                             </Button>
                         </DialogActions>
                     </Dialog>
+                    <Snackbar open={this.state.snackBarOpen} autoHideDuration={3000} onClose={()=>this.setState({snackBarOpen:false})}>
+                        <Alert severity="success" variant="filled" elevation={6}>
+                            Сервер удален
+                        </Alert>
+                    </Snackbar>
                 </div>);
         }
     }

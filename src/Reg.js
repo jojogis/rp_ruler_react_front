@@ -25,9 +25,10 @@ class Reg extends React.Component{
         this.state = {
             login:"",
             pass:"",
-            mail:"",
-            isWrongLogin:false,
-            isWrongMail:false
+            email:"",
+            isWrongLogin:"",
+            isWrongMail:"",
+            isWrongPassword:""
         };
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -38,13 +39,31 @@ class Reg extends React.Component{
         const name = target.name;
         this.setState({
             [name]: value,
-            isWrongLogin:false,
-            isWrongMail:false
+            isWrongLogin:"",
+            isWrongMail:"",
+            isWrongPassword:""
         });
     }
 
     handleSubmit(e){
         e.preventDefault();
+        if(this.state.login == ""){
+            this.setState({isWrongLogin:"Введите логин"});
+            return;
+        }
+        if(this.state.email == ""){
+            this.setState({isWrongMail:"Введите email"});
+            return;
+        }
+        if( !(/^[a-zA-Z0-9]+@(?:[a-zA-Z0-9]+\.)+[A-Za-z]+$/.test(this.state.email)) ){
+            this.setState({isWrongMail:"Некорректный email"});
+            return;
+        }
+        if(this.state.pass.length < 6){
+            this.setState({isWrongPassword:"Слишком короткий пароль"});
+            return;
+        }
+
         const requestOptions = {
             method: 'POST',
             headers: {
@@ -56,12 +75,12 @@ class Reg extends React.Component{
             .then(response => response.json())
             .then((data)=>{
                 if(data["token"] !== undefined){
-                    this.props.onReg(data["token"],data["user_id"]);
+                    this.props.onReg(data["token"],data["user_id"],data["user_type"]);
                     this.routingFunction();
                 }else if( data["error"] === 1){
-                    this.setState({isWrongLogin:true});
+                    this.setState({isWrongLogin:"Логин занят"});
                 }else if( data["error"] === 2) {
-                    this.setState({isWrongMail:true});
+                    this.setState({isWrongMail:"Email занят"});
                 }
             })
     }
@@ -85,8 +104,8 @@ class Reg extends React.Component{
                                 required
                                 fullWidth
                                 id="login"
-                                error={this.state.isWrongLogin}
-                                helperText={this.state.isWrongLogin ? "Логин занят" : ""}
+                                error={this.state.isWrongLogin != ""}
+                                helperText={this.state.isWrongLogin}
                                 onChange={this.handleInputChange}
                                 label="Логин"
                                 autoFocus
@@ -99,9 +118,8 @@ class Reg extends React.Component{
                                 fullWidth
                                 id="email"
                                 label="Email"
-                                error={this.state.isWrongMail}
-                                helperText={this.state.isWrongMail ?
-                                    "Пользователь с такой почтой уже существует " : ""}
+                                error={this.state.isWrongMail != ""}
+                                helperText={this.state.isWrongMail}
                                 name="email"
                                 onChange={this.handleInputChange}
                                 autoComplete="email"
@@ -114,6 +132,8 @@ class Reg extends React.Component{
                                 fullWidth
                                 name="pass"
                                 label="Пароль"
+                                error={this.state.isWrongPassword != ""}
+                                helperText={this.state.isWrongPassword}
                                 type="password"
                                 onChange={this.handleInputChange}
                                 id="pass"

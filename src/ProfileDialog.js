@@ -108,8 +108,7 @@ class ProfileDialog extends React.Component {
 
 
     handleSaveStatus(data){
-        if(data==null)return;
-        let newStatus = data.status;
+        let newStatus = data == null ? " " : data.status;
         this.setState({statusFormOpen:false});
         const requestOptions = {
             method: 'POST',

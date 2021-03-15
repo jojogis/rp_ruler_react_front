@@ -18,7 +18,7 @@ class AddServerDialog extends React.Component {
     static contextType = TokenContext;
     constructor(props) {
         super(props);
-        this.tags = ["Аниме","Хентай","Фури","Ужасы"];
+        this.tags = ["Аниме","Хентай","Фури","Ужасы","Детектив","Приключения","Эротика","Криминал","Мистика","Комедия","Фантастика"];
         this.state = {
             tags:"",
             name:"",
@@ -64,8 +64,8 @@ class AddServerDialog extends React.Component {
             this.setState({isNameError:"Введите название"});
             return;
         }
-        if(this.state.name.length > 50){
-            this.setState({isNameError:"Максимальная длина - 50 символов"});
+        if(this.state.name.length > 20){
+            this.setState({isNameError:"Максимальная длина - 20 символов"});
             return;
         }
         const requestOptions = {
@@ -149,7 +149,6 @@ class AddServerDialog extends React.Component {
                     //value={this.state.tags}
                     name="tags"
                     clearText="Очистить"
-                    freeSolo
                     onChange = {(e,value) => {this.setState({tags:value}) }}
                     renderTags={(value, getTagProps) =>
                         value.map((option, index) => (

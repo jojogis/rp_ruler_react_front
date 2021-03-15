@@ -46,8 +46,9 @@ class MainMenu extends React.Component{
                         <Fab className={classes.serverElem + (this.props.currentServer===item.id ? " "+classes.current : "")}>{item.name.substr(0,2)}</Fab>
                     </Avatar></ListItem>
             ))}
-            <ListItem><Fab color="primary" className={classes.serverElem} onClick={() => this.setState({addServerDialogOpen:true})}>
-                <Add/></Fab></ListItem>
+                {this.context.user_type == 1 ? <ListItem><Fab color="primary" className={classes.serverElem} onClick={() => this.setState({addServerDialogOpen:true})}>
+                    <Add/></Fab></ListItem> : ""}
+
                 <ListItem><Fab color="primary" onClick={() =>this.setState({serversDialogOpen:true})} className={classes.serverElem}>
                     <Explore/></Fab></ListItem>
 

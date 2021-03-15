@@ -48,6 +48,7 @@ export class App extends React.Component{
         const cookies = new Cookies();
         const token = cookies.get("token");
         const user_id = cookies.get("user_id");
+        const user_type = cookies.get("user_type");
         const isDarkTheme = cookies.get("is_dark_theme") == "1";
         this.handleLogin = this.handleLogin.bind(this);
         this.toggleTheme = this.toggleTheme.bind(this);
@@ -55,6 +56,7 @@ export class App extends React.Component{
         this.state = {
             token:token,
             user_id:user_id,
+            user_type:user_type,
             isDarkTheme:isDarkTheme,
             toggleTheme:this.toggleTheme,
             logout:this.logout,
@@ -89,14 +91,16 @@ export class App extends React.Component{
         const cookies = new Cookies();
         cookies.set("token",null);
         cookies.set("user_id",null);
-        this.setState({token:null,user_id:null});
+        cookies.set("user_type",null);
+        this.setState({token:null,user_id:null,user_type:null});
     }
 
-    handleLogin(token,id){
+    handleLogin(token,id,user_type){
         const cookies = new Cookies();
         cookies.set("token",token);
         cookies.set("user_id",id);
-        this.setState({token:token,user_id:id});
+        cookies.set("user_type",user_type);
+        this.setState({token:token,user_id:id,user_type:user_type});
     }
 
 

@@ -33,8 +33,8 @@ class AddRoomDialog extends React.Component {
             this.setState({isNameError:"Введите название"});
             return;
         }
-        if(this.state.name.length > 50){
-            this.setState({isNameError:"Максимальная длина - 50 символов"});
+        if(this.state.name.length > 35){
+            this.setState({isNameError:"Максимальная длина - 35 символов"});
             return;
         }
         let roomId = this.props.roomId == null ? "" : "&room_id="+this.props.roomId;

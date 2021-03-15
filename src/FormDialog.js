@@ -20,6 +20,14 @@ class FormDialog extends React.Component {
     handleChange(event,key){
         this.setState({[key]:event.target.value});
     }
+    componentDidUpdate(prevProps) {
+        if(!prevProps.open && this.props.open){
+            this.props.names.map((item)=>{
+                this.setState({[item]:""});
+            })
+        }
+    }
+
     render() {
 
         return (<Dialog maxWidth="sm" fullWidth open={this.props.open} onClose={this.props.onClose} aria-labelledby="form-dialog-title">

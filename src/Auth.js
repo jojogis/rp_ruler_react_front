@@ -60,7 +60,7 @@ class Auth extends React.Component{
             .then(response => response.json())
             .then((data)=>{
                 if(data["token"] !== undefined){
-                    this.props.onLogin(data["token"],data["user_id"]);
+                    this.props.onLogin(data["token"],data["user_id"],data["user_type"]);
                     this.routingFunction();
                 }else if( data["error"] === 1){
                     this.setState({wrongLoginPass:true});
