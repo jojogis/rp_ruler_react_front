@@ -10,6 +10,7 @@ import {
 import DialogTitleWithClose from "./DialogTitleWithClose";
 import {Autocomplete} from "@material-ui/lab";
 import TokenContext from "./AppContext";
+import {instanceOf} from "prop-types";
 
 
 
@@ -19,20 +20,61 @@ class AddServerDialog extends React.Component {
     constructor(props) {
         super(props);
         this.tags = ["Аниме","Хентай","Фури","Ужасы","Детектив","Приключения","Эротика","Криминал","Мистика","Комедия","Фантастика"];
+        let tagsArr = [];
+        if(this.props.tags != null){
+            tagsArr = this.props.tags.split(",");
+            if(tagsArr == null || tagsArr[0] == "")tagsArr = [];
+            if(!(tagsArr instanceof Array))tagsArr = [tagsArr];
+        }
+
+
         this.state = {
-            tags:"",
-            name:"",
-            avatar:null,
-            isPrivate:false,
-            age:"0",
-            bg:null,
+            tags:tagsArr,
+            name:this.props.name == null ? "" : this.props.name,
+            avatar:this.props.avatar,
+            description:this.props.description,
+            isPrivate:this.props.isPrivate,
+            age:this.props.age == null ? "0" : this.props.age,
+            bg:this.props.bg == null ? null : this.props.bg,
             isNameError:""
         };
 
-        this.name = React.createRef();
-        this.description = React.createRef();
+
+
+
+
         this.handleFileUploaded = this.handleFileUploaded.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.name !== this.props.name) {
+            this.setState({name:this.props.name});
+        }
+        if (prevProps.description !== this.props.description) {
+            this.setState({description:this.props.description});
+        }
+        if (prevProps.tags !== this.props.tags) {
+            let tagsArr = this.props.tags.split(",");
+            if(tagsArr == null || tagsArr[0] == "")tagsArr = [];
+            if(!(tagsArr instanceof Array))tagsArr = [tagsArr];
+
+
+            this.setState({tags:tagsArr});
+        }
+        if (prevProps.isPrivate !== this.props.isPrivate) {
+            this.setState({isPrivate:this.props.isPrivate});
+        }
+        if (prevProps.age !== this.props.age) {
+            this.setState({age:this.props.age});
+        }
+        if (prevProps.avatar !== this.props.avatar) {
+            this.setState({avatar:this.props.avatar});
+        }
+        if (prevProps.bg !== this.props.bg) {
+            this.setState({bg:this.props.bg});
+        }
+
     }
 
     handleFileUploaded(event){
@@ -60,6 +102,7 @@ class AddServerDialog extends React.Component {
     }
 
     handleSubmit(){
+
         if(this.state.name.length == 0){
             this.setState({isNameError:"Введите название"});
             return;
@@ -68,28 +111,32 @@ class AddServerDialog extends React.Component {
             this.setState({isNameError:"Максимальная длина - 20 символов"});
             return;
         }
+        let url = this.props.serverId == null ? "https://rp-ruler.ru/api/create_server.php" : "https://rp-ruler.ru/api/edit_server.php";
+        let serverId = this.props.serverId == null ? "" : "&server_id="+this.props.serverId;
         const requestOptions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: "token="+this.context.token+"&age="+this.state.age+"&name="+this.state.name+"&description="+this.description.current.value+"&avatar="+this.state.avatar+
-                "&is_private="+this.state.isPrivate*1+"&bg="+this.state.bg+"&tags="+this.state.tags
+            body: "token="+this.context.token+"&age="+this.state.age+"&name="+this.state.name+"&description="+this.state.description+"&avatar="+this.state.avatar+
+                "&is_private="+this.state.isPrivate*1+"&bg="+this.state.bg+"&tags="+this.state.tags+serverId
         };
-        fetch("https://rp-ruler.ru/api/create_server.php",requestOptions)
+        fetch(url,requestOptions)
             .then(response => response.json())
             .then((data)=>{
-                this.props.onCreate(data.id,this.state.name);
                 this.props.onClose();
             })
     }
 
     render() {
+        console.log(this.state.tags);
         const {classes} = this.props;
+        let title = this.props.serverId == null ? "Добавление сервера" :  "Редактирование сервера";
+        let btnText = this.props.serverId == null ? "Создать сервер" :  "Сохранить";
         return (<Dialog maxWidth="sm" fullWidth open={this.props.open} onClose={this.props.onClose}
                         aria-labelledby="form-dialog-title">
             <DialogTitleWithClose id="customized-dialog-title" onClose={this.props.onClose}>
-                Добавление сервера
+                {title}
             </DialogTitleWithClose>
             <DialogContent dividers>
                 <Grid container justify="center">
@@ -127,8 +174,9 @@ class AddServerDialog extends React.Component {
                     onChange={(e)=>this.setState({name:e.target.value})}
                     label="Название сервера"
                     autoFocus
+                    value={this.state.name}
                     error={this.state.isNameError.length != 0}
-                    inputRef={this.name}
+
                 />
                 <TextField
                     variant="outlined"
@@ -139,14 +187,15 @@ class AddServerDialog extends React.Component {
                     name="description"
                     multiline
                     rowsMax={5}
-                    inputRef={this.description}
+                    onChange={(e)=>this.setState({description:e.target.value})}
+                    value={this.state.description}
                 />
                 <br/><br/>
                 <Autocomplete
                     multiple
                     options={this.tags}
                     id="tags"
-                    //value={this.state.tags}
+                    value={this.state.tags}
                     name="tags"
                     clearText="Очистить"
                     onChange = {(e,value) => {this.setState({tags:value}) }}
@@ -212,7 +261,7 @@ class AddServerDialog extends React.Component {
                 </RadioGroup><br/>
                 <Grid container justify="center">
                     <Button variant="contained" color="primary" onClick={this.handleSubmit} component="span">
-                        Создать сервер
+                        {btnText}
                     </Button>
                 </Grid>
             </DialogContent>

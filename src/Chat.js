@@ -473,7 +473,8 @@ class Chat extends React.Component{
                         <ServerName isChat={this.state.isChat}
                                     serverId={this.state.serverId}
                                     name={serverName}
-                                    onServerDelete={() => this.loadServers()}
+                                    server={curServer}
+                                    updateServers={() => this.loadServers()}
                                     onRoomCreate={() => this.loadRooms()}
                                     admin={adminId == this.context.user_id*1}
                                     onServerDisconnect={this.handleServerDisconnect}/>

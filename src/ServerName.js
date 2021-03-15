@@ -14,6 +14,7 @@ import {Add, Delete, Edit, ExitToApp, ExpandMore, Remove} from "@material-ui/ico
 import AddRoomDialog from "./AddRoomDialog";
 import TokenContext from "./AppContext";
 import {Alert} from "@material-ui/lab";
+import AddServerDialog from "./AddServerDialog";
 
 class ServerName extends React.Component{
     static contextType = TokenContext;
@@ -23,7 +24,8 @@ class ServerName extends React.Component{
             anchorEl:null,
             isAddRoomOpen:false,
             isConfirmDeleteOpen:false,
-            snackBarOpen:false
+            snackBarOpen:false,
+            editOpen:false
         };
         this.handleServerMenuClick       = this.handleServerMenuClick.bind(this);
         this.handleServerMenuClose       = this.handleServerMenuClose.bind(this);
@@ -55,11 +57,12 @@ class ServerName extends React.Component{
             .then(response => response.json())
             .then((data)=>{
                 this.setState({isConfirmDeleteOpen:false,snackBarOpen:true});
-                this.props.onServerDelete();
+                this.props.updateServers();
             })
     }
 
     render() {
+
         const {classes} = this.props;
         if(this.props.isChat){
             return(<div><Button fullWidth onContextMenu={this.handleServerMenuClick} onClick={this.handleServerMenuClick}
@@ -89,7 +92,7 @@ class ServerName extends React.Component{
                 >
                     <MenuItem className={classes.exitServer} onClick={this.handleServerDisconnectClick}>
                         Покинуть сервер <ExitToApp className={classes.icon}/></MenuItem>
-                    {this.props.admin ? <MenuItem className={classes.edit} onClick={this.handleServerDisconnectClick}>
+                    {this.props.admin ? <MenuItem className={classes.edit} onClick={() => this.setState({editOpen:true})}>
                         Редактировать <Edit className={classes.icon}/></MenuItem> : ""}
                     {this.props.admin ? <MenuItem className={classes.add} onClick={() => this.setState({isAddRoomOpen:true,anchorEl:false})}>
                         Добавить комнату <Add className={classes.icon}/></MenuItem> : ""}
@@ -118,6 +121,18 @@ class ServerName extends React.Component{
                             Сервер удален
                         </Alert>
                     </Snackbar>
+                    {this.props.server != null ? <AddServerDialog
+                        serverId={this.props.serverId}
+                        name={this.props.server.name}
+                        description={this.props.server.description}
+                        open={this.state.editOpen}
+                        tags={this.props.server.tags}
+                        age={this.props.server.age}
+                        avatar={this.props.server.avatar}
+                        bg={this.props.server.card_bg}
+                        isPrivate={this.props.server.is_private}
+                        onClose={() => {this.setState({editOpen:false});this.props.updateServers(); }}/> : ""}
+
                 </div>);
         }
     }
