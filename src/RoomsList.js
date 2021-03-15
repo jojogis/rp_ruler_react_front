@@ -114,6 +114,7 @@ class RoomsList extends React.Component{
                     onCreate={this.props.onRoomsUpdate}
                     roomId={this.state.clickedRoomId}
                     name={this.state.clickedRoom.name}
+                    description={this.state.clickedRoom.description}
                     bg={this.state.clickedRoom.bg}
                     isGlobal={this.state.clickedRoom.is_global === 1}
                     onClose={() => this.setState({isEditOpen:false})}

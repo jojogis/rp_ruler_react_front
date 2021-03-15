@@ -441,6 +441,7 @@ class Chat extends React.Component{
         const room = this.getElById(this.state.rooms,this.state.roomId);
         let labelText = "Писать некуда...";
         let roomName = "";
+        let roomDescription = "";
         let bg = "";
         if(room != null){
             let writeTo = this.state.isChat ? "Написать " : "Написать в ";
@@ -448,6 +449,7 @@ class Chat extends React.Component{
             labelText = this.state.replyTo==null ? writeTo + roomName.toLowerCase() :
                 "Написать в ответ "+this.getElById(this.state.messages,this.state.replyTo).login;
             bg = "url(https://rp-ruler.ru/upload/" + room.bg+")";
+            roomDescription = room.description;
         }
         const replyText = this.state.replyTo==null ? null : this.getElById(this.state.messages,this.state.replyTo).text;
         const replyLogin = this.state.replyTo==null ? null : this.getElById(this.state.messages,this.state.replyTo).login;
@@ -487,7 +489,7 @@ class Chat extends React.Component{
                 <Grid justify="center" container item xs={this.state.isChat ? 9 : 7} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1}  >
 
-                        <RoomAppBar name={roomName}/>
+                        <RoomAppBar className={classes.appBar} name={roomName} description={roomDescription}/>
 
                         <Messages messages={this.state.messages}
                                   onRemoveMessage={this.handleRemoveMessage}
@@ -535,7 +537,6 @@ class Chat extends React.Component{
 
 
 const styles = {
-
     sendBtn:{
         position:"absolute",
         bottom:"10px",
