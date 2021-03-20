@@ -269,7 +269,7 @@ class Chat extends React.Component{
                 .then(response => response.json())
                 .then((data) => {
                 })
-            this.getElById(this.state.rooms,this.state.roomId).is_unread = false;
+            this.getElById(this.state.rooms,this.state.roomId).is_unread = 0;
         }
     }
 
@@ -283,12 +283,13 @@ class Chat extends React.Component{
         console.log(data);
 
         if(data.message != null){
-            this.lastUpdateTs = new Date().getTime();
             let newMessages = [...this.state.messages];
             if(this.getElById(this.state.messages,data.message.id) == null){
                 newMessages.push(data.message);
             }
-
+            console.log(data.message.sender_id);
+            console.log(this.context.user_id*1);
+            if(data.message.sender_id != this.context.user_id*1)this.popsound.play();
             this.setState({messages: newMessages});
         }
         if(data.left_user != null){
@@ -320,6 +321,16 @@ class Chat extends React.Component{
                 }
             });
         }
+        if(data.unread_room != null){
+            let newRooms = [...this.state.rooms];
+            let unreadRoom = this.getElById(newRooms,data.unread_room*1);
+            console.log(unreadRoom.is_unread);
+            if(unreadRoom != null)unreadRoom.is_unread = (unreadRoom.is_unread*1 || 0) + 1;
+            this.setState( {
+                    rooms:newRooms
+                });
+            if(!unreadRoom.is_muted)this.popsound.play();
+        }
 
     }
 
@@ -328,24 +339,23 @@ class Chat extends React.Component{
     connectSocket(){
         if(this.client != null){
             this.client.close();
+            this.client = null;
         }
-        this.client = new W3CWebSocket('ws://rp-ruler.ru:8084?token='+this.context.token+"&room_id="+this.state.roomId);
+        this.client = new W3CWebSocket('wss://rp-ruler.ru:8084?token='+this.context.token+"&room_id="+this.state.roomId);
         this.client.onopen = this.onSocketOpen;
         this.client.onmessage = this.onSocketMessage;
     }
 
     componentDidMount() {
-
+        this.popsound = new Audio('https://rp-ruler.ru/sounds_water_droplet_3.mp3');
+        this.popsound.load();
+        this.popsound.volume = 0.6;
 
         this.loadServers();
         this.loadRooms();
-        this.timerChat = setInterval(this.updateChat,this.updateInterval);
 
     }
 
-    componentWillUnmount() {
-        clearInterval(this.timerChat);
-    }
 
     removeElById(arr,id){
         for(let i=0;i<arr.length;i++){
@@ -586,7 +596,7 @@ const styles = {
             position:"absolute",
             bottom:"0px",
             width:"100%",
-            zIndex:10000
+            zIndex:10
         },
 
 

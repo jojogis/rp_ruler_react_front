@@ -55,7 +55,8 @@ class Reg extends React.Component{
             this.setState({isWrongMail:"Введите email"});
             return;
         }
-        if( !(/^[a-zA-Z0-9]+@(?:[a-zA-Z0-9]+\.)+[A-Za-z]+$/.test(this.state.email)) ){
+        let re = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+        if( !(re.test(this.state.email.toLowerCase())) ){
             this.setState({isWrongMail:"Некорректный email"});
             return;
         }

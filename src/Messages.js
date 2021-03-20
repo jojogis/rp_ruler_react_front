@@ -100,7 +100,7 @@ class Messages extends React.Component{
             {this.props.messages.map((item,i,msgs)=>(
             <ListItem button key={item.id}
                       className={(item.id > this.props.lastRead ? classes.unreadMessage : "")+" "+
-                      (item.id == this.props.replyTo ? classes.replyTo : "") +
+                      (item.id == this.props.replyTo ? classes.replyTo : "") + " "+
                       ((i != 0 && msgs[i - 1].sender_id == item.sender_id) ? classes.noAvatar : "")
                       }
                       onContextMenu={(event) => this.handleContextClick(event,item.id)}>

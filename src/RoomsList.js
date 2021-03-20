@@ -11,12 +11,15 @@ import {
     Typography,
     withStyles
 } from "@material-ui/core";
-import {AlternateEmail, Delete, Edit, ExitToApp, Language} from "@material-ui/icons";
+import {AlternateEmail, Delete, Edit, ExitToApp, Language, Notifications} from "@material-ui/icons";
 import AddRoomDialog from "./AddRoomDialog";
+import {Alert} from "@material-ui/lab";
+import {AlertWarning} from "material-ui/svg-icons/index.es";
 
 
 class RoomsList extends React.Component{
     static contextType = AppContext;
+
     constructor(props) {
         super(props);
         this.state = {
@@ -27,10 +30,13 @@ class RoomsList extends React.Component{
         };
         this.handleRoomContext = this.handleRoomContext.bind(this);
         this.deleteRoom = this.deleteRoom.bind(this);
+        this.handleChangeNotifications = this.handleChangeNotifications.bind(this);
     }
+
     handleRoomClick(roomId){
         this.props.onChangeRoom(roomId);
     }
+
     deleteRoom(){
         const requestOptions = {
             method: 'POST',
@@ -48,7 +54,6 @@ class RoomsList extends React.Component{
     }
 
     handleRoomContext(event,id){
-        if(this.props.admin){
             let clickedRoom = this.getElById(this.props.rooms,id);
             this.setState({
                 anchorEl:event.currentTarget,
@@ -56,9 +61,25 @@ class RoomsList extends React.Component{
                 clickedRoom:clickedRoom
             });
 
-        }
 
     }
+
+    handleChangeNotifications(){
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: "token="+this.context.token+"&room_id="+this.state.clickedRoomId
+        };
+        fetch("https://rp-ruler.ru/api/change_alert.php",requestOptions)
+            .then(response => response.json())
+            .then((data)=>{
+                this.setState({anchorEl:null,clickedRoomId:null});
+                this.props.onRoomsUpdate();
+            })
+    }
+
     getElById(arr,id){
         if(arr === undefined)return null;
         for(let i=0;i<arr.length;i++){
@@ -66,6 +87,7 @@ class RoomsList extends React.Component{
         }
         return null;
     }
+
     render() {
         const {classes} = this.props;
         if(this.props.rooms == null || this.props.rooms.length === 0){
@@ -79,7 +101,7 @@ class RoomsList extends React.Component{
                             <Badge anchorOrigin={{
                                 vertical: 'top',
                                 horizontal: 'left',
-                            }} color="primary" variant="dot" invisible={!item.is_unread}>
+                            }} color="primary" badgeContent={"+"+item.is_unread} invisible={!(item.is_unread > 0)}>
                             {item.is_global === 1 ? <Language/> : <AlternateEmail/>}
                             </Badge>
                         </ListItemIcon>
@@ -89,7 +111,7 @@ class RoomsList extends React.Component{
 
                     </ListItem>
                 ))}
-                {this.props.admin ? <Menu
+                <Menu
                     transformOrigin={{
                         vertical: 'top',
                         horizontal: 'center',
@@ -98,16 +120,20 @@ class RoomsList extends React.Component{
                         vertical: "bottom",
                         horizontal: 'center',
                     }}
+
                     getContentAnchorEl={null}
                     anchorEl={this.state.anchorEl}
                     keepMounted
                     open={Boolean(this.state.anchorEl)}
                     onClose={() => this.setState({anchorEl:null})}
-                ><MenuItem className={classes.delete} onClick={this.deleteRoom}>
-                    Удалить комнату<Delete className={classes.icon}/></MenuItem>
-                    <MenuItem className={classes.edit} onClick={() => this.setState({isEditOpen:true,anchorEl:null})}>
-                        Редактировать <Edit className={classes.icon}/></MenuItem>
-                </Menu> : ""}
+                >
+                    {this.props.admin ? <MenuItem className={classes.delete} onClick={this.deleteRoom}>
+                    Удалить комнату<Delete className={classes.icon}/></MenuItem> : ""}
+                    {this.props.admin ? <MenuItem className={classes.edit} onClick={() => this.setState({isEditOpen:true,anchorEl:null})}>
+                        Редактировать <Edit className={classes.icon}/></MenuItem> : ""}
+                    <MenuItem className={classes.notifications} onClick={this.handleChangeNotifications}>
+                         <Notifications className={classes.icon}/>{this.state.clickedRoom != null && this.state.clickedRoom.is_muted ? "Включить уведомления" : "Отключить уведомления"}</MenuItem>
+                </Menu>
                 {this.state.clickedRoom != null ? <AddRoomDialog
                     open={this.state.isEditOpen}
                     serverId={this.props.serverId}
@@ -134,8 +160,15 @@ const styles = {
         "width":"100%",
         "overflow":"hidden"
     },
+    notifications:{
+        color:"#ccc",
+    },
     edit:{
-        color:"#ffc107"
+        color:"#ffc107",
+        width:"250px"
+    },
+    menu:{
+        width:"400px"
     },
     delete:{
         color:"#f50057",
