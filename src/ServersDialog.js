@@ -162,6 +162,7 @@ class ServersDialog extends React.Component {
                             avatar={item.avatar}
                             bg={item.card_bg}
                             tags={item.tags}
+                            age={item.age}
                             isConnected={this.getElById(this.props.connectedServers,item.id)}
                             description={item.description}
                             players={item.count}

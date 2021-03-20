@@ -21,7 +21,7 @@ class RoomAppBar extends React.Component{
         const {classes} = this.props;
         if(this.props.description != null && this.props.description.length > 100){
             return(<AppBar color="default" position="absolute">
-                <Toolbar>
+                <Toolbar className={classes.root}>
                     <Accordion className={classes.accordion} expanded={this.state.open} onChange={() => this.setState((state) => {return {open:!state.open}} )}>
                         <AccordionSummary
                             expandIcon={<ExpandMore />}
@@ -30,7 +30,7 @@ class RoomAppBar extends React.Component{
                             <Typography className={classes.divider} variant="h6" noWrap>
                                 {this.props.name}
                             </Typography>
-                            {!this.state.open ? <Typography className={classes.description} variant="body2" noWrap>
+                            {!this.state.open ? <Typography className={classes.description} variant="body2">
                                 {this.truncateString(this.props.description,100)}
                             </Typography> : ""}
                         </AccordionSummary>
@@ -45,7 +45,7 @@ class RoomAppBar extends React.Component{
                 </Toolbar>
             </AppBar>);
         }else{
-            return(<AppBar color="default" position="static">
+            return(<AppBar color="default" position="absolute">
                 <Toolbar>
                     <Typography className={this.props.description != "" ? classes.divider : ""} variant="h6" noWrap>
                         {this.props.name}
@@ -70,6 +70,9 @@ class RoomAppBar extends React.Component{
 }
 
 const styles = {
+    root:{
+        overflow:"hidden"
+    },
     accordion:{
         background:"transparent",
         boxShadow:"none"
@@ -80,7 +83,8 @@ const styles = {
     },
     description:{
         marginTop:"5px",
-        marginLeft:"10px"
+        marginLeft:"10px",
+
     }
 
 };

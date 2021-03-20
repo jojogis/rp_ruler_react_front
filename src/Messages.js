@@ -11,6 +11,7 @@ import {
 import {Delete, Reply} from "@material-ui/icons";
 import TokenContext from "./AppContext";
 import InputReplyMessage from "./InputReplyMessage";
+import StyledBadge from "./StyledBadge";
 
 
 class Messages extends React.Component{
@@ -51,6 +52,13 @@ class Messages extends React.Component{
         this.scrollToBottom();
     }
 
+    getElById(arr,id){
+        if(arr === undefined)return null;
+        for(let i=0;i<arr.length;i++){
+            if(arr[i].id === id)return arr[i];
+        }
+        return null;
+    }
 
     handleCloseMenu(event){
         event.preventDefault();
@@ -87,21 +95,36 @@ class Messages extends React.Component{
 
     render(){
         const {classes} = this.props;
-        return(<List onScroll={this.handleScroll} className={classes.messagesWrap}>
-            <div className={classes.roomBg} style={{"background-image":this.props.bg}}/>
-            {this.props.messages.map((item)=>(
+        return(<div><div className={classes.roomBg} style={{"background-image":this.props.bg}}/><List onScroll={this.handleScroll} className={classes.messagesWrap}>
+
+            {this.props.messages.map((item,i,msgs)=>(
             <ListItem button key={item.id}
                       className={(item.id > this.props.lastRead ? classes.unreadMessage : "")+" "+
-                      (item.id == this.props.replyTo ? classes.replyTo : "")}
+                      (item.id == this.props.replyTo ? classes.replyTo : "") +
+                      ((i != 0 && msgs[i - 1].sender_id == item.sender_id) ? classes.noAvatar : "")
+                      }
                       onContextMenu={(event) => this.handleContextClick(event,item.id)}>
-                <ListItemAvatar>
-                    <Avatar alt={item.login} src={"https://rp-ruler.ru/upload/"+item.avatar}/>
-                </ListItemAvatar>
+                {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :
+                    <ListItemAvatar>
+                        <StyledBadge variant="dot"
+                                     anchorOrigin={{
+                                         vertical: 'bottom',
+                                         horizontal: 'right',
+                                     }}
+                                     overlap="circle"
+                                     invisible={this.getElById(this.props.online, item.sender_id) == null}>
+                            <Avatar alt={item.login} src={"https://rp-ruler.ru/upload/" + item.avatar}/>
+                        </StyledBadge>
+
+                    </ListItemAvatar>
+                }
                 <ListItemText
                     secondary={<div>{item.text}
                     {item.reply_message != null ? <InputReplyMessage replyLogin={item.reply_message.login}
                                                                 replyText={item.reply_message.text}/> : null}</div>}>
-                    <span className={classes.login}>{item.login}</span> <l className={classes.messageTime}>{item.datetime}</l>
+                    {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<span className={classes.login}>{item.login}</span>}
+                    {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<l className={classes.messageTime}> {item.datetime}</l>}
+
 
                 </ListItemText>
             </ListItem>
@@ -137,7 +160,7 @@ class Messages extends React.Component{
             <div style={{ float:"left", clear: "both" }}
                  ref={(el) => { this.messagesEnd = el; }}>
             </div>
-        </List>);
+        </List></div>);
     }
 }
 
@@ -151,11 +174,12 @@ const styles = {
         left:0,
         width:"100%",
         height:"100%",
-        opacity: 0.3
+        opacity: 0.2
     },
     messagesWrap:{
         height:"calc(100vh - 147px)",
-        "overflow":"auto"
+        "overflow":"auto",
+        marginTop:"67px"
     },
     messageTime:{
         "font-size":"13px",
@@ -171,7 +195,14 @@ const styles = {
     login:{
         color:"#ff5722",
         "font-weight":"400"
-    }}
+    },
+    noAvatar:{
+        paddingLeft:"72px",
+        paddingTop:"0px",
+        paddingBlock:"0px"
+    }
+}
+
 
 ;
 export default withStyles(styles)(Messages);

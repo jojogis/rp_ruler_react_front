@@ -20,6 +20,11 @@ import Emoji from "./Emoji";
 import {Send} from "@material-ui/icons";
 
 
+
+import { w3cwebsocket as W3CWebSocket } from "websocket";
+
+
+
 class Chat extends React.Component{
     static contextType = TokenContext;
 
@@ -40,16 +45,13 @@ class Chat extends React.Component{
             inputFocused:false
         }
         this.messageInput = React.createRef();
-        this.lastUpdateTs = new Date().getTime();
         this.isLoadingMessages = false;
-        this.updateInterval = 1000;
         this.handleChangeServer = this.handleChangeServer.bind(this);
         this.handleChangeRoom = this.handleChangeRoom.bind(this);
         this.loadRooms = this.loadRooms.bind(this);
         this.loadServers = this.loadServers.bind(this);
         this.loadMessages = this.loadMessages.bind(this);
         this.handleKeyDown = this.handleKeyDown.bind(this);
-        this.updateChat = this.updateChat.bind(this);
         this.loadUsers = this.loadUsers.bind(this);
         this.handleRemoveMessage = this.handleRemoveMessage.bind(this);
         this.readMessages = this.readMessages.bind(this);
@@ -62,7 +64,9 @@ class Chat extends React.Component{
         this.handleLoadMoreMessages = this.handleLoadMoreMessages.bind(this);
         this.handleSelectEmoji = this.handleSelectEmoji.bind(this);
         this.handleBlur = this.handleBlur.bind(this);
-        this.setUpdateInterval = this.setUpdateInterval.bind(this);
+        this.onSocketMessage = this.onSocketMessage.bind(this);
+
+
     }
 
     handleWriteToUserClick(event,user_id){
@@ -79,80 +83,14 @@ class Chat extends React.Component{
                 if (data.error === undefined) {
                     this.state.room_id = data.result;
                     this.state.isChat = true;
+
                     this.loadRooms(data.result);
                 }
             });
     }
 
-    updateChat(){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&room_id="+this.state.roomId+"&ts="+this.lastUpdateTs
-        };
-        fetch("https://rp-ruler.ru/api/get_updates.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
 
-                if(data.error === undefined){
-                    let isNewData = false;
-                    if(data.messages.length > 0){
-                        this.lastUpdateTs = new Date().getTime();
-                        let newMessages = [...this.state.messages];
-                        data.messages.forEach((item)=>{
-                            if(this.getElById(this.state.messages,item.id) == null){
-                                newMessages.push(item);
-                            }
-                        })
-                        this.setState({messages: newMessages});
-                        isNewData = true;
-                    }
-                    let newUsers = [...this.state.users];
-                    if(data.joined_users.length > 0){
-                        this.lastUpdateTs = new Date().getTime();
-                        data.joined_users.forEach((user)=>{
-                            if(this.getElById(this.state.users,user.id) == null){
-                                newUsers.unshift(user);
-                            }
-                        })
-                        isNewData = true;
-                    }
-                    if(data.left_users.length > 0){
-                        this.lastUpdateTs = new Date().getTime();
-                        data.left_users.forEach((user)=>{
-                            this.removeElById(newUsers,user.id);
-                        })
-                    }
-                    if(data.online.length > 0) {
-                        newUsers.forEach((user) => {
-                            if (data.online.indexOf(user.id) !== -1) {
-                                user.online = 1;
-                            } else {
-                                user.online = 0;
-                            }
-                        })
-                        isNewData = true;
-                    }
-                    if(data.rooms_nu.length > 0) {
-                        data.rooms_nu.forEach((room) => {
-                            let cur_room =this.getElById(this.state.rooms,room.id);
-                            if(cur_room !== null)cur_room.is_unread = true;
-                        })
-                    }
-                    if(isNewData && this.updateInterval !== 1000){
-                        this.setUpdateInterval(1000);
-                    }else if(this.updateInterval < 5000){
-                        this.updateInterval += 1000;
-                        this.setUpdateInterval(this.updateInterval);
-                    }
-                    this.setState({users: newUsers});
 
-                }
-
-            })
-    }
 
 
     handleServerDisconnect(){
@@ -179,7 +117,8 @@ class Chat extends React.Component{
     handleChangeRoom(roomId){
         this.state.roomId = roomId;//так надо
         this.loadMessages();
-        if(!this.state.isChat)this.loadUsers();
+        if(this.state.isChat)this.connectSocket();
+        else this.loadUsers();
     }
 
     handleToChatClick(){
@@ -219,15 +158,16 @@ class Chat extends React.Component{
                     if(data.length > 0)roomId = data[0].id;
 
                     if(choosedRoom == null){
-                        this.setState({rooms:data,roomId:roomId,isLoading:false});
+                        this.setState({rooms:data,roomId:roomId,isLoading:false},() => this.connectSocket());
                     }else{
-                        this.setState({rooms:data,roomId:choosedRoom,isLoading:false});
+                        this.setState({rooms:data,roomId:choosedRoom,isLoading:false},() => this.connectSocket());
                     }
                     this.loadMessages();
                     this.loadUsers();
                 }
 
             })
+
     }
 
     loadServers(){
@@ -268,6 +208,7 @@ class Chat extends React.Component{
             .then((data)=>{
                 if(data.error === undefined){
                     this.setState({users:data.users});
+                    this.connectSocket();
                 }
             })
     }
@@ -332,14 +273,70 @@ class Chat extends React.Component{
         }
     }
 
-    setUpdateInterval(interval){
-        this.updateInterval = interval;
-        clearInterval(this.timerChat);
-        this.timerChat = setInterval(this.updateChat,interval);
+
+
+    onSocketOpen(){
+        console.log("socket connected");
+    }
+    onSocketMessage(message){
+        let data = JSON.parse(message.data);
+        console.log(data);
+
+        if(data.message != null){
+            this.lastUpdateTs = new Date().getTime();
+            let newMessages = [...this.state.messages];
+            if(this.getElById(this.state.messages,data.message.id) == null){
+                newMessages.push(data.message);
+            }
+
+            this.setState({messages: newMessages});
+        }
+        if(data.left_user != null){
+            this.setState((state) => {
+                let newUsers = [...state.users];
+                this.removeElById(newUsers,data.left_user);
+                return {
+                    users:newUsers
+                }
+            });
+        }
+        if(data.joined_user != null){
+
+            this.setState((state) => {
+                let newUsers = [...state.users];
+                if(this.getElById(newUsers,data.joined_user.id) == null)newUsers.unshift(data.joined_user);
+                return {
+                    users:newUsers
+                }
+            });
+        }
+        if(data.remove_message != null){
+
+            this.setState((state) => {
+                let newMessages = [...state.messages];
+                this.removeElById(newMessages,data.remove_message);
+                return {
+                    messages:newMessages
+                }
+            });
+        }
 
     }
 
+
+
+    connectSocket(){
+        if(this.client != null){
+            this.client.close();
+        }
+        this.client = new W3CWebSocket('ws://rp-ruler.ru:8084?token='+this.context.token+"&room_id="+this.state.roomId);
+        this.client.onopen = this.onSocketOpen;
+        this.client.onmessage = this.onSocketMessage;
+    }
+
     componentDidMount() {
+
+
         this.loadServers();
         this.loadRooms();
         this.timerChat = setInterval(this.updateChat,this.updateInterval);
@@ -373,16 +370,24 @@ class Chat extends React.Component{
         newMessages = this.removeElById(newMessages,id);
         let newReplyTo = id != this.state.replyTo ? this.state.replyTo : null;
         this.setState({messages:newMessages,replyTo:newReplyTo});
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&msg_id="+id
-        };
-        fetch("https://rp-ruler.ru/api/remove_message.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{})
+        if(this.client != null){
+            this.client.send(JSON.stringify({
+                removeMsg:id
+            }));
+        }else {//фолбек до POST, нужно ли?
+
+            const requestOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: "token=" + this.context.token + "&msg_id=" + id
+            };
+            fetch("https://rp-ruler.ru/api/remove_message.php", requestOptions)
+                .then(response => response.json())
+                .then((data) => {
+                })
+        }
     }
 
     handleKeyDown(event){
@@ -397,21 +402,31 @@ class Chat extends React.Component{
     }
 
     sendMessage(msg){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token=" + this.context.token + "&room_id=" + this.state.roomId + "&text=" + msg + "&reply_id=" + this.state.replyTo
-        };
-        fetch("https://rp-ruler.ru/api/send_message.php", requestOptions)
-            .then(response => response.json())
-            .then((data) => {
-                let newMessages = [...this.state.messages];
-                newMessages.push(data);
-                this.setState({lastReadMsg: data.id,messages: newMessages,  replyTo: null});
-                this.messageInput.current.value = null;
-            })
+        if(this.client != null){
+            this.client.send(JSON.stringify({
+                text:msg,
+                reply_id:this.state.replyTo
+            }));
+            this.setState({replyTo: null});
+            this.messageInput.current.value = null;
+
+        }else {//фолбек до POST, нужно ли?
+            const requestOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: "token=" + this.context.token + "&room_id=" + this.state.roomId + "&text=" + msg + "&reply_id=" + this.state.replyTo
+            };
+            fetch("https://rp-ruler.ru/api/send_message.php", requestOptions)
+                .then(response => response.json())
+                .then((data) => {
+                    let newMessages = [...this.state.messages];
+                    newMessages.push(data);
+                    this.setState({lastReadMsg: data.id, messages: newMessages, replyTo: null});
+                    this.messageInput.current.value = null;
+                })
+        }
     }
 
     handleSelectEmoji(emoji){
@@ -422,7 +437,7 @@ class Chat extends React.Component{
 
     handleBlur(){
         if(this.messageInput.current.value.length === 0){
-            ///this.setState({inputFocused:null});
+///this.setState({inputFocused:null});
         }
         this.setState({inputFocused:null});
     }
@@ -498,25 +513,26 @@ class Chat extends React.Component{
                                   bg={bg}
                                   replyTo={this.state.replyTo}
                                   loadMoreMessages={this.handleLoadMoreMessages}
+                                  online={this.state.users}
                                   lastRead={this.state.lastReadMsg}/>
                         <Paper elevation={4} className={classes.messageInputWrap}>
                             <InputReplyMessage onCancel={this.handleCancelReply} replyText={replyText} replyLogin={replyLogin}/>
-                        <TextField
-                            id="filled-textarea"
-                            label={labelText}
-                            placeholder="Введите сообщение"
-                            onKeyDown={this.handleKeyDown}
-                            multiline
-                            onFocus={this.handleFocus}
-                            fullWidth
-                            onBlur={this.handleBlur}
-                            focused={this.state.inputFocused}
-                            rowsMax={8}
-                            color="black"
-                            className={classes.messageInput}
-                            variant="filled"
-                            inputRef={this.messageInput}
-                        />
+                            <TextField
+                                id="filled-textarea"
+                                label={labelText}
+                                placeholder="Введите сообщение"
+                                onKeyDown={this.handleKeyDown}
+                                multiline
+                                onFocus={this.handleFocus}
+                                fullWidth
+                                onBlur={this.handleBlur}
+                                focused={this.state.inputFocused}
+                                rowsMax={8}
+                                color="black"
+                                className={classes.messageInput}
+                                variant="filled"
+                                inputRef={this.messageInput}
+                            />
                             <Emoji isDarkTheme={this.props.isDarkTheme} onSelect={this.handleSelectEmoji}/>
                             <Button onClick={() => {if(this.messageInput.current)this.sendMessage(this.messageInput.current.value)}} className={classes.sendBtn}><Send/></Button>
                         </Paper>
@@ -538,41 +554,42 @@ class Chat extends React.Component{
 
 
 const styles = {
-    sendBtn:{
-        position:"absolute",
-        bottom:"10px",
-        right:"5px",
-        opacity:0.7
-    },
-    loading:{
-        width:"100%",
-        position:"fixed",
-        top:"0"
-    },
-    wrap: {
-        padding:"10px 5px",
-        width:"100vw",
-        height:"100vh"
-    },
-    paperWrap:{
-        width:"100%",
-        position: "relative",
-    },
-    exitServer:{
-        color:"red"
-    },
-    messageInput:{
-        "border-radius":"3px",
-        overflow:"hidden",
+        sendBtn:{
+            position:"absolute",
+            bottom:"10px",
+            right:"5px",
+            opacity:0.7
+        },
+        loading:{
+            width:"100%",
+            position:"fixed",
+            top:"0"
+        },
+        wrap: {
+            padding:"10px 5px",
+            width:"100vw",
+            height:"100vh"
+        },
+        paperWrap:{
+            width:"100%",
+            position: "relative",
+        },
+        exitServer:{
+            color:"red"
+        },
+        messageInput:{
+            "border-radius":"3px",
+            overflow:"hidden",
 
-    },
-    messageInputWrap:{
-        position:"absolute",
-        bottom:"0px",
-        width:"100%"
-    },
+        },
+        messageInputWrap:{
+            position:"absolute",
+            bottom:"0px",
+            width:"100%",
+            zIndex:10000
+        },
 
 
-}
+    }
 ;
 export default withStyles(styles)(Chat);

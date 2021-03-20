@@ -129,7 +129,6 @@ class AddServerDialog extends React.Component {
     }
 
     render() {
-        console.log(this.state.tags);
         const {classes} = this.props;
         let title = this.props.serverId == null ? "Добавление сервера" :  "Редактирование сервера";
         let btnText = this.props.serverId == null ? "Создать сервер" :  "Сохранить";

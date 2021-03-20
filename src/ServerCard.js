@@ -35,8 +35,10 @@ class ServerCard extends React.Component{
 
                         </Typography>
                         <Typography variant="body2" color="textSecondary" component="p">
-                            Игроков: {this.props.players}<br/><br/>
-                            {this.props.description}
+                            {this.props.description}<br/><br/>
+                            Игроков: {this.props.players}<br/>
+                            {"Возраст: +" + this.props.age}<br/>
+                            {"Макс игроков: 50"}
                         </Typography>
 
                     </CardContent>
