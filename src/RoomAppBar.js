@@ -3,12 +3,12 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    AppBar,
+    AppBar, IconButton,
     Toolbar,
     Typography,
     withStyles
 } from "@material-ui/core";
-import {ExpandMore} from "@material-ui/icons";
+import {ExpandMore,Menu} from "@material-ui/icons";
 
 class RoomAppBar extends React.Component{
     constructor(props) {
@@ -22,6 +22,9 @@ class RoomAppBar extends React.Component{
         if(this.props.description != null && this.props.description.length > 100){
             return(<AppBar color="default" position="absolute">
                 <Toolbar className={classes.root}>
+                    <IconButton onClick={this.props.onMenuClick} edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+                        <Menu />
+                    </IconButton>
                     <Accordion className={classes.accordion} expanded={this.state.open} onChange={() => this.setState((state) => {return {open:!state.open}} )}>
                         <AccordionSummary
                             expandIcon={<ExpandMore />}
@@ -47,8 +50,12 @@ class RoomAppBar extends React.Component{
         }else{
             return(<AppBar color="default" position="absolute">
                 <Toolbar>
+                    <IconButton onClick={this.props.onMenuClick} edge="start" aria-label="menu">
+                        <Menu/>
+                    </IconButton>
                     <Typography className={this.props.description != "" ? classes.divider : ""} variant="h6" noWrap>
                         {this.props.name}
+
                     </Typography>
                     <Typography className={classes.description} variant="body2" noWrap>
                         {this.truncateString(this.props.description,100)}

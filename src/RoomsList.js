@@ -11,7 +11,7 @@ import {
     Typography,
     withStyles
 } from "@material-ui/core";
-import {AlternateEmail, Delete, Edit, ExitToApp, Language, Notifications} from "@material-ui/icons";
+import {AlternateEmail, Delete, Edit, ExitToApp, Language, Notifications, NotificationsOff} from "@material-ui/icons";
 import AddRoomDialog from "./AddRoomDialog";
 import {Alert} from "@material-ui/lab";
 import {AlertWarning} from "material-ui/svg-icons/index.es";
@@ -74,9 +74,9 @@ class RoomsList extends React.Component{
         };
         fetch("https://rp-ruler.ru/api/change_alert.php",requestOptions)
             .then(response => response.json())
-            .then((data)=>{
+            .then(()=>{
+                this.props.onChangeNotifications(this.state.clickedRoomId);
                 this.setState({anchorEl:null,clickedRoomId:null});
-                this.props.onRoomsUpdate();
             })
     }
 
@@ -107,6 +107,7 @@ class RoomsList extends React.Component{
                         </ListItemIcon>
                         <ListItemText>
                             <span className={classes.room}>{item.login != null ? item.login : item.name}</span>
+                            {item.is_muted ? <NotificationsOff className={classes.notificationsDisabled}/> : ""}
                         </ListItemText>
 
                     </ListItem>
@@ -162,17 +163,22 @@ const styles = {
     },
     notifications:{
         color:"#ccc",
+        width:"250px"
     },
     edit:{
         color:"#ffc107",
         width:"250px"
     },
-    menu:{
-        width:"400px"
+    notificationsDisabled:{
+        position: "absolute",
+        right: "10px",
+        opacity:0.5,
+        top:"10px"
     },
     delete:{
         color:"#f50057",
-        "padding-right":"50px"
+
+        width:"250px"
     },
     icon:{
         position:"absolute",

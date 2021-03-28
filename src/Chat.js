@@ -42,7 +42,8 @@ class Chat extends React.Component{
             isChat:false,
             isLoading:false,
             messageText:"",
-            inputFocused:false
+            inputFocused:false,
+            isMobileMenuOpen:false
         }
         this.messageInput = React.createRef();
         this.isLoadingMessages = false;
@@ -65,7 +66,7 @@ class Chat extends React.Component{
         this.handleSelectEmoji = this.handleSelectEmoji.bind(this);
         this.handleBlur = this.handleBlur.bind(this);
         this.onSocketMessage = this.onSocketMessage.bind(this);
-
+        this.handleChangeRoomNotifications = this.handleChangeRoomNotifications.bind(this);
 
     }
 
@@ -137,6 +138,13 @@ class Chat extends React.Component{
         return null;
     }
 
+
+    handleChangeRoomNotifications(roomId){
+        let newRooms = [...this.state.rooms];
+        let room = this.getElById(newRooms,roomId);
+        room.is_muted = !room.is_muted;
+        this.setState({rooms:newRooms});
+    }
 
 
     loadRooms(choosedRoom){
@@ -459,6 +467,18 @@ class Chat extends React.Component{
         const curServer = this.getElById(this.state.servers,this.state.serverId);
         let serverName = "";
         let adminId = null;
+        let messagesWidth = 12;
+        if(window.innerWidth >= 1000){
+            messagesWidth= 7;
+            if(this.state.isChat){
+                messagesWidth = 9;
+            }
+        }else{
+            if(this.state.isMobileMenuOpen){
+                messagesWidth = 4;
+            }
+        }
+
         if(curServer != null){
             serverName = curServer.name;
             adminId = curServer.admin_id;
@@ -484,7 +504,7 @@ class Chat extends React.Component{
 
                 <CssBaseline />
                 {this.state.isLoading ? <LinearProgress className={classes.loading}/> : ""}
-                <Grid justify="center" container item xs={1} spacing={0}>
+                {window.innerWidth >= 1000 || this.state.isMobileMenuOpen ? <Grid justify="center" container item xs={this.state.isMobileMenuOpen ? 2 : 1} spacing={0}>
 
                     <MainMenu servers={this.state.servers}
                               onServerConnect={this.loadServers}
@@ -492,8 +512,8 @@ class Chat extends React.Component{
                               onToChatClick={this.handleToChatClick}
                               currentServer={this.state.serverId}
                     />
-                </Grid>
-                <Grid justify="center" container item xs={2} spacing={0}>
+                </Grid>:""}
+                {window.innerWidth >= 1000 || this.state.isMobileMenuOpen ? <Grid justify="center" container item xs={this.state.isMobileMenuOpen ? 6 : 2} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1} >
                         <ServerName isChat={this.state.isChat}
                                     serverId={this.state.serverId}
@@ -508,14 +528,15 @@ class Chat extends React.Component{
                                        currentRoom={this.state.roomId}
                                        rooms={this.state.rooms}
                                        onRoomsUpdate={this.loadRooms}
+                                       onChangeNotifications={this.handleChangeRoomNotifications}
                                        serverId={this.state.serverId}
                                        onChangeRoom={this.handleChangeRoom}/> : ""}
                     </Paper>
-                </Grid>
-                <Grid justify="center" container item xs={this.state.isChat ? 9 : 7} spacing={0}>
+                </Grid>:""}
+                <Grid justify="center" container item xs={messagesWidth} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1}  >
 
-                        <RoomAppBar className={classes.appBar} name={roomName} description={roomDescription}/>
+                        <RoomAppBar onMenuClick={ () => this.setState((state) =>{ return {isMobileMenuOpen:!state.isMobileMenuOpen} } ) } className={classes.appBar} name={roomName} description={roomDescription}/>
 
                         <Messages messages={this.state.messages}
                                   onRemoveMessage={this.handleRemoveMessage}
@@ -550,7 +571,7 @@ class Chat extends React.Component{
                     </Paper>
 
                 </Grid>
-                {!this.state.isChat ? <Grid justify="center" container item xs={2} spacing={0}>
+                {!this.state.isChat && window.innerWidth >= 1000 ? <Grid justify="center" container item xs={2} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1} >
                         <UsersList onWriteToUser={this.handleWriteToUserClick} users={this.state.users}/>
                     </Paper>

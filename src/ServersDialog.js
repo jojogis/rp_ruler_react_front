@@ -151,7 +151,8 @@ class ServersDialog extends React.Component {
                     default: 5,
                     1650: 4,
                     1200: 3,
-                    900: 2
+                    900: 2,
+                    600:1
                 }}
                          className="my-masonry-grid"
                          columnClassName="my-masonry-grid_column"
