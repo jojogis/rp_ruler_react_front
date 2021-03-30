@@ -1,18 +1,69 @@
 import * as React from "react";
 import {
-    Avatar, Button,
+    Avatar,
+    Box,
+    Button,
     Chip,
     Dialog,
-    DialogContent, Fab, FormControlLabel, FormLabel, Grid, ListItem, Radio, RadioGroup, Switch,
+    DialogContent, Divider,
+    Fab,
+    FormControlLabel,
+    FormLabel,
+    Grid,
+    IconButton,
+    List,
+    ListItem,
+    ListItemSecondaryAction, ListItemText,
+    Paper,
+    Radio,
+    RadioGroup,
+    Switch,
     TextField,
+    Typography,
     withStyles
 } from "@material-ui/core";
 import DialogTitleWithClose from "./DialogTitleWithClose";
 import {Autocomplete} from "@material-ui/lab";
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 import TokenContext from "./AppContext";
-import {instanceOf} from "prop-types";
+
+import * as PropTypes from "prop-types";
+import Reorder, {
+    reorder,
+    reorderImmutable,
+    reorderFromTo,
+    reorderFromToImmutable
+
+} from 'react-reorder';
+import {DeleteOutline} from "@material-ui/icons";
 
 
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box p={3}>
+                    <Typography>{children}</Typography>
+                </Box>
+            )}
+        </div>
+    );
+}
+
+TabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.any.isRequired,
+    value: PropTypes.any.isRequired,
+};
 
 
 class AddServerDialog extends React.Component {
@@ -30,19 +81,22 @@ class AddServerDialog extends React.Component {
 
         this.state = {
             tags:tagsArr,
+            roles:this.props.roles == null ? [] : this.props.roles,
             name:this.props.name == null ? "" : this.props.name,
             avatar:this.props.avatar,
             description:this.props.description,
             isPrivate:this.props.isPrivate,
             age:this.props.age == null ? "0" : this.props.age,
             bg:this.props.bg == null ? null : this.props.bg,
-            isNameError:""
+            isNameError:"",
+            tab:0,
+            currentRole:0
         };
 
-
-
-
-
+        this.handleDeleteRole = this.handleDeleteRole.bind(this);
+        this.handleReorder = this.handleReorder.bind(this);
+        this.handleRoleSwitchChange = this.handleRoleSwitchChange.bind(this);
+        this.handleAddRole = this.handleAddRole.bind(this);
         this.handleFileUploaded = this.handleFileUploaded.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
@@ -74,6 +128,9 @@ class AddServerDialog extends React.Component {
         if (prevProps.bg !== this.props.bg) {
             this.setState({bg:this.props.bg});
         }
+        if (prevProps.roles !== this.props.roles) {
+            this.setState({roles:this.props.roles == null ? [] : this.props.roles});
+        }
 
     }
 
@@ -99,6 +156,13 @@ class AddServerDialog extends React.Component {
 
         }
 
+    }
+
+    handleReorder (event, previousIndex, nextIndex, fromId, toId) {
+        this.setState({
+            roles: reorder(this.state.roles, previousIndex, nextIndex),
+            //currentRole:nextIndex
+        });
     }
 
     handleSubmit(){
@@ -128,17 +192,52 @@ class AddServerDialog extends React.Component {
             })
     }
 
+    handleRoleSwitchChange(name,value){
+        let newRoles = [...this.state.roles];
+        newRoles[this.state.currentRole][name] = value*1;
+        this.setState({roles:newRoles});
+    }
+
+    handleAddRole(){
+        let newRoles = [...this.state.roles];
+        newRoles.push({id: 0,
+            msg_delete: 0,
+            msg_send: 0,
+            name: "Новая роль",
+            role_edit: 0,
+            server_edit: 0,
+            server_id:this.props.serverId });
+        this.setState({roles:newRoles});
+    }
+
+    handleDeleteRole(index){
+        let newRoles = [...this.state.roles];
+        newRoles.splice(index, 1);
+        let newCurrentRole = this.state.currentRole;
+        if(newCurrentRole === newRoles.length)newCurrentRole--;
+
+        this.setState({roles:newRoles},() => this.setState({currentRole:newCurrentRole}));
+    }
+
     render() {
         const {classes} = this.props;
         let title = this.props.serverId == null ? "Добавление сервера" :  "Редактирование сервера";
         let btnText = this.props.serverId == null ? "Создать сервер" :  "Сохранить";
-        return (<Dialog maxWidth="sm" fullWidth open={this.props.open} onClose={this.props.onClose}
+        return (<Dialog maxWidth="md" fullWidth open={this.props.open} onClose={this.props.onClose}
                         aria-labelledby="form-dialog-title">
-            <DialogTitleWithClose id="customized-dialog-title" onClose={this.props.onClose}>
-                {title}
+            <DialogTitleWithClose id="customized-dialog-title" noPadding={true} onClose={this.props.onClose}>
+                <Paper square>
+                <Tabs value={this.state.tab} indicatorColor="primary"
+                      textColor="primary" onChange={(e,value) => this.setState({tab:value})}>
+                    <Tab value={0} label="Основные" className={classes.tabs} />
+                    <Tab label="Роли" value={1}  className={classes.tabs}/>
+                </Tabs>
+                </Paper>
             </DialogTitleWithClose>
-            <DialogContent dividers>
+            <DialogContent>
+                <TabPanel value={this.state.tab} index={0}>
                 <Grid container justify="center">
+
                     <Avatar item src={"https://rp-ruler.ru/upload/"+this.state.avatar} className={classes.avatar}>
                         <Fab>{this.state.name.substr(0,2)}</Fab>
                     </Avatar>
@@ -258,6 +357,115 @@ class AddServerDialog extends React.Component {
                         labelPlacement="end"
                     />
                 </RadioGroup><br/>
+                </TabPanel>
+
+                <TabPanel value={this.state.tab} index={1}>
+                    <Grid container spacing={4}>
+                        <Grid item xs={4}>
+                            {this.props.roles != null ?
+                                <List >
+
+                        <Reorder
+                            reorderId="my-list" // Unique ID that is used internally to track this list (required)                            placeholderClassName="placeholder" // Class name to be applied to placeholder elements (optional), defaults to 'placeholder'
+                            draggedClassName="dragged" // Class name to be applied to dragged elements (optional), defaults to 'dragged'
+                            lock="horizontal" // Lock the dragging direction (optional): vertical, horizontal (do not use with groups)
+                            holdTime={300} // Default hold time before dragging begins (mouse & touch) (optional), defaults to 0
+                            touchHoldTime={500} // Hold time before dragging begins on touch devices (optional), defaults to holdTime
+                            mouseHoldTime={200} // Hold time before dragging begins with mouse (optional), defaults to holdTime
+                            autoScroll={true} // Enable auto-scrolling when the pointer is close to the edge of the Reorder component (optional), defaults to true
+                            disabled={false} // Disable reordering (optional), defaults to false
+                            disableContextMenus={true} // Disable context menus when holding on touch devices (optional), defaults to true
+                            onReorder={this.handleReorder}
+                            placeholder={
+                                <ListItem button className={classes.listItem+" "+classes.dragPlaceholder}/>
+                            }
+                        >
+                            {this.state.roles.map((item,i)=>(
+                                <ListItem key={i} selected={i===this.state.currentRole} onClick={() => this.setState({currentRole:i})} button className={classes.listItem}>
+                                    {item.name}
+
+                                    <IconButton onClick={() => this.handleDeleteRole(i)} className={classes.listIcon}  edge="end" aria-label="comments">
+                                        <DeleteOutline />
+                                    </IconButton>
+
+                                </ListItem>
+                            ))}
+
+
+                        </Reorder>
+
+                    </List>:""}<br/>
+                            <Button variant="contained" fullWidth color="primary" onClick={this.handleAddRole} component="span">
+                                Добавить роль
+                            </Button>
+                        </Grid>
+                        <Grid className={classes.rightsList} item xs={8}>
+                            <List>
+                                <ListItem>
+                                    <TextField
+                                        variant="outlined"
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        onChange={(e)=>this.setState({name:e.target.value})}
+                                        label="Имя роли"
+                                        autoFocus
+                                        value={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].name : ""}
+
+                                    />
+                                </ListItem>
+                                <ListItem>
+                                    <ListItemText
+                                        primary="Управление сервером"
+                                        secondary="Дает право редактировать сервер...TODO"/>
+                                    <ListItemSecondaryAction>
+                                        <Switch
+                                            onChange={(e,value) => this.handleRoleSwitchChange("server_edit",value)}
+                                            edge="end"
+                                            checked={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].server_edit === 1 : false}
+                                        />
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                                <ListItem>
+                                    <ListItemText
+                                        primary="Управление правами"
+                                        secondary="Дает право менять права игроков...TODO"/>
+                                    <ListItemSecondaryAction>
+                                        <Switch
+                                            edge="end"
+                                            onChange={(e,value) => this.handleRoleSwitchChange("role_edit",value)}
+                                            checked={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].role_edit === 1 : false}
+                                        />
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                                <ListItem>
+                                    <ListItemText
+                                        primary="Отправка сообщений"
+                                        secondary="Дает право писать в каналы...TODO"/>
+                                    <ListItemSecondaryAction>
+                                        <Switch
+                                            edge="end"
+                                            onChange={(e,value) => this.handleRoleSwitchChange("msg_send",value)}
+                                            checked={ this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].msg_send === 1 : false}
+                                        />
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                                <ListItem>
+                                    <ListItemText
+                                        primary="Удаление сообщений"
+                                        secondary="Дает право удалять чужие сообщения...TODO"/>
+                                    <ListItemSecondaryAction>
+                                        <Switch
+                                            edge="end"
+                                            onChange={(e,value) => this.handleRoleSwitchChange("msg_delete",value)}
+                                            checked={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].msg_delete === 1 : false}
+                                        />
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                            </List>
+                        </Grid>
+                    </Grid>
+                </TabPanel>
                 <Grid container justify="center">
                     <Button variant="contained" color="primary" onClick={this.handleSubmit} component="span">
                         {btnText}
@@ -271,8 +479,27 @@ const styles = {
     inputFile:{
         display: 'none',
     },
+    listIcon:{
+        position:"absolute",
+        right:"15px"
+
+    },
+    dragPlaceholder:{
+        height:"56px",
+        border:"2px dashed #999"
+    },
+    rightsList:{
+        borderLeft:"1px solid #999"
+    },
+    listItem:{
+        lineHeight:"40px"
+    },
     bg:{
       "max-width":"200px"
+    },
+    tabs:{
+        paddingTop:"16px",
+        paddingBottom:"16px",
     },
     avatar:{
         "margin-right":"30px"

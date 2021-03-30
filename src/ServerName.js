@@ -44,6 +44,7 @@ class ServerName extends React.Component{
     handleServerDisconnectClick(){
         this.handleServerMenuClose();
         this.props.onServerDisconnect();
+
     }
     deleteServer(){
         const requestOptions = {
@@ -92,7 +93,7 @@ class ServerName extends React.Component{
                 >
                     <MenuItem className={classes.exitServer} onClick={this.handleServerDisconnectClick}>
                         Покинуть сервер <ExitToApp className={classes.icon}/></MenuItem>
-                    {this.props.admin ? <MenuItem className={classes.edit} onClick={() => this.setState({editOpen:true})}>
+                    {this.props.admin ? <MenuItem className={classes.edit} onClick={() => {this.setState({editOpen:true});this.handleServerMenuClose()} }>
                         Редактировать <Edit className={classes.icon}/></MenuItem> : ""}
                     {this.props.admin ? <MenuItem className={classes.add} onClick={() => this.setState({isAddRoomOpen:true,anchorEl:false})}>
                         Добавить комнату <Add className={classes.icon}/></MenuItem> : ""}
@@ -131,6 +132,7 @@ class ServerName extends React.Component{
                         avatar={this.props.server.avatar}
                         bg={this.props.server.card_bg}
                         isPrivate={this.props.server.is_private}
+                        roles={this.props.server.roles}
                         onClose={() => {this.setState({editOpen:false});this.props.updateServers(); }}/> : ""}
 
                 </div>);
