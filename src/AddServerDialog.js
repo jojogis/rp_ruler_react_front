@@ -36,7 +36,8 @@ import Reorder, {
     reorderFromToImmutable
 
 } from 'react-reorder';
-import {DeleteOutline} from "@material-ui/icons";
+import {Check, DeleteOutline} from "@material-ui/icons";
+import {blue, cyan, deepPurple, green, orange, pink, purple, yellow} from "@material-ui/core/colors";
 
 
 function TabPanel(props) {
@@ -99,6 +100,7 @@ class AddServerDialog extends React.Component {
         this.handleAddRole = this.handleAddRole.bind(this);
         this.handleFileUploaded = this.handleFileUploaded.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleColorChange = this.handleColorChange.bind(this);
     }
 
     componentDidUpdate(prevProps) {
@@ -162,7 +164,7 @@ class AddServerDialog extends React.Component {
         this.setState({
             roles: reorder(this.state.roles, previousIndex, nextIndex),
             //currentRole:nextIndex
-        });
+        },() => this.setState({currentRole:nextIndex}));
     }
 
     handleSubmit(){
@@ -183,7 +185,7 @@ class AddServerDialog extends React.Component {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: "token="+this.context.token+"&age="+this.state.age+"&name="+this.state.name+"&description="+this.state.description+"&avatar="+this.state.avatar+
-                "&is_private="+this.state.isPrivate*1+"&bg="+this.state.bg+"&tags="+this.state.tags+serverId
+                "&is_private="+this.state.isPrivate*1+"&bg="+this.state.bg+"&tags="+this.state.tags+serverId+"&roles="+encodeURI(JSON.stringify(this.state.roles))
         };
         fetch(url,requestOptions)
             .then(response => response.json())
@@ -219,8 +221,15 @@ class AddServerDialog extends React.Component {
         this.setState({roles:newRoles},() => this.setState({currentRole:newCurrentRole}));
     }
 
+    handleColorChange(color){
+        let newRoles = [...this.state.roles];
+        newRoles[this.state.currentRole].color = color;
+        this.setState({roles:newRoles});
+    }
+
     render() {
         const {classes} = this.props;
+        let roleColor = this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].color : "default";
         let title = this.props.serverId == null ? "Добавление сервера" :  "Редактирование сервера";
         let btnText = this.props.serverId == null ? "Создать сервер" :  "Сохранить";
         return (<Dialog maxWidth="md" fullWidth open={this.props.open} onClose={this.props.onClose}
@@ -381,7 +390,7 @@ class AddServerDialog extends React.Component {
                             }
                         >
                             {this.state.roles.map((item,i)=>(
-                                <ListItem key={i} selected={i===this.state.currentRole} onClick={() => this.setState({currentRole:i})} button className={classes.listItem}>
+                                <ListItem  key={i} selected={i===this.state.currentRole} onClick={() => this.setState({currentRole:i})} button className={classes.listItem}>
                                     {item.name}
 
                                     <IconButton onClick={() => this.handleDeleteRole(i)} className={classes.listIcon}  edge="end" aria-label="comments">
@@ -414,6 +423,27 @@ class AddServerDialog extends React.Component {
 
                                     />
                                 </ListItem>
+                                <Divider/>
+                                <ListItem>
+                                    <ListItemText
+                                        primary="Цвет роли"
+                                        secondary={<div><br/><br/><br/></div>}/>
+                                    <ListItemSecondaryAction>
+                                        <br/>
+                                        <Button variant="contained" onClick={() => this.handleColorChange("default")} className={classes.colorBtn} color="default">{"default" === roleColor ? <Check/> : ""}</Button>
+                                        <Button variant="contained" onClick={() => this.handleColorChange("red")} className={classes.colorBtn+" "+classes.red} color="primary">{"red" === roleColor ? <Check/> : ""}</Button>
+                                        <Button variant="contained" onClick={() => this.handleColorChange("pink")} className={classes.colorBtn+" "+classes.pink} color="primary">{"pink" === roleColor ? <Check/> : ""}</Button>
+                                        <Button variant="contained" onClick={() => this.handleColorChange("purple")} className={classes.colorBtn+" "+classes.purple} color="primary">{"purple" === roleColor ? <Check/> : ""}</Button>
+                                        <Button variant="contained" onClick={() => this.handleColorChange("deepPurple")} className={classes.colorBtn+" "+classes.deepPurple} color="primary">{"deepPurple" === roleColor ? <Check/> : ""}</Button>
+                                        <Button variant="contained" onClick={() => this.handleColorChange("blue")} className={classes.colorBtn+" "+classes.blue} color="primary">{"blue" === roleColor ? <Check/> : ""}</Button>
+                                        <Button variant="contained" onClick={() => this.handleColorChange("cyan")} className={classes.colorBtn+" "+classes.cyan} color="primary">{"cyan" === roleColor ? <Check/> : ""}</Button>
+                                        <Button variant="contained" onClick={() => this.handleColorChange("green")} className={classes.colorBtn+" "+classes.green} color="primary">{"green" === roleColor ? <Check/> : ""}</Button>
+                                        <Button variant="contained" onClick={() => this.handleColorChange("yellow")} className={classes.colorBtn+" "+classes.yellow} color="primary">{"yellow" === roleColor ? <Check/> : ""}</Button>
+                                        <Button variant="contained" onClick={() => this.handleColorChange("orange")} className={classes.colorBtn+" "+classes.orange} color="primary">{"orange" === roleColor ? <Check/> : ""}</Button>
+
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                                <Divider/>
                                 <ListItem>
                                     <ListItemText
                                         primary="Управление сервером"
@@ -426,6 +456,7 @@ class AddServerDialog extends React.Component {
                                         />
                                     </ListItemSecondaryAction>
                                 </ListItem>
+                                <Divider/>
                                 <ListItem>
                                     <ListItemText
                                         primary="Управление правами"
@@ -438,6 +469,7 @@ class AddServerDialog extends React.Component {
                                         />
                                     </ListItemSecondaryAction>
                                 </ListItem>
+                                <Divider/>
                                 <ListItem>
                                     <ListItemText
                                         primary="Отправка сообщений"
@@ -450,6 +482,7 @@ class AddServerDialog extends React.Component {
                                         />
                                     </ListItemSecondaryAction>
                                 </ListItem>
+                                <Divider/>
                                 <ListItem>
                                     <ListItemText
                                         primary="Удаление сообщений"
@@ -503,6 +536,63 @@ const styles = {
     },
     avatar:{
         "margin-right":"30px"
+    },
+    colorBtn:{
+        height:"35px",
+        minWidth:"35px",
+        width:"35px",
+        marginRight:"10px"
+    },
+    red:{
+        background:"#e53935"
+    },
+    pink:{
+        background:pink[600],
+        '&:hover':{
+            background:pink[800],
+        }
+    },
+    purple:{
+        background:purple[600],
+        '&:hover':{
+            background:purple[800],
+        }
+    },
+    deepPurple:{
+        background:deepPurple[600],
+        '&:hover':{
+            background:deepPurple[800],
+        }
+    },
+    blue:{
+        background:blue[600],
+        '&:hover':{
+            background:blue[800],
+        }
+    },
+    cyan:{
+        background:cyan[600],
+        '&:hover':{
+            background:cyan[800],
+        }
+    },
+    green:{
+        background:green[600],
+        '&:hover':{
+            background:green[800],
+        }
+    },
+    yellow:{
+        background:yellow[600],
+        '&:hover':{
+            background:yellow[800],
+        }
+    },
+    orange:{
+        background:orange[600],
+        '&:hover':{
+            background:orange[800],
+        }
     }
 };
 export default withStyles(styles)(AddServerDialog);
