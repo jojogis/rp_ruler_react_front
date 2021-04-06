@@ -37,7 +37,7 @@ import Reorder, {
 
 } from 'react-reorder';
 import {Check, DeleteOutline} from "@material-ui/icons";
-import {blue, cyan, deepPurple, green, orange, pink, purple, yellow} from "@material-ui/core/colors";
+import {blue, cyan, deepPurple, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
 
 
 function TabPanel(props) {
@@ -101,6 +101,7 @@ class AddServerDialog extends React.Component {
         this.handleFileUploaded = this.handleFileUploaded.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleColorChange = this.handleColorChange.bind(this);
+        this.handleRoleNameChange = this.handleRoleNameChange.bind(this);
     }
 
     componentDidUpdate(prevProps) {
@@ -208,6 +209,7 @@ class AddServerDialog extends React.Component {
             name: "Новая роль",
             role_edit: 0,
             server_edit: 0,
+            color:"default",
             server_id:this.props.serverId });
         this.setState({roles:newRoles});
     }
@@ -224,6 +226,12 @@ class AddServerDialog extends React.Component {
     handleColorChange(color){
         let newRoles = [...this.state.roles];
         newRoles[this.state.currentRole].color = color;
+        this.setState({roles:newRoles});
+    }
+
+    handleRoleNameChange(e){
+        let newRoles = [...this.state.roles];
+        newRoles[this.state.currentRole].name = e.target.value;
         this.setState({roles:newRoles});
     }
 
@@ -390,7 +398,7 @@ class AddServerDialog extends React.Component {
                             }
                         >
                             {this.state.roles.map((item,i)=>(
-                                <ListItem  key={i} selected={i===this.state.currentRole} onClick={() => this.setState({currentRole:i})} button className={classes.listItem}>
+                                <ListItem  key={i} selected={i===this.state.currentRole} onClick={() => this.setState({currentRole:i})} button className={classes.listItem+" "+classes[item.color+"Text"]}>
                                     {item.name}
 
                                     <IconButton onClick={() => this.handleDeleteRole(i)} className={classes.listIcon}  edge="end" aria-label="comments">
@@ -416,7 +424,7 @@ class AddServerDialog extends React.Component {
                                         margin="normal"
                                         required
                                         fullWidth
-                                        onChange={(e)=>this.setState({name:e.target.value})}
+                                        onChange={this.handleRoleNameChange}
                                         label="Имя роли"
                                         autoFocus
                                         value={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].name : ""}
@@ -434,7 +442,7 @@ class AddServerDialog extends React.Component {
                                         <Button variant="contained" onClick={() => this.handleColorChange("red")} className={classes.colorBtn+" "+classes.red} color="primary">{"red" === roleColor ? <Check/> : ""}</Button>
                                         <Button variant="contained" onClick={() => this.handleColorChange("pink")} className={classes.colorBtn+" "+classes.pink} color="primary">{"pink" === roleColor ? <Check/> : ""}</Button>
                                         <Button variant="contained" onClick={() => this.handleColorChange("purple")} className={classes.colorBtn+" "+classes.purple} color="primary">{"purple" === roleColor ? <Check/> : ""}</Button>
-                                        <Button variant="contained" onClick={() => this.handleColorChange("deepPurple")} className={classes.colorBtn+" "+classes.deepPurple} color="primary">{"deepPurple" === roleColor ? <Check/> : ""}</Button>
+                                        <Button variant="contained" onClick={() => this.handleColorChange("lime")} className={classes.colorBtn+" "+classes.lime} color="primary">{"lime" === roleColor ? <Check/> : ""}</Button>
                                         <Button variant="contained" onClick={() => this.handleColorChange("blue")} className={classes.colorBtn+" "+classes.blue} color="primary">{"blue" === roleColor ? <Check/> : ""}</Button>
                                         <Button variant="contained" onClick={() => this.handleColorChange("cyan")} className={classes.colorBtn+" "+classes.cyan} color="primary">{"cyan" === roleColor ? <Check/> : ""}</Button>
                                         <Button variant="contained" onClick={() => this.handleColorChange("green")} className={classes.colorBtn+" "+classes.green} color="primary">{"green" === roleColor ? <Check/> : ""}</Button>
@@ -558,10 +566,10 @@ const styles = {
             background:purple[800],
         }
     },
-    deepPurple:{
-        background:deepPurple[600],
+    lime:{
+        background:lime[600],
         '&:hover':{
-            background:deepPurple[800],
+            background:lime[800],
         }
     },
     blue:{
@@ -593,6 +601,33 @@ const styles = {
         '&:hover':{
             background:orange[800],
         }
+    },
+    redText:{
+        color:red[400]
+    },
+    pinkText:{
+        color:pink[400],
+    },
+    purpleText:{
+        color:purple[400],
+    },
+    limeText:{
+        color:lime[400],
+    },
+    blueText:{
+        color:blue[400],
+    },
+    cyanText:{
+        color:cyan[400],
+    },
+    greenText:{
+        color:green[400],
+    },
+    yellowText:{
+        color:yellow[400],
+    },
+    orangeText:{
+        color:orange[400],
     }
 };
 export default withStyles(styles)(AddServerDialog);

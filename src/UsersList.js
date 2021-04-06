@@ -3,6 +3,7 @@ import TokenContext from "./AppContext";
 import {Avatar, Badge, List, ListItem, ListItemAvatar, ListItemText, withStyles} from "@material-ui/core";
 import UserPopover from "./UserPopover";
 import StyledBadge from "./StyledBadge";
+import {blue, cyan, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
 
 
 
@@ -45,6 +46,7 @@ class UsersList extends React.Component{
     }
 
     render() {
+        const {classes} = this.props;
         if(this.props.users == null)return(<List/>);
         return(<div><List>
             {this.props.users.map((user)=>(
@@ -61,7 +63,7 @@ class UsersList extends React.Component{
                         <Avatar alt={user.login} src={"https://rp-ruler.ru/upload/"+user.avatar} />
                     </StyledBadge>
                 </ListItemAvatar>
-                <ListItemText primary={user.login}/>
+                <ListItemText className={user.color != null ? classes[user.color+"Text"] : ""} primary={user.login}/>
             </ListItem>
             ))}
         </List>
@@ -77,6 +79,32 @@ class UsersList extends React.Component{
 }
 
 const styles = {
-
+    redText:{
+        color:red[400]
+    },
+    pinkText:{
+        color:pink[400],
+    },
+    purpleText:{
+        color:purple[400],
+    },
+    limeText:{
+        color:lime[400],
+    },
+    blueText:{
+        color:blue[400],
+    },
+    cyanText:{
+        color:cyan[400],
+    },
+    greenText:{
+        color:green[400],
+    },
+    yellowText:{
+        color:yellow[400],
+    },
+    orangeText:{
+        color:orange[400],
+    }
 };
 export default withStyles(styles)(UsersList);
