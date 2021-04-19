@@ -12,6 +12,7 @@ import {Delete, Reply} from "@material-ui/icons";
 import TokenContext from "./AppContext";
 import InputReplyMessage from "./InputReplyMessage";
 import StyledBadge from "./StyledBadge";
+import {blue, cyan, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
 
 
 class Messages extends React.Component{
@@ -122,7 +123,7 @@ class Messages extends React.Component{
                     secondary={<div>{item.text}
                     {item.reply_message != null ? <InputReplyMessage replyLogin={item.reply_message.login}
                                                                 replyText={item.reply_message.text}/> : null}</div>}>
-                    {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<span className={classes.login}>{item.login}</span>}
+                    {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<span className={classes.login + " " + item.color != null ? classes[item.color+"Text"] : ""}>{item.login}</span>}
                     {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<l className={classes.messageTime}> {item.datetime}</l>}
 
 
@@ -141,8 +142,9 @@ class Messages extends React.Component{
                         : undefined
                 }
             >
-                {this.getMessageById(this.state.menuMessageId) != null &&
-                this.getMessageById(this.state.menuMessageId).sender_id == this.context.user_id ?
+                {this.getMessageById(this.state.menuMessageId) != null && (
+                this.getMessageById(this.state.menuMessageId).sender_id == this.context.user_id ||
+                    (this.props.role.msg_delete && this.props.role.role_order < this.getMessageById(this.state.menuMessageId).role_order) )?
                     <MenuItem onClick={this.handleDeleteMsg}>
                     <ListItemIcon>
                         <Delete fontSize="small" />
@@ -193,14 +195,40 @@ const styles = {
         "background-color":"#ff572209"
     },
     login:{
-        color:"#ff5722",
         "font-weight":"400"
     },
     noAvatar:{
         paddingLeft:"72px",
         paddingTop:"0px",
         paddingBlock:"0px"
-    }
+    },
+        redText:{
+            color:red[400]
+        },
+        pinkText:{
+            color:pink[400],
+        },
+        purpleText:{
+            color:purple[400],
+        },
+        limeText:{
+            color:lime[400],
+        },
+        blueText:{
+            color:blue[400],
+        },
+        cyanText:{
+            color:cyan[400],
+        },
+        greenText:{
+            color:green[400],
+        },
+        yellowText:{
+            color:yellow[400],
+        },
+        orangeText:{
+            color:orange[400],
+        }
 }
 
 

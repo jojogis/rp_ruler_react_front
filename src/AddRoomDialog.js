@@ -42,6 +42,7 @@ class AddRoomDialog extends React.Component {
             return;
         }
         let roomId = this.props.roomId == null ? "" : "&room_id="+this.props.roomId;
+        let desc = this.state.description == null ? "" : this.state.description;
         let url = this.props.roomId == null ? "https://rp-ruler.ru/api/add_room.php" : "https://rp-ruler.ru/api/edit_room.php";
         const requestOptions = {
             method: 'POST',
@@ -49,7 +50,7 @@ class AddRoomDialog extends React.Component {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: "token="+this.context.token+"&name="+this.state.name+"&server_id="+this.props.serverId+"&is_global="+this.state.isGlobal+"&bg="+this.state.bg+
-                "&desc="+this.state.description+roomId
+                "&desc="+desc+roomId
         };
         fetch(url,requestOptions)
             .then(response => response.json())

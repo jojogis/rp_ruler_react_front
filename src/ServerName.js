@@ -10,11 +10,12 @@ import {
     Snackbar,
     withStyles
 } from "@material-ui/core";
-import {Add, Delete, Edit, ExitToApp, ExpandMore, Remove} from "@material-ui/icons";
+import {Add, Delete, Edit, ExitToApp, ExpandMore, ListAlt, Remove} from "@material-ui/icons";
 import AddRoomDialog from "./AddRoomDialog";
 import TokenContext from "./AppContext";
 import {Alert} from "@material-ui/lab";
 import AddServerDialog from "./AddServerDialog";
+import UsersList from "./UsersList";
 
 class ServerName extends React.Component{
     static contextType = TokenContext;
@@ -25,11 +26,15 @@ class ServerName extends React.Component{
             isAddRoomOpen:false,
             isConfirmDeleteOpen:false,
             snackBarOpen:false,
-            editOpen:false
+            editOpen:false,
+            usersListOpen:false,
+            users:[]
         };
         this.handleServerMenuClick       = this.handleServerMenuClick.bind(this);
         this.handleServerMenuClose       = this.handleServerMenuClose.bind(this);
         this.handleServerDisconnectClick = this.handleServerDisconnectClick.bind(this);
+        this.openUsersList               = this.openUsersList.bind(this);
+        this.loadUsers                   = this.loadUsers.bind(this);
     }
     handleServerMenuClick(event){
         event.preventDefault();
@@ -45,6 +50,26 @@ class ServerName extends React.Component{
         this.handleServerMenuClose();
         this.props.onServerDisconnect();
 
+    }
+
+    loadUsers(){
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: "token=" + this.context.token + "&server_id=" + this.props.serverId
+        };
+        fetch("https://rp-ruler.ru/api/get_users_on_server.php", requestOptions)
+            .then(response => response.json())
+            .then((data) => {
+                this.setState({users:data.users});
+            })
+    }
+
+    openUsersList(){
+        this.setState({usersListOpen:true});
+        this.loadUsers();
     }
     deleteServer(){
         const requestOptions = {
@@ -93,12 +118,14 @@ class ServerName extends React.Component{
                 >
                     <MenuItem className={classes.exitServer} onClick={this.handleServerDisconnectClick}>
                         Покинуть сервер <ExitToApp className={classes.icon}/></MenuItem>
-                    {this.props.admin ? <MenuItem className={classes.edit} onClick={() => {this.setState({editOpen:true});this.handleServerMenuClose()} }>
-                        Редактировать <Edit className={classes.icon}/></MenuItem> : ""}
-                    {this.props.admin ? <MenuItem className={classes.add} onClick={() => this.setState({isAddRoomOpen:true,anchorEl:false})}>
+                    <MenuItem className={classes.edit} onClick={() => {this.setState({editOpen:true});this.handleServerMenuClose()} }>
+                        Настройки <Edit className={classes.icon}/></MenuItem>
+                    {this.props.admin || this.props.role.room_edit ? <MenuItem className={classes.add} onClick={() => this.setState({isAddRoomOpen:true,anchorEl:false})}>
                         Добавить комнату <Add className={classes.icon}/></MenuItem> : ""}
                     {this.props.admin ? <MenuItem className={classes.exitServer} onClick={() => this.setState({isConfirmDeleteOpen:true,anchorEl:false})}>
                         Удалить сервер <Delete className={classes.icon}/></MenuItem> : ""}
+                    <MenuItem className={classes.edit} onClick={this.openUsersList}>
+                        Список игроков <ListAlt className={classes.icon}/></MenuItem>
                 </Menu>
                 <AddRoomDialog
                     open={this.state.isAddRoomOpen}
@@ -122,9 +149,19 @@ class ServerName extends React.Component{
                             Сервер удален
                         </Alert>
                     </Snackbar>
+                    <Dialog maxWidth="md" open={this.state.usersListOpen} onClose={() => this.setState({usersListOpen:false})}>
+                        <UsersList  users={this.state.users}
+                                    role={this.props.role}
+                                    server={this.props.server}
+                                    onWriteToUser={this.props.onWriteToUser}
+                                    onUsersUpdate={() => {this.props.onUsersUpdate();this.loadUsers()}}
+                                    onMessagesUpdate={this.props.onMessagesUpdate}
+                        />
+                    </Dialog>
                     {this.props.server != null ? <AddServerDialog
                         serverId={this.props.serverId}
                         name={this.props.server.name}
+                        role={this.props.role}
                         description={this.props.server.description}
                         open={this.state.editOpen}
                         tags={this.props.server.tags}

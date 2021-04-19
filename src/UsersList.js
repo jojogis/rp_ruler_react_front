@@ -59,7 +59,7 @@ class UsersList extends React.Component{
                                     horizontal: 'right',
                                  }}
                                  overlap="circle"
-                                 invisible={0}>
+                                 invisible={user.online == 0}>
                         <Avatar alt={user.login} src={"https://rp-ruler.ru/upload/"+user.avatar} />
                     </StyledBadge>
                 </ListItemAvatar>
@@ -72,6 +72,10 @@ class UsersList extends React.Component{
                      onWriteToUser={(event)=>this.handleWriteClick(event,this.state.clickedUser.id)}
                      anchorEl={this.state.anchorEl}
                      user={this.state.clickedUser}
+                     server={this.props.server}
+                     role={this.props.role}
+                     onUsersUpdate={this.props.onUsersUpdate}
+                     onMessagesUpdate={this.props.onMessagesUpdate}
                      doWrite={this.state.clickedUser != null && this.context.user_id != this.state.clickedUser.id}
         />
         </div>)

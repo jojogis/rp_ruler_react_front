@@ -11,7 +11,7 @@ import {
     Typography,
     withStyles
 } from "@material-ui/core";
-import {AlternateEmail, Delete, Edit, ExitToApp, Language, Notifications} from "@material-ui/icons";
+import {AlternateEmail, Delete, Edit, ExitToApp, Language, Notifications, NotificationsOff} from "@material-ui/icons";
 import AddRoomDialog from "./AddRoomDialog";
 import {Alert} from "@material-ui/lab";
 import {AlertWarning} from "material-ui/svg-icons/index.es";
@@ -54,12 +54,12 @@ class RoomsList extends React.Component{
     }
 
     handleRoomContext(event,id){
-            let clickedRoom = this.getElById(this.props.rooms,id);
-            this.setState({
-                anchorEl:event.currentTarget,
-                clickedRoomId:id,
-                clickedRoom:clickedRoom
-            });
+        let clickedRoom = this.getElById(this.props.rooms,id);
+        this.setState({
+            anchorEl:event.currentTarget,
+            clickedRoomId:id,
+            clickedRoom:clickedRoom
+        });
 
 
     }
@@ -102,12 +102,13 @@ class RoomsList extends React.Component{
                                 vertical: 'top',
                                 horizontal: 'left',
                             }} color="primary" badgeContent={"+"+item.is_unread} invisible={!(item.is_unread > 0)}>
-                            {item.is_global === 1 ? <Language/> : <AlternateEmail/>}
+                                {item.is_global === 1 ? <Language/> : <AlternateEmail/>}
                             </Badge>
                         </ListItemIcon>
                         <ListItemText>
                             <span className={classes.room}>{item.login != null ? item.login : item.name}</span>
                         </ListItemText>
+                        {item.is_muted ? <NotificationsOff opacity={0.7}/> : ""}
 
                     </ListItem>
                 ))}
@@ -127,12 +128,12 @@ class RoomsList extends React.Component{
                     open={Boolean(this.state.anchorEl)}
                     onClose={() => this.setState({anchorEl:null})}
                 >
-                    {this.props.admin ? <MenuItem className={classes.delete} onClick={this.deleteRoom}>
-                    Удалить комнату<Delete className={classes.icon}/></MenuItem> : ""}
-                    {this.props.admin ? <MenuItem className={classes.edit} onClick={() => this.setState({isEditOpen:true,anchorEl:null})}>
+                    {this.props.admin || this.props.role.room_edit ? <MenuItem className={classes.delete} onClick={this.deleteRoom}>
+                        Удалить комнату<Delete className={classes.icon}/></MenuItem> : ""}
+                    {this.props.admin || this.props.role.room_edit ? <MenuItem className={classes.edit} onClick={() => this.setState({isEditOpen:true,anchorEl:null})}>
                         Редактировать <Edit className={classes.icon}/></MenuItem> : ""}
                     <MenuItem className={classes.notifications} onClick={this.handleChangeNotifications}>
-                         <Notifications className={classes.icon}/>{this.state.clickedRoom != null && this.state.clickedRoom.is_muted ? "Включить уведомления" : "Отключить уведомления"}</MenuItem>
+                        <Notifications className={classes.icon}/>{this.state.clickedRoom != null && this.state.clickedRoom.is_muted ? "Включить уведомления" : "Отключить уведомления"}</MenuItem>
                 </Menu>
                 {this.state.clickedRoom != null ? <AddRoomDialog
                     open={this.state.isEditOpen}
@@ -162,6 +163,7 @@ const styles = {
     },
     notifications:{
         color:"#ccc",
+        width:"250px"
     },
     edit:{
         color:"#ffc107",

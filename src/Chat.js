@@ -42,7 +42,8 @@ class Chat extends React.Component{
             isChat:false,
             isLoading:false,
             messageText:"",
-            inputFocused:false
+            inputFocused:false,
+            role:{color:"default",msg_delete:0,msg_send:0,role_edit:0,role_order:1,server_edit:0,room_edit:0}
         }
         this.messageInput = React.createRef();
         this.isLoadingMessages = false;
@@ -65,7 +66,7 @@ class Chat extends React.Component{
         this.handleSelectEmoji = this.handleSelectEmoji.bind(this);
         this.handleBlur = this.handleBlur.bind(this);
         this.onSocketMessage = this.onSocketMessage.bind(this);
-
+        this.loadRole = this.loadRole.bind(this);
 
     }
 
@@ -108,23 +109,36 @@ class Chat extends React.Component{
             });
     }
 
+    loadRole(){
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: "token="+this.context.token+"&server_id="+this.state.serverId
+        };
+        fetch("https://rp-ruler.ru/api/get_user_role.php",requestOptions).then(response => response.json())
+            .then((data)=>{
+                this.setState({role:data.role});
+            });
+    }
+
     handleChangeServer(serverId){
-        this.state.serverId = serverId;//так надо
-        this.state.isChat = false;
-        this.loadRooms();
+        this.setState({serverId:serverId,isChat:false},() => {this.loadRooms();this.loadRole()});
+
     }
 
     handleChangeRoom(roomId){
-        this.state.roomId = roomId;//так надо
-        this.loadMessages();
-        if(this.state.isChat)this.connectSocket();
-        else this.loadUsers();
+        this.setState({roomId:roomId},() => {
+            this.loadMessages();
+            if(this.state.isChat)this.connectSocket();
+            else this.loadUsers();
+        });
+
     }
 
     handleToChatClick(){
-        this.state.serverId = 0;//так надо
-        this.state.isChat = true;
-        this.loadRooms();
+        this.setState({serverId:0,isChat:true},() => this.loadRooms());
     }
 
 
@@ -498,15 +512,20 @@ class Chat extends React.Component{
                         <ServerName isChat={this.state.isChat}
                                     serverId={this.state.serverId}
                                     name={serverName}
+                                    onWriteToUser={this.handleWriteToUserClick}
+                                    onUsersUpdate={this.loadUsers}
+                                    onMessagesUpdate={this.loadMessages}
                                     server={curServer}
                                     updateServers={() => this.loadServers()}
                                     onRoomCreate={() => this.loadRooms()}
                                     admin={adminId == this.context.user_id*1}
+                                    role={this.state.role}
                                     onServerDisconnect={this.handleServerDisconnect}/>
                         {(this.state.rooms !== undefined) ?
                             <RoomsList admin={adminId == this.context.user_id*1}
                                        currentRoom={this.state.roomId}
                                        rooms={this.state.rooms}
+                                       role={this.state.role}
                                        onRoomsUpdate={this.loadRooms}
                                        serverId={this.state.serverId}
                                        onChangeRoom={this.handleChangeRoom}/> : ""}
@@ -524,12 +543,14 @@ class Chat extends React.Component{
                                   replyTo={this.state.replyTo}
                                   loadMoreMessages={this.handleLoadMoreMessages}
                                   online={this.state.users}
+                                  role={this.state.role}
                                   lastRead={this.state.lastReadMsg}/>
                         <Paper elevation={4} className={classes.messageInputWrap}>
                             <InputReplyMessage onCancel={this.handleCancelReply} replyText={replyText} replyLogin={replyLogin}/>
                             <TextField
                                 id="filled-textarea"
                                 label={labelText}
+                                disabled={!this.state.role.msg_send}
                                 placeholder="Введите сообщение"
                                 onKeyDown={this.handleKeyDown}
                                 multiline
@@ -552,7 +573,13 @@ class Chat extends React.Component{
                 </Grid>
                 {!this.state.isChat ? <Grid justify="center" container item xs={2} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1} >
-                        <UsersList onWriteToUser={this.handleWriteToUserClick} users={this.state.users}/>
+                        <UsersList
+                            onWriteToUser={this.handleWriteToUserClick}
+                            onUsersUpdate={this.loadUsers}
+                            onMessagesUpdate={this.loadMessages}
+                            server={curServer}
+                            role={this.state.role}
+                            users={this.state.users}/>
                     </Paper>
                 </Grid> : ""}
 

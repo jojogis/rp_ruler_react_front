@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Avatar, Fab, List, ListItem, withStyles} from "@material-ui/core";
+import {Avatar, Dialog, Fab, List, ListItem, withStyles} from "@material-ui/core";
 import {AssignmentInd, Add, Settings, Explore, Forum} from "@material-ui/icons";
 
 import {Divider} from "@material-ui/core";
@@ -7,6 +7,7 @@ import AppContext from "./AppContext.js";
 import ProfileDialog from "./ProfileDialog";
 import ServersDialog from "./ServersDialog";
 import AddServerDialog from "./AddServerDialog";
+import UsersList from "./UsersList";
 
 
 
@@ -17,10 +18,12 @@ class MainMenu extends React.Component{
         this.state = {
             profileDialogOpen:false,
             serversDialogOpen:false,
-            addServerDialogOpen:false
+            addServerDialogOpen:false,
+
         };
 
         this.handleServerCreate = this.handleServerCreate.bind(this);
+
     }
     handleServerClick(id,name){
         this.props.onChangeServer(id,name);
@@ -30,6 +33,7 @@ class MainMenu extends React.Component{
         this.props.onServerConnect();
         this.props.onChangeServer(id,name);
     }
+
 
     render() {
         const {classes} = this.props;
@@ -53,8 +57,14 @@ class MainMenu extends React.Component{
                     <Explore/></Fab></ListItem>
 
             </List><ProfileDialog open={this.state.profileDialogOpen} onClose={() =>this.setState({profileDialogOpen:false})}/>
-                    <ServersDialog open={this.state.serversDialogOpen} connectedServers={this.props.servers} onServerConnect={this.props.onServerConnect} onClose={() => this.setState({serversDialogOpen:false})}/>
-                    <AddServerDialog open={this.state.addServerDialogOpen} onCreate={this.handleServerCreate} onClose={() => this.setState({addServerDialogOpen:false})}/>
+                    <ServersDialog open={this.state.serversDialogOpen}
+                                   connectedServers={this.props.servers}
+                                   onServerConnect={this.props.onServerConnect}
+                                   onClose={() => this.setState({serversDialogOpen:false})}/>
+                    <AddServerDialog open={this.state.addServerDialogOpen}
+                                     onCreate={this.handleServerCreate}
+                                     onClose={() => this.setState({addServerDialogOpen:false})}/>
+
         </div>
         );
     }
