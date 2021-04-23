@@ -51,7 +51,6 @@ class UserPopover extends React.Component {
 
     render() {
         const {classes} = this.props;
-        console.log(this.props.user);
         if(this.props.user == null)return(<div/>);
         let role_id = this.props.user.role_id;
         let canChangeRole = this.props.user.role_order > this.props.role.role_order;
@@ -73,7 +72,7 @@ class UserPopover extends React.Component {
             <div className={classes.rootUser}>
             <Avatar className={classes.avatar} alt={this.props.user.login} src={"https://rp-ruler.ru/upload/"+this.props.user.avatar}/>
             <Typography variant="h6">{this.props.user.login}</Typography>
-                <Typography variant="subtitle1" className={classes[curRole.color+"Text"]}>{curRole.name}</Typography>
+                {curRole != null ? <Typography variant="subtitle1" className={classes[curRole.color+"Text"]}>{curRole.name}</Typography>: ""}
             <Typography paragraph={true} variant="caption" >{this.props.user.status}</Typography>
                 {this.props.doWrite ? <Button onClick={this.props.onWriteToUser} variant="contained" color="primary">
                     Написать

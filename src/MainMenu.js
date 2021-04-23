@@ -25,13 +25,13 @@ class MainMenu extends React.Component{
         this.handleServerCreate = this.handleServerCreate.bind(this);
 
     }
-    handleServerClick(id,name){
-        this.props.onChangeServer(id,name);
+    handleServerClick(id){
+        this.props.onChangeServer(id);
     }
 
-    handleServerCreate(id,name){
+    handleServerCreate(id){
         this.props.onServerConnect();
-        this.props.onChangeServer(id,name);
+        this.props.onChangeServer(id);
     }
 
 

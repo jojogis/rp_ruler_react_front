@@ -88,7 +88,7 @@ class AddServerDialog extends React.Component {
             description:this.props.description,
             isPrivate:this.props.isPrivate,
             age:this.props.age == null ? "0" : this.props.age,
-            bg:this.props.bg == null ? null : this.props.bg,
+            bg:this.props.bg == null || this.props.bg === "null" ? null : this.props.bg,
             isNameError:"",
             tab:0,
             currentRole:0
@@ -129,7 +129,7 @@ class AddServerDialog extends React.Component {
             this.setState({avatar:this.props.avatar});
         }
         if (prevProps.bg !== this.props.bg) {
-            this.setState({bg:this.props.bg});
+            this.setState({bg:this.props.bg == null || this.props.bg === "null" ? null : this.props.bg});
         }
         if (prevProps.roles !== this.props.roles) {
             this.setState({roles:this.props.roles == null ? [] : this.props.roles});
@@ -191,6 +191,7 @@ class AddServerDialog extends React.Component {
         fetch(url,requestOptions)
             .then(response => response.json())
             .then((data)=>{
+                if(this.props.onCreate != null)this.props.onCreate(this.props.serverId == null ? data.id : this.props.serverId );
                 this.props.onClose();
             })
     }
@@ -209,6 +210,7 @@ class AddServerDialog extends React.Component {
             name: "Новая роль",
             role_edit: 0,
             server_edit: 0,
+            room_edit:0,
             color:"default",
             server_id:this.props.serverId });
         this.setState({roles:newRoles});
@@ -240,7 +242,6 @@ class AddServerDialog extends React.Component {
         let cantEditServer = this.props.role != null && !this.props.role.server_edit;
         let cantEditRoles = this.props.role != null && !this.props.role.role_edit;
         let roleColor = this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].color : "default";
-        let title = this.props.serverId == null ? "Добавление сервера" :  "Редактирование сервера";
         let btnText = this.props.serverId == null ? "Создать сервер" :  "Сохранить";
         return (<Dialog maxWidth="md" fullWidth open={this.props.open} onClose={this.props.onClose}
                         aria-labelledby="form-dialog-title">
@@ -268,7 +269,7 @@ class AddServerDialog extends React.Component {
                     </label>
                 </Grid><br/>
                 <Grid container alignItems="center" direction="column">
-                    <img className={classes.bg} src={this.state.bg === null ? null : "https://rp-ruler.ru/upload/"+this.state.bg}/>
+                    {this.state.bg != null ? <img className={classes.bg} src={"https://rp-ruler.ru/upload/"+this.state.bg}/> : ""}
                     <br/>
                     <input onChange={this.handleFileUploaded} name="bg" accept="image/*" className={classes.inputFile} id="bg-file" type="file"/>
                     <label htmlFor="bg-file">
