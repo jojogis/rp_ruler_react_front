@@ -6,12 +6,12 @@ import Reg from "./Reg";
 import Chat from "./Chat";
 import {createMuiTheme} from "@material-ui/core";
 import {ThemeProvider} from "@material-ui/core";
-import {Route, Switch, Redirect, useHistory, useLocation} from "react-router";
+import {Route, Switch, Redirect} from "react-router";
 import {BrowserRouter as Router} from "react-router-dom";
 import TokenContext from "./AppContext";
 import Restore from "./Restore";
 import ParticlesBg from "particles-bg";
-import {useEffect} from "react";
+
 
 
 export class App extends React.Component{

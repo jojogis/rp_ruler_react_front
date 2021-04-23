@@ -16,6 +16,7 @@ import TokenContext from "./AppContext";
 import {Alert} from "@material-ui/lab";
 import AddServerDialog from "./AddServerDialog";
 import UsersList from "./UsersList";
+import AddCategoryDialog from "./AddCategoryDialog";
 
 class ServerName extends React.Component{
     static contextType = TokenContext;
@@ -25,6 +26,7 @@ class ServerName extends React.Component{
             anchorEl:null,
             isAddRoomOpen:false,
             isConfirmDeleteOpen:false,
+            isAddCategoryOpen:false,
             snackBarOpen:false,
             editOpen:false,
             usersListOpen:false,
@@ -122,6 +124,8 @@ class ServerName extends React.Component{
                         Настройки <Edit className={classes.icon}/></MenuItem>
                     {this.props.admin || this.props.role.room_edit ? <MenuItem className={classes.add} onClick={() => this.setState({isAddRoomOpen:true,anchorEl:false})}>
                         Добавить комнату <Add className={classes.icon}/></MenuItem> : ""}
+                    {this.props.admin || this.props.role.room_edit ? <MenuItem className={classes.add} onClick={() => this.setState({isAddCategoryOpen:true,anchorEl:false})}>
+                        Добавить категорию <Add className={classes.icon}/></MenuItem> : ""}
                     {this.props.admin ? <MenuItem className={classes.exitServer} onClick={() => this.setState({isConfirmDeleteOpen:true,anchorEl:false})}>
                         Удалить сервер <Delete className={classes.icon}/></MenuItem> : ""}
                     <MenuItem className={classes.edit} onClick={this.openUsersList}>
@@ -132,6 +136,12 @@ class ServerName extends React.Component{
                     serverId={this.props.serverId}
                     onCreate={this.props.onRoomCreate}
                     onClose={() => this.setState({isAddRoomOpen:false})}
+                />
+                <AddCategoryDialog
+                    open={this.state.isAddCategoryOpen}
+                    onCreate={this.props.onCategoryCreate}
+                    serverId={this.props.serverId}
+                    onClose={() => this.setState({isAddCategoryOpen:false})}
                 />
                     <Dialog open={this.state.isConfirmDeleteOpen} onClose={() => this.setState({isConfirmDeleteOpen:false})}>
                         <DialogTitle>Вы уверены?</DialogTitle>
@@ -187,7 +197,7 @@ const styles = {
     },
     exitServer:{
         color:"#f50057",
-        "padding-right":"50px"
+        "padding-right":"70px"
     },
     edit:{
         color:"#ffc107"

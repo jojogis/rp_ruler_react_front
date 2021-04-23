@@ -31,6 +31,7 @@ class Chat extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
+            categories:[],
             serverId:0,
             roomId:null,
             servers:[],
@@ -67,6 +68,7 @@ class Chat extends React.Component{
         this.handleBlur = this.handleBlur.bind(this);
         this.onSocketMessage = this.onSocketMessage.bind(this);
         this.loadRole = this.loadRole.bind(this);
+        this.loadCategories = this.loadCategories.bind(this);
 
     }
 
@@ -124,7 +126,7 @@ class Chat extends React.Component{
     }
 
     handleChangeServer(serverId){
-        this.setState({serverId:serverId,isChat:false},() => {this.loadRooms();this.loadRole()});
+        this.setState({serverId:serverId,isChat:false},() => {this.loadCategories();this.loadRooms();this.loadRole()});
 
     }
 
@@ -151,7 +153,29 @@ class Chat extends React.Component{
         return null;
     }
 
+    loadCategories(){
+        if(this.state.isChat){
+            this.setState({categories:[]});
+            return;
+        }
+        this.setState({isLoading:true});
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: "token="+this.context.token+"&server_id=" + this.state.serverId
+        };
+        fetch("https://rp-ruler.ru/api/get_categories.php",requestOptions)
+            .then(response => response.json())
+            .then((data)=>{
+                if(data.error === undefined){
+                    this.setState({categories:data.categories,isLoading:false})
+                }
 
+            })
+
+    }
 
     loadRooms(choosedRoom){
         const serverId = this.state.isChat ? 0 : this.state.serverId;
@@ -178,7 +202,7 @@ class Chat extends React.Component{
                     }
                     this.loadMessages();
                     this.loadUsers();
-                }
+                }else if(data.error === "invalid token")this.context.logout();
 
             })
 
@@ -364,8 +388,8 @@ class Chat extends React.Component{
         this.popsound = new Audio('https://rp-ruler.ru/sounds_water_droplet_3.mp3');
         this.popsound.load();
         this.popsound.volume = 0.6;
-
         this.loadServers();
+        this.loadCategories();
         this.loadRooms();
 
     }
@@ -516,8 +540,9 @@ class Chat extends React.Component{
                                     onUsersUpdate={this.loadUsers}
                                     onMessagesUpdate={this.loadMessages}
                                     server={curServer}
-                                    updateServers={() => this.loadServers()}
-                                    onRoomCreate={() => this.loadRooms()}
+                                    updateServers={this.loadServers}
+                                    onRoomCreate={this.loadRooms}
+                                    onCategoryCreate={this.loadCategories}
                                     admin={adminId == this.context.user_id*1}
                                     role={this.state.role}
                                     onServerDisconnect={this.handleServerDisconnect}/>
@@ -526,7 +551,9 @@ class Chat extends React.Component{
                                        currentRoom={this.state.roomId}
                                        rooms={this.state.rooms}
                                        role={this.state.role}
+                                       categories={this.state.categories}
                                        onRoomsUpdate={this.loadRooms}
+                                       onCategoriesUpdate={this.loadCategories}
                                        serverId={this.state.serverId}
                                        onChangeRoom={this.handleChangeRoom}/> : ""}
                     </Paper>
