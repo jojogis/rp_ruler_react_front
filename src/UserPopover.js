@@ -12,6 +12,7 @@ import {
 } from "@material-ui/core";
 import {blue, cyan, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
 import TokenContext from "./AppContext";
+import Utils from "./Utils";
 
 class UserPopover extends React.Component {
     static contextType = TokenContext;
@@ -41,21 +42,13 @@ class UserPopover extends React.Component {
 
     }
 
-    getElById(arr,id){
-        if(arr === undefined)return null;
-        for(let i=0;i<arr.length;i++){
-            if(arr[i].id === id)return arr[i];
-        }
-        return null;
-    }
-
     render() {
         const {classes} = this.props;
         if(this.props.user == null)return(<div/>);
         let role_id = this.props.user.role_id;
         let canChangeRole = this.props.user.role_order > this.props.role.role_order;
 
-        let curRole = this.getElById(this.props.server.roles,role_id);
+        let curRole = Utils.getElById(this.props.server.roles,role_id);
         return(<Popover
             open={this.props.open}
             anchorEl={this.props.anchorEl}

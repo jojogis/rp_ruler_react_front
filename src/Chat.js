@@ -22,6 +22,7 @@ import {Send} from "@material-ui/icons";
 
 
 import { w3cwebsocket as W3CWebSocket } from "websocket";
+import Utils from "./Utils";
 
 
 
@@ -143,15 +144,6 @@ class Chat extends React.Component{
         this.setState({serverId:0,isChat:true},() => this.loadRooms());
     }
 
-
-
-    getElById(arr,id){
-        if(arr === undefined)return null;
-        for(let i=0;i<arr.length;i++){
-            if(arr[i].id === id)return arr[i];
-        }
-        return null;
-    }
 
     loadCategories(){
         if(this.state.isChat){
@@ -307,7 +299,7 @@ class Chat extends React.Component{
                 .then(response => response.json())
                 .then((data) => {
                 })
-            this.getElById(this.state.rooms,this.state.roomId).is_unread = 0;
+            Utils.getElById(this.state.rooms,this.state.roomId).is_unread = 0;
         }
     }
 
@@ -322,7 +314,7 @@ class Chat extends React.Component{
 
         if(data.message != null){
             let newMessages = [...this.state.messages];
-            if(this.getElById(this.state.messages,data.message.id) == null){
+            if(Utils.getElById(this.state.messages,data.message.id) == null){
                 newMessages.push(data.message);
             }
             console.log(data.message.sender_id);
@@ -343,7 +335,7 @@ class Chat extends React.Component{
 
             this.setState((state) => {
                 let newUsers = [...state.users];
-                if(this.getElById(newUsers,data.joined_user.id) == null)newUsers.unshift(data.joined_user);
+                if(Utils.getElById(newUsers,data.joined_user.id) == null)newUsers.unshift(data.joined_user);
                 return {
                     users:newUsers
                 }
@@ -361,7 +353,7 @@ class Chat extends React.Component{
         }
         if(data.unread_room != null){
             let newRooms = [...this.state.rooms];
-            let unreadRoom = this.getElById(newRooms,data.unread_room*1);
+            let unreadRoom = Utils.getElById(newRooms,data.unread_room*1);
             console.log(unreadRoom.is_unread);
             if(unreadRoom != null)unreadRoom.is_unread = (unreadRoom.is_unread*1 || 0) + 1;
             this.setState( {
@@ -494,14 +486,14 @@ class Chat extends React.Component{
     render() {
         const {classes} = this.props;
 
-        const curServer = this.getElById(this.state.servers,this.state.serverId);
+        const curServer = Utils.getElById(this.state.servers,this.state.serverId);
         let serverName = "";
         let adminId = null;
         if(curServer != null){
             serverName = curServer.name;
             adminId = curServer.admin_id;
         }
-        const room = this.getElById(this.state.rooms,this.state.roomId);
+        const room = Utils.getElById(this.state.rooms,this.state.roomId);
         let labelText = "Писать некуда...";
         let roomName = "";
         let roomDescription = "";
@@ -510,12 +502,12 @@ class Chat extends React.Component{
             let writeTo = this.state.isChat ? "Написать " : "Написать в ";
             roomName = room.login != null ? room.login : room.name;
             labelText = this.state.replyTo==null ? writeTo + roomName.toLowerCase() :
-                "Написать в ответ "+this.getElById(this.state.messages,this.state.replyTo).login;
+                "Написать в ответ "+Utils.getElById(this.state.messages,this.state.replyTo).login;
             bg = "url(https://rp-ruler.ru/upload/" + room.bg+")";
             roomDescription = room.description;
         }
-        const replyText = this.state.replyTo==null ? null : this.getElById(this.state.messages,this.state.replyTo).text;
-        const replyLogin = this.state.replyTo==null ? null : this.getElById(this.state.messages,this.state.replyTo).login;
+        const replyText = this.state.replyTo==null ? null : Utils.getElById(this.state.messages,this.state.replyTo).text;
+        const replyLogin = this.state.replyTo==null ? null : Utils.getElById(this.state.messages,this.state.replyTo).login;
         return(
 
             <Grid className={classes.wrap} container spacing={1} onContextMenu={(event) => {event.preventDefault()}}>

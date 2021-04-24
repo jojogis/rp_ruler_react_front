@@ -4,6 +4,7 @@ import {Avatar, Badge, List, ListItem, ListItemAvatar, ListItemText, withStyles}
 import UserPopover from "./UserPopover";
 import StyledBadge from "./StyledBadge";
 import {blue, cyan, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
+import Utils from "./Utils";
 
 
 
@@ -26,13 +27,6 @@ class UsersList extends React.Component{
         this.props.onWriteToUser(event,id);
 
     }
-    getElById(arr,id){
-        if(arr === undefined)return null;
-        for(let i=0;i<arr.length;i++){
-            if(arr[i].id === id)return arr[i];
-        }
-        return null;
-    }
 
     handleClose(){
         this.setState({popoverOpen:false})
@@ -40,7 +34,7 @@ class UsersList extends React.Component{
 
     handleClick(event,id){
         this.setState({anchorEl:event.currentTarget,
-            clickedUser:this.getElById(this.props.users,id),
+            clickedUser:Utils.getElById(this.props.users,id),
             popoverOpen:true
         });
     }

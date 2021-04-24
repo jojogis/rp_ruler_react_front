@@ -13,6 +13,7 @@ import TokenContext from "./AppContext";
 import InputReplyMessage from "./InputReplyMessage";
 import StyledBadge from "./StyledBadge";
 import {blue, cyan, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
+import Utils from "./Utils";
 
 
 class Messages extends React.Component{
@@ -53,13 +54,6 @@ class Messages extends React.Component{
         this.scrollToBottom();
     }
 
-    getElById(arr,id){
-        if(arr === undefined)return null;
-        for(let i=0;i<arr.length;i++){
-            if(arr[i].id === id)return arr[i];
-        }
-        return null;
-    }
 
     handleCloseMenu(event){
         event.preventDefault();
@@ -113,7 +107,7 @@ class Messages extends React.Component{
                                          horizontal: 'right',
                                      }}
                                      overlap="circle"
-                                     invisible={this.getElById(this.props.online, item.sender_id) == null}>
+                                     invisible={Utils.getElById(this.props.online, item.sender_id) == null}>
                             <Avatar alt={item.login} src={"https://rp-ruler.ru/upload/" + item.avatar}/>
                         </StyledBadge>
 

@@ -15,6 +15,7 @@ import clsx from "clsx";
 import ServerCard from "./ServerCard";
 import TokenContext from "./AppContext";
 import Masonry from 'react-masonry-css'
+import Utils from "./Utils";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="right" ref={ref} {...props} />;
@@ -38,14 +39,6 @@ class ServersDialog extends React.Component {
 
     }
 
-
-    getElById(arr,id){
-        if(arr === undefined)return null;
-        for(let i=0;i<arr.length;i++){
-            if(arr[i].id === id)return arr[i];
-        }
-        return null;
-    }
 
     componentDidUpdate(prevProps) {
         if(!prevProps.open && this.props.open){
@@ -163,7 +156,7 @@ class ServersDialog extends React.Component {
                             bg={item.card_bg}
                             tags={item.tags}
                             age={item.age}
-                            isConnected={this.getElById(this.props.connectedServers,item.id)}
+                            isConnected={Utils.getElById(this.props.connectedServers,item.id)}
                             description={item.description}
                             players={item.count}
                             onFindTag={this.findTag}

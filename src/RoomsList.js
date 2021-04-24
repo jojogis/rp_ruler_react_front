@@ -26,6 +26,7 @@ import AddRoomDialog from "./AddRoomDialog";
 import {Alert} from "@material-ui/lab";
 import {AlertWarning} from "material-ui/svg-icons/index.es";
 import Reorder, {reorder} from "react-reorder";
+import Utils from "./Utils";
 
 
 class RoomsList extends React.Component{
@@ -69,7 +70,8 @@ class RoomsList extends React.Component{
     }
 
     handleRoomContext(event,id){
-        let clickedRoom = this.getElById(this.props.rooms,id);
+
+        let clickedRoom = Utils.getElById(this.props.rooms,id);
         this.setState({
             anchorEl:event.currentTarget,
             clickedRoomId:id,
@@ -95,13 +97,7 @@ class RoomsList extends React.Component{
             })
     }
 
-    getElById(arr,id){
-        if(arr === undefined)return null;
-        for(let i=0;i<arr.length;i++){
-            if(arr[i].id === id)return arr[i];
-        }
-        return null;
-    }
+
 
     deleteCategory(){
         const requestOptions = {
