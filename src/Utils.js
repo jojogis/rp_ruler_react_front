@@ -6,5 +6,12 @@ class Utils{
         }
         return null;
     }
+    static truncateString(str, num) {
+        if(str == null)return  null;
+        if (str.length <= num) {
+            return str
+        }
+        return str.slice(0, num) + '...'
+    }
 }
 export default Utils;

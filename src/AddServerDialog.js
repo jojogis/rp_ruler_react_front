@@ -82,12 +82,12 @@ class AddServerDialog extends React.Component {
 
         this.state = {
             tags:tagsArr,
-            roles:this.props.roles == null ? [] : this.props.roles,
-            name:this.props.name == null ? "" : this.props.name,
+            roles:this.props.roles ?? [],
+            name:this.props.name ?? "",
             avatar:this.props.avatar,
             description:this.props.description,
             isPrivate:this.props.isPrivate,
-            age:this.props.age == null ? "0" : this.props.age,
+            age:this.props.age ?? "0",
             bg:this.props.bg == null || this.props.bg === "null" ? null : this.props.bg,
             isNameError:"",
             tab:0,
@@ -132,7 +132,7 @@ class AddServerDialog extends React.Component {
             this.setState({bg:this.props.bg == null || this.props.bg === "null" ? null : this.props.bg});
         }
         if (prevProps.roles !== this.props.roles) {
-            this.setState({roles:this.props.roles == null ? [] : this.props.roles});
+            this.setState({roles:this.props.roles ?? []});
         }
 
     }
@@ -191,7 +191,7 @@ class AddServerDialog extends React.Component {
         fetch(url,requestOptions)
             .then(response => response.json())
             .then((data)=>{
-                if(this.props.onCreate != null)this.props.onCreate(this.props.serverId == null ? data.id : this.props.serverId );
+                if(this.props.onCreate != null)this.props.onCreate(this.props.serverId ?? data.id);
                 this.props.onClose();
             })
     }

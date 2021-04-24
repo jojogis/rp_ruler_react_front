@@ -27,7 +27,6 @@ class ServersDialog extends React.Component {
     static contextType = TokenContext;
     constructor(props) {
         super(props);
-        this.handleClose = this.handleClose.bind(this);
         this.handleConnect = this.handleConnect.bind(this);
         this.handleSearchChange = this.handleSearchChange.bind(this);
         this.findTag = this.findTag.bind(this);
@@ -52,9 +51,6 @@ class ServersDialog extends React.Component {
         }
     }
 
-    handleClose(){
-        this.props.onClose();
-    }
 
     handleConnect(id){
         const requestOptions = {
@@ -112,10 +108,10 @@ class ServersDialog extends React.Component {
         const {classes} = this.props;
 
         return (
-            <Dialog fullScreen open={this.props.open} onClose={this.handleClose} TransitionComponent={Transition}>
+            <Dialog fullScreen open={this.props.open} onClose={this.props.onClose} TransitionComponent={Transition}>
                 <AppBar className={classes.root}>
                     <Toolbar>
-                        <IconButton edge="start" color="inherit" onClick={this.handleClose} aria-label="close">
+                        <IconButton edge="start" color="inherit" onClick={this.props.onClose} aria-label="close">
                             <Close />
                         </IconButton>
                         <Typography className={classes.title} variant="h6" >

@@ -187,7 +187,7 @@ class RoomsList extends React.Component{
                                         </Badge>
                                     </ListItemIcon>
                                     <ListItemText>
-                                        <span className={classes.room}>{room.login != null ? room.login : room.name}</span>
+                                        <span className={classes.room}>{room.login ?? room.name}</span>
                                     </ListItemText>
                                     {room.is_muted ? <NotificationsOff opacity={0.7}/> : ""}
 
@@ -228,7 +228,7 @@ class RoomsList extends React.Component{
                                 </Badge>
                             </ListItemIcon>
                             <ListItemText>
-                                <span className={classes.room}>{room.login != null ? room.login : room.name}</span>
+                                <span className={classes.room}>{room.login ?? room.name}</span>
                             </ListItemText>
                             {room.is_muted ? <NotificationsOff opacity={0.7}/> : ""}
 

@@ -25,9 +25,6 @@ class MainMenu extends React.Component{
         this.handleServerCreate = this.handleServerCreate.bind(this);
 
     }
-    handleServerClick(id){
-        this.props.onChangeServer(id);
-    }
 
     handleServerCreate(id){
         this.props.onServerConnect();
@@ -46,7 +43,7 @@ class MainMenu extends React.Component{
                 <Divider className={classes.divider}/>
             {this.props.servers.map((item)=>(
                 <ListItem key={item.id}>
-                    <Avatar className={classes.avatar + (this.props.currentServer===item.id ? " " + classes.current : "")} onClick={() => this.handleServerClick(item.id)} src={"https://rp-ruler.ru/upload/"+item.avatar}>
+                    <Avatar className={classes.avatar + (this.props.currentServer===item.id ? " " + classes.current : "")} onClick={() => this.props.onChangeServer(item.id)} src={"https://rp-ruler.ru/upload/"+item.avatar}>
                         <Fab className={classes.serverElem + (this.props.currentServer===item.id ? " "+classes.current : "")}>{item.name.substr(0,2)}</Fab>
                     </Avatar></ListItem>
             ))}

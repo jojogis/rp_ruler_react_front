@@ -141,7 +141,7 @@ class Chat extends React.Component{
     }
 
     handleToChatClick(){
-        this.setState({serverId:0,isChat:true},() => this.loadRooms());
+        this.setState({serverId:0,isChat:true,categories:[]},() => this.loadRooms());
     }
 
 
