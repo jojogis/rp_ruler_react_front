@@ -59,8 +59,6 @@ class Chat extends React.Component{
         this.handleRemoveMessage = this.handleRemoveMessage.bind(this);
         this.readMessages = this.readMessages.bind(this);
         this.handleFocus = this.handleFocus.bind(this);
-        this.handleCancelReply = this.handleCancelReply.bind(this);
-        this.handleReplyChoose = this.handleReplyChoose.bind(this);
         this.handleToChatClick = this.handleToChatClick.bind(this);
         this.handleServerDisconnect = this.handleServerDisconnect.bind(this);
         this.handleWriteToUserClick = this.handleWriteToUserClick.bind(this);
@@ -69,7 +67,6 @@ class Chat extends React.Component{
         this.handleBlur = this.handleBlur.bind(this);
         this.onSocketMessage = this.onSocketMessage.bind(this);
         this.loadRole = this.loadRole.bind(this);
-        this.loadCategories = this.loadCategories.bind(this);
 
     }
 
@@ -87,13 +84,10 @@ class Chat extends React.Component{
                 if (data.error === undefined) {
                     this.state.room_id = data.result;
                     this.state.isChat = true;
-
                     this.loadRooms(data.result);
                 }
             });
     }
-
-
 
 
 
@@ -107,7 +101,7 @@ class Chat extends React.Component{
         };
         fetch("https://rp-ruler.ru/api/disconnect_from_server.php",requestOptions).then(response => response.json())
             .then(()=>{
-                this.setState({roomId:null,rooms:[],messages:[],users:[]});
+                this.setState({roomId:null,rooms:[],messages:[],categories:[],users:[]});
                 this.loadServers();
             });
     }
@@ -127,7 +121,7 @@ class Chat extends React.Component{
     }
 
     handleChangeServer(serverId){
-        this.setState({serverId:serverId,isChat:false},() => {this.loadCategories();this.loadRooms();this.loadRole()});
+        this.setState({serverId:serverId,isChat:false,categories:[],rooms:[]},() => {this.loadRooms();this.loadRole()});
 
     }
 
@@ -141,33 +135,9 @@ class Chat extends React.Component{
     }
 
     handleToChatClick(){
-        this.setState({serverId:0,isChat:true,categories:[]},() => this.loadRooms());
+        this.setState({serverId:0,isChat:true,categories:[],rooms:[]},() => this.loadRooms());
     }
 
-
-    loadCategories(){
-        if(this.state.isChat){
-            this.setState({categories:[]});
-            return;
-        }
-        this.setState({isLoading:true});
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&server_id=" + this.state.serverId
-        };
-        fetch("https://rp-ruler.ru/api/get_categories.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    this.setState({categories:data.categories,isLoading:false})
-                }
-
-            })
-
-    }
 
     loadRooms(choosedRoom){
         const serverId = this.state.isChat ? 0 : this.state.serverId;
@@ -188,9 +158,9 @@ class Chat extends React.Component{
                     if(data.length > 0)roomId = data[0].id;
 
                     if(choosedRoom == null){
-                        this.setState({rooms:data,roomId:roomId,isLoading:false},() => this.connectSocket());
+                        this.setState({rooms:data.rooms,categories:data.categories,roomId:roomId,isLoading:false},() => this.connectSocket());
                     }else{
-                        this.setState({rooms:data,roomId:choosedRoom,isLoading:false},() => this.connectSocket());
+                        this.setState({rooms:data.rooms,categories:data.categories,roomId:choosedRoom,isLoading:false},() => this.connectSocket());
                     }
                     this.loadMessages();
                     this.loadUsers();
@@ -381,7 +351,6 @@ class Chat extends React.Component{
         this.popsound.load();
         this.popsound.volume = 0.6;
         this.loadServers();
-        this.loadCategories();
         this.loadRooms();
 
     }
@@ -396,14 +365,6 @@ class Chat extends React.Component{
         }
     }
 
-
-    handleReplyChoose(id){
-        this.setState({replyTo:id});
-    }
-
-    handleCancelReply(){
-        this.setState({replyTo:null});
-    }
 
     handleRemoveMessage(id){
         let newMessages = [...this.state.messages];
@@ -557,7 +518,7 @@ class Chat extends React.Component{
 
                         <Messages messages={this.state.messages}
                                   onRemoveMessage={this.handleRemoveMessage}
-                                  onReplyChoose={this.handleReplyChoose}
+                                  onReplyChoose={(id) => this.setState({replyTo:id})}
                                   bg={bg}
                                   replyTo={this.state.replyTo}
                                   loadMoreMessages={this.handleLoadMoreMessages}
@@ -565,7 +526,7 @@ class Chat extends React.Component{
                                   role={this.state.role}
                                   lastRead={this.state.lastReadMsg}/>
                         <Paper elevation={4} className={classes.messageInputWrap}>
-                            <InputReplyMessage onCancel={this.handleCancelReply} replyText={replyText} replyLogin={replyLogin}/>
+                            <InputReplyMessage onCancel={() => this.setState({replyTo:null})} replyText={replyText} replyLogin={replyLogin}/>
                             <TextField
                                 id="filled-textarea"
                                 label={labelText}

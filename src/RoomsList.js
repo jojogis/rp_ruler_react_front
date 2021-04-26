@@ -117,7 +117,7 @@ class RoomsList extends React.Component{
     }
 
     handleReorder (event, previousIndex, nextIndex, fromId, toId) {
-
+        if(previousIndex === nextIndex && fromId === toId)return;
         let toCat = toId.replace("cat-","");
         if(toCat === "null")toCat = null;
 

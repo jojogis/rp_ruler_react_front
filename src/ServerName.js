@@ -129,7 +129,7 @@ class ServerName extends React.Component{
                     {this.props.admin ? <MenuItem className={classes.exitServer} onClick={() => this.setState({isConfirmDeleteOpen:true,anchorEl:false})}>
                         Удалить сервер <Delete className={classes.icon}/></MenuItem> : ""}
                     <MenuItem className={classes.edit} onClick={this.openUsersList}>
-                        Список игроков <ListAlt className={classes.icon}/></MenuItem>
+                        Список участников <ListAlt className={classes.icon}/></MenuItem>
                 </Menu>
                 <AddRoomDialog
                     open={this.state.isAddRoomOpen}

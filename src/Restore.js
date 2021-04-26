@@ -32,6 +32,7 @@ class Restore extends React.Component{
             code:"",
             codeConfirm:false,
             password:"",
+            emptyPass:false,
             passwordRepeat:"",
             wrongPass:false
         };
@@ -92,6 +93,10 @@ class Restore extends React.Component{
     }
     handleSubmitPass(e){
         e.preventDefault();
+        if(this.state.password.length < 6){
+            this.setState({emptyPass:true});
+            return;
+        }
         if(this.state.password != this.state.passwordRepeat){
             this.setState({wrongPass:true});
             return;
@@ -236,6 +241,8 @@ class Restore extends React.Component{
                             margin="normal"
                             required
                             fullWidth
+                            error={this.state.emptyPass}
+                            helperText={this.state.emptyPass ? "Слишком короткий пароль" : ""}
                             id="password"
                             label="Новый пароль"
                             name="password"
