@@ -1,22 +1,37 @@
 import * as React from "react";
 import TokenContext from "./AppContext";
-import {Button, Dialog, DialogContent, FormControlLabel, Grid, Switch, TextField, withStyles} from "@material-ui/core";
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    FormControlLabel,
+    Grid,
+    Icon,
+    Switch,
+    TextField,
+    withStyles
+} from "@material-ui/core";
 import DialogTitleWithClose from "./DialogTitleWithClose";
+
 
 class AddRoomDialog extends React.Component {
     static contextType = TokenContext;
 
     constructor(props) {
         super(props);
+        this.icons = ["chat","chat_bubble","chat_bubble_outline","bookmark","change_history","child_care","child_friendly","code","directions_run","directions_walk","drafts",
+        "eco","emoji_flags","emoji_food_beverage","explore","favorite","favorite_border","fireplace","grade","group","person","home","monetization_on","question_answer","school",
+            "smoking_rooms","spa","terrain","waves","work"];
         this.state = {
             name: this.props.name,
-            isGlobal:this.props.isGlobal == null ? false : this.props.isGlobal,
-            bg:this.props.bg == null ? null : this.props.bg,
+            bg:this.props.bg ?? null,
             isNameError:"",
+            icon:this.props.icon ?? "chat",
             description:this.props.description
         }
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleFileUploaded = this.handleFileUploaded.bind(this);
+
     }
     componentDidUpdate(prevProps) {
         if (prevProps.bg !== this.props.bg) {
@@ -28,8 +43,8 @@ class AddRoomDialog extends React.Component {
         if (prevProps.description !== this.props.description) {
             this.setState({description:this.props.description});
         }
-        if (prevProps.isGlobal !== this.props.isGlobal) {
-            this.setState({isGlobal:this.props.isGlobal});
+        if (prevProps.icon !== this.props.icon) {
+            this.setState({icon:this.props.icon});
         }
     }
     handleSubmit(){
@@ -49,7 +64,7 @@ class AddRoomDialog extends React.Component {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: "token="+this.context.token+"&name="+this.state.name+"&server_id="+this.props.serverId+"&is_global="+this.state.isGlobal+"&bg="+this.state.bg+
+            body: "token="+this.context.token+"&name="+this.state.name+"&server_id="+this.props.serverId+"&icon="+this.state.icon+"&bg="+this.state.bg+
                 "&desc="+desc+roomId
         };
         fetch(url,requestOptions)
@@ -132,18 +147,13 @@ class AddRoomDialog extends React.Component {
                     value={this.state.description}
                 />
 
-                <FormControlLabel
-                    control={
-                        <Switch
-                            checked={this.state.isGlobal}
-                            onChange={(e)=>this.setState({isGlobal:e.target.checked})}
-                            name="checkedB"
-                            color="primary"
-                        />
-                    }
-                    label="Глобальная"
-                />
 
+                <Grid container justify="center" >
+                    {this.icons.map((icon) => {
+                        return <Button onClick={() => this.setState({icon:icon})} variant={icon===this.state.icon ? "contained" : ""} className={classes.iconButton}><Icon>{icon}</Icon></Button>
+                    })}
+                </Grid>
+                <br/>
                 <Grid container justify="center">
                     <Button variant="contained" color="primary" onClick={this.handleSubmit} component="span">
                         {btnText}
@@ -154,6 +164,10 @@ class AddRoomDialog extends React.Component {
     }
 }
 const styles = {
+    iconButton:{
+        width:'25px',
+
+    },
     inputFile:{
         display: 'none',
     },

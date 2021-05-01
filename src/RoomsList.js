@@ -2,7 +2,7 @@ import * as React from "react";
 import AppContext from "./AppContext";
 import {
     Accordion, AccordionDetails, AccordionSummary,
-    Badge,
+    Badge, Icon,
     List,
     ListItem,
     ListItemIcon,
@@ -184,7 +184,7 @@ class RoomsList extends React.Component{
                                             vertical: 'top',
                                             horizontal: 'left',
                                         }} color="primary" badgeContent={"+"+room.is_unread} invisible={!(room.is_unread > 0)}>
-                                            {room.is_global === 1 ? <Language/> : <AlternateEmail/>}
+                                            <Icon>{room.icon}</Icon>
                                         </Badge>
                                     </ListItemIcon>
                                     <ListItemText>
@@ -225,7 +225,7 @@ class RoomsList extends React.Component{
                                     vertical: 'top',
                                     horizontal: 'left',
                                 }} color="primary" badgeContent={"+"+room.is_unread} invisible={!(room.is_unread > 0)}>
-                                    {room.is_global === 1 ? <Language/> : <AlternateEmail/>}
+                                    <Icon>{room.icon}</Icon>
                                 </Badge>
                             </ListItemIcon>
                             <ListItemText>

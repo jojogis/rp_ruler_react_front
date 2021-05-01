@@ -17,7 +17,25 @@ import Messages from "./Messages";
 import InputReplyMessage from "./InputReplyMessage";
 import UsersList from "./UsersList";
 import Emoji from "./Emoji";
-import {Send} from "@material-ui/icons";
+import {
+    Bookmark,
+    ChangeHistory,
+    ChatBubble,
+    ChatBubbleOutline,
+    ChildCare,
+    ChildFriendly,
+    Code,
+    DirectionsRun,
+    DirectionsWalk,
+    Drafts,
+    Eco,
+    EmojiFlags,
+    EmojiFoodBeverage,
+    Explore,
+    Favorite,
+    FavoriteBorder, Fireplace, Grade, Group, Home, MonetizationOn, Person, QuestionAnswer, School,
+    Send, SmokingRooms, Spa, Terrain, Waves, Work
+} from "@material-ui/icons";
 
 
 
@@ -551,6 +569,8 @@ class Chat extends React.Component{
                     </Paper>
 
                 </Grid>
+
+
                 {!this.state.isChat ? <Grid justify="center" container item xs={2} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1} >
                         {room != null ? <UsersList
