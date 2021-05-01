@@ -212,6 +212,7 @@ class AddServerDialog extends React.Component {
             server_edit: 0,
             room_edit:0,
             color:"default",
+            immutable:0,
             server_id:this.props.serverId });
         this.setState({roles:newRoles});
     }
@@ -239,8 +240,10 @@ class AddServerDialog extends React.Component {
 
     render() {
         const {classes} = this.props;
+        if(this.state.roles[this.state.currentRole] == null)this.state.currentRole = 0;
         let cantEditServer = this.props.role != null && !this.props.role.server_edit;
-        let cantEditRoles = this.props.role != null && !this.props.role.role_edit;
+        let cantEditRoles = (this.props.role != null && !this.props.role.role_edit);
+        let immutableRole = (this.state.roles[this.state.currentRole] != null && this.state.roles[this.state.currentRole].immutable == 1);
         let roleColor = this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].color : "default";
         let btnText = this.props.serverId == null ? "Создать сервер" :  "Сохранить";
         return (<Dialog maxWidth="md" fullWidth open={this.props.open} onClose={this.props.onClose}
@@ -250,7 +253,7 @@ class AddServerDialog extends React.Component {
                 <Tabs value={this.state.tab} indicatorColor="primary"
                       textColor="primary" onChange={(e,value) => this.setState({tab:value})}>
                     <Tab value={0} label="Основные" className={classes.tabs} />
-                    <Tab label="Роли" value={1}  className={classes.tabs}/>
+                    {this.props.serverId != null ? <Tab label="Роли" value={1}  className={classes.tabs}/>: ""}
                 </Tabs>
                 </Paper>
             </DialogTitleWithClose>
@@ -393,14 +396,22 @@ class AddServerDialog extends React.Component {
                         <Grid item xs={4}>
                             {this.props.roles != null ?
                                 <List >
+                                    {this.state.roles.filter((role) => role.immutable == 1).map((item,i)=>(
+                                        <ListItem key={i} selected={i===this.state.currentRole} onClick={() => this.setState({currentRole:i})} button className={classes.listItem+" "+classes[item.color+"Text"]}>
+                                            {item.name}
+                                            <IconButton disabled={cantEditRoles || item.immutable == 1} onClick={() => this.handleDeleteRole(i)} className={classes.listIcon}  edge="end" aria-label="comments">
+                                                <DeleteOutline />
+                                            </IconButton>
 
+                                        </ListItem>
+                                    ))}
                         <Reorder
                             reorderId="my-list" // Unique ID that is used internally to track this list (required)                            placeholderClassName="placeholder" // Class name to be applied to placeholder elements (optional), defaults to 'placeholder'
                             draggedClassName="dragged" // Class name to be applied to dragged elements (optional), defaults to 'dragged'
                             lock="horizontal" // Lock the dragging direction (optional): vertical, horizontal (do not use with groups)
-                            holdTime={300} // Default hold time before dragging begins (mouse & touch) (optional), defaults to 0
-                            touchHoldTime={500} // Hold time before dragging begins on touch devices (optional), defaults to holdTime
-                            mouseHoldTime={200} // Hold time before dragging begins with mouse (optional), defaults to holdTime
+                            holdTime={100} // Default hold time before dragging begins (mouse & touch) (optional), defaults to 0
+                            touchHoldTime={400} // Hold time before dragging begins on touch devices (optional), defaults to holdTime
+                            mouseHoldTime={100} // Hold time before dragging begins with mouse (optional), defaults to holdTime
                             autoScroll={true} // Enable auto-scrolling when the pointer is close to the edge of the Reorder component (optional), defaults to true
                             disabled={cantEditRoles} // Disable reordering (optional), defaults to false
                             disableContextMenus={true} // Disable context menus when holding on touch devices (optional), defaults to true
@@ -409,11 +420,11 @@ class AddServerDialog extends React.Component {
                                 <ListItem button className={classes.listItem+" "+classes.dragPlaceholder}/>
                             }
                         >
-                            {this.state.roles.map((item,i)=>(
-                                <ListItem  key={i} selected={i===this.state.currentRole} onClick={() => this.setState({currentRole:i})} button className={classes.listItem+" "+classes[item.color+"Text"]}>
+                            {this.state.roles.filter((role) => role.immutable == 0).map((item,i)=>(
+                                <ListItem key={i+1} selected={i+1===this.state.currentRole} onClick={() => this.setState({currentRole:i+1})} button className={classes.listItem+" "+classes[item.color+"Text"]}>
                                     {item.name}
 
-                                    <IconButton disabled={cantEditRoles} onClick={() => this.handleDeleteRole(i)} className={classes.listIcon}  edge="end" aria-label="comments">
+                                    <IconButton disabled={cantEditRoles || item.immutable == 1} onClick={() => this.handleDeleteRole(i+1)} className={classes.listIcon}  edge="end" aria-label="comments">
                                         <DeleteOutline />
                                     </IconButton>
 
@@ -440,7 +451,7 @@ class AddServerDialog extends React.Component {
                                         label="Имя роли"
                                         autoFocus
                                         value={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].name : ""}
-                                        disabled={cantEditRoles}
+                                        disabled={cantEditRoles || immutableRole}
                                     />
                                 </ListItem>
                                 <Divider/>
@@ -450,16 +461,16 @@ class AddServerDialog extends React.Component {
                                         secondary={<div><br/><br/><br/></div>}/>
                                     <ListItemSecondaryAction>
                                         <br/>
-                                        <Button disabled={cantEditRoles} variant="contained" onClick={() => this.handleColorChange("default")} className={classes.colorBtn} color="default">{"default" === roleColor ? <Check/> : ""}</Button>
-                                        <Button disabled={cantEditRoles} variant="contained" onClick={() => this.handleColorChange("red")} className={classes.colorBtn+" "+classes.red} color="primary">{"red" === roleColor ? <Check/> : ""}</Button>
-                                        <Button disabled={cantEditRoles} variant="contained" onClick={() => this.handleColorChange("pink")} className={classes.colorBtn+" "+classes.pink} color="primary">{"pink" === roleColor ? <Check/> : ""}</Button>
-                                        <Button disabled={cantEditRoles} variant="contained" onClick={() => this.handleColorChange("purple")} className={classes.colorBtn+" "+classes.purple} color="primary">{"purple" === roleColor ? <Check/> : ""}</Button>
-                                        <Button disabled={cantEditRoles} variant="contained" onClick={() => this.handleColorChange("lime")} className={classes.colorBtn+" "+classes.lime} color="primary">{"lime" === roleColor ? <Check/> : ""}</Button>
-                                        <Button disabled={cantEditRoles} variant="contained" onClick={() => this.handleColorChange("blue")} className={classes.colorBtn+" "+classes.blue} color="primary">{"blue" === roleColor ? <Check/> : ""}</Button>
-                                        <Button disabled={cantEditRoles} variant="contained" onClick={() => this.handleColorChange("cyan")} className={classes.colorBtn+" "+classes.cyan} color="primary">{"cyan" === roleColor ? <Check/> : ""}</Button>
-                                        <Button disabled={cantEditRoles} variant="contained" onClick={() => this.handleColorChange("green")} className={classes.colorBtn+" "+classes.green} color="primary">{"green" === roleColor ? <Check/> : ""}</Button>
-                                        <Button disabled={cantEditRoles} variant="contained" onClick={() => this.handleColorChange("yellow")} className={classes.colorBtn+" "+classes.yellow} color="primary">{"yellow" === roleColor ? <Check/> : ""}</Button>
-                                        <Button disabled={cantEditRoles} variant="contained" onClick={() => this.handleColorChange("orange")} className={classes.colorBtn+" "+classes.orange} color="primary">{"orange" === roleColor ? <Check/> : ""}</Button>
+                                        <Button disabled={cantEditRoles || immutableRole} variant="contained" onClick={() => this.handleColorChange("default")} className={classes.colorBtn} color="default">{"default" === roleColor ? <Check/> : ""}</Button>
+                                        <Button disabled={cantEditRoles || immutableRole} variant="contained" onClick={() => this.handleColorChange("red")} className={classes.colorBtn+" "+classes.red} color="primary">{"red" === roleColor ? <Check/> : ""}</Button>
+                                        <Button disabled={cantEditRoles || immutableRole} variant="contained" onClick={() => this.handleColorChange("pink")} className={classes.colorBtn+" "+classes.pink} color="primary">{"pink" === roleColor ? <Check/> : ""}</Button>
+                                        <Button disabled={cantEditRoles || immutableRole} variant="contained" onClick={() => this.handleColorChange("purple")} className={classes.colorBtn+" "+classes.purple} color="primary">{"purple" === roleColor ? <Check/> : ""}</Button>
+                                        <Button disabled={cantEditRoles || immutableRole} variant="contained" onClick={() => this.handleColorChange("lime")} className={classes.colorBtn+" "+classes.lime} color="primary">{"lime" === roleColor ? <Check/> : ""}</Button>
+                                        <Button disabled={cantEditRoles || immutableRole} variant="contained" onClick={() => this.handleColorChange("blue")} className={classes.colorBtn+" "+classes.blue} color="primary">{"blue" === roleColor ? <Check/> : ""}</Button>
+                                        <Button disabled={cantEditRoles || immutableRole} variant="contained" onClick={() => this.handleColorChange("cyan")} className={classes.colorBtn+" "+classes.cyan} color="primary">{"cyan" === roleColor ? <Check/> : ""}</Button>
+                                        <Button disabled={cantEditRoles || immutableRole} variant="contained" onClick={() => this.handleColorChange("green")} className={classes.colorBtn+" "+classes.green} color="primary">{"green" === roleColor ? <Check/> : ""}</Button>
+                                        <Button disabled={cantEditRoles || immutableRole} variant="contained" onClick={() => this.handleColorChange("yellow")} className={classes.colorBtn+" "+classes.yellow} color="primary">{"yellow" === roleColor ? <Check/> : ""}</Button>
+                                        <Button disabled={cantEditRoles || immutableRole} variant="contained" onClick={() => this.handleColorChange("orange")} className={classes.colorBtn+" "+classes.orange} color="primary">{"orange" === roleColor ? <Check/> : ""}</Button>
 
                                     </ListItemSecondaryAction>
                                 </ListItem>
@@ -472,7 +483,7 @@ class AddServerDialog extends React.Component {
                                         <Switch
                                             onChange={(e,value) => this.handleRoleSwitchChange("server_edit",value)}
                                             edge="end"
-                                            disabled={cantEditRoles}
+                                            disabled={cantEditRoles || immutableRole}
                                             checked={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].server_edit === 1 : false}
                                         />
                                     </ListItemSecondaryAction>
@@ -485,7 +496,7 @@ class AddServerDialog extends React.Component {
                                     <ListItemSecondaryAction>
                                         <Switch
                                             edge="end"
-                                            disabled={cantEditRoles}
+                                            disabled={cantEditRoles || immutableRole}
                                             onChange={(e,value) => this.handleRoleSwitchChange("role_edit",value)}
                                             checked={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].role_edit === 1 : false}
                                         />
@@ -499,7 +510,7 @@ class AddServerDialog extends React.Component {
                                     <ListItemSecondaryAction>
                                         <Switch
                                             edge="end"
-                                            disabled={cantEditRoles}
+                                            disabled={cantEditRoles || immutableRole}
                                             onChange={(e,value) => this.handleRoleSwitchChange("msg_send",value)}
                                             checked={ this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].msg_send === 1 : false}
                                         />
@@ -513,7 +524,7 @@ class AddServerDialog extends React.Component {
                                     <ListItemSecondaryAction>
                                         <Switch
                                             edge="end"
-                                            disabled={cantEditRoles}
+                                            disabled={cantEditRoles || immutableRole}
                                             onChange={(e,value) => this.handleRoleSwitchChange("msg_delete",value)}
                                             checked={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].msg_delete === 1 : false}
                                         />
@@ -527,7 +538,7 @@ class AddServerDialog extends React.Component {
                                     <ListItemSecondaryAction>
                                         <Switch
                                             edge="end"
-                                            disabled={cantEditRoles}
+                                            disabled={cantEditRoles || immutableRole}
                                             onChange={(e,value) => this.handleRoleSwitchChange("room_edit",value)}
                                             checked={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].room_edit === 1 : false}
                                         />

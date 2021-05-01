@@ -145,7 +145,8 @@ class RoomsList extends React.Component{
 
     render() {
         const {classes} = this.props;
-        if(this.props.rooms == null || this.props.rooms.length === 0){
+        let canEditRooms = (this.props.admin || this.props.role.room_edit) && !this.props.isChat;
+        if((this.props.rooms == null || this.props.rooms.length === 0) && (this.props.categories == null || this.props.categories.length === 0)){
             return(<Typography variant="subtitle2" align="center">Комнат пока нет...</Typography>);
         }else {
             return (<div>
@@ -162,9 +163,9 @@ class RoomsList extends React.Component{
                             reorderId={"cat-"+category.id} // Unique ID that is used internally to track this list (required)
                             reorderGroup="roomsReorder"
                             lock="horizontal" // Lock the dragging direction (optional): vertical, horizontal (do not use with groups)
-                            holdTime={300} // Default hold time before dragging begins (mouse & touch) (optional), defaults to 0
+                            holdTime={100} // Default hold time before dragging begins (mouse & touch) (optional), defaults to 0
                             touchHoldTime={500} // Hold time before dragging begins on touch devices (optional), defaults to holdTime
-                            mouseHoldTime={200} // Hold time before dragging begins with mouse (optional), defaults to holdTime
+                            mouseHoldTime={100} // Hold time before dragging begins with mouse (optional), defaults to holdTime
                             autoScroll={true} // Enable auto-scrolling when the pointer is close to the edge of the Reorder component (optional), defaults to true
                             disableContextMenus={true} // Disable context menus when holding on touch devices (optional), defaults to true
                             onReorder={this.handleReorder}
@@ -252,14 +253,14 @@ class RoomsList extends React.Component{
                 open={Boolean(this.state.anchorEl)}
                 onClose={() => this.setState({anchorEl:null})}
             >
-                {this.props.admin || this.props.role.room_edit ? <MenuItem className={classes.delete} onClick={this.deleteRoom}>
+                {canEditRooms ? <MenuItem className={classes.delete} onClick={this.deleteRoom}>
                     Удалить комнату<Delete className={classes.icon}/></MenuItem> : ""}
-                {this.props.admin || this.props.role.room_edit ? <MenuItem className={classes.edit} onClick={() => this.setState({isEditOpen:true,anchorEl:null})}>
+                {canEditRooms ? <MenuItem className={classes.edit} onClick={() => this.setState({isEditOpen:true,anchorEl:null})}>
                     Редактировать <Edit className={classes.icon}/></MenuItem> : ""}
                 <MenuItem className={classes.notifications} onClick={this.handleChangeNotifications}>
                     <Notifications className={classes.icon}/>{this.state.clickedRoom != null && this.state.clickedRoom.is_muted ? "Включить уведомления" : "Отключить уведомления"}</MenuItem>
             </Menu>
-                <Menu
+                {canEditRooms ?<Menu
                     transformOrigin={{
                         vertical: 'top',
                         horizontal: 'center',
@@ -275,9 +276,9 @@ class RoomsList extends React.Component{
                     open={Boolean(this.state.categoryAnchorEl)}
                     onClose={() => this.setState({categoryAnchorEl:null})}
                 >
-                    {this.props.admin || this.props.role.room_edit ? <MenuItem className={classes.delete} onClick={this.deleteCategory}>
-                        Удалить категорию<Delete className={classes.icon}/></MenuItem> : ""}
-                </Menu>
+                     <MenuItem className={classes.delete} onClick={this.deleteCategory}>
+                        Удалить категорию<Delete className={classes.icon}/></MenuItem>
+                </Menu>: ""}
                 {this.state.clickedRoom != null ? <AddRoomDialog
                     open={this.state.isEditOpen}
                     serverId={this.props.serverId}

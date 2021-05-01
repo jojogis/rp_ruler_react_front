@@ -41,7 +41,7 @@ class Chat extends React.Component{
             lastReadMsg:0,
             replyTo:null,
             users:[],
-            isChat:false,
+            isChat:true,
             isLoading:false,
             messageText:"",
             inputFocused:false,
@@ -101,7 +101,7 @@ class Chat extends React.Component{
         };
         fetch("https://rp-ruler.ru/api/disconnect_from_server.php",requestOptions).then(response => response.json())
             .then(()=>{
-                this.setState({roomId:null,rooms:[],messages:[],categories:[],users:[]});
+                this.setState({roomId:null,serverId:null,rooms:[],messages:[],categories:[],users:[]});
                 this.loadServers();
             });
     }
@@ -154,9 +154,9 @@ class Chat extends React.Component{
             .then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
-                    let roomId = null;
-                    if(data.length > 0)roomId = data[0].id;
-
+                    let roomId = this.state.roomId;
+                    if(Utils.getElById(data.rooms,this.state.roomId) == null && data.rooms.length > 0)roomId = data.rooms[0].id;
+                    else if(data.rooms.length == 0)roomId = null;
                     if(choosedRoom == null){
                         this.setState({rooms:data.rooms,categories:data.categories,roomId:roomId,isLoading:false},() => this.connectSocket());
                     }else{
@@ -184,7 +184,7 @@ class Chat extends React.Component{
                 if(data.error === undefined){
                     let serverId = null;
                     if(data.length > 0)serverId = data[0].id;
-                    this.handleChangeServer(serverId);
+                    //this.handleChangeServer(serverId);
                     this.setState({servers:data});
                 }
 
@@ -280,7 +280,6 @@ class Chat extends React.Component{
     }
     onSocketMessage(message){
         let data = JSON.parse(message.data);
-        console.log(data);
 
         if(data.message != null){
             let newMessages = [...this.state.messages];
@@ -486,7 +485,7 @@ class Chat extends React.Component{
                 </Grid>
                 <Grid justify="center" container item xs={2} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1} >
-                        <ServerName isChat={this.state.isChat}
+                        {this.state.serverId != null ? <ServerName isChat={this.state.isChat}
                                     serverId={this.state.serverId}
                                     name={serverName}
                                     onWriteToUser={this.handleWriteToUserClick}
@@ -495,18 +494,19 @@ class Chat extends React.Component{
                                     server={curServer}
                                     updateServers={this.loadServers}
                                     onRoomCreate={this.loadRooms}
-                                    onCategoryCreate={this.loadCategories}
+                                    onCategoryCreate={this.loadRooms}
                                     admin={adminId == this.context.user_id*1}
                                     role={this.state.role}
-                                    onServerDisconnect={this.handleServerDisconnect}/>
+                                    onServerDisconnect={this.handleServerDisconnect}/> : ""}
                         {(this.state.rooms !== undefined) ?
                             <RoomsList admin={adminId == this.context.user_id*1}
                                        currentRoom={this.state.roomId}
                                        rooms={this.state.rooms}
+                                       isChat={this.state.isChat}
                                        role={this.state.role}
                                        categories={this.state.categories}
                                        onRoomsUpdate={this.loadRooms}
-                                       onCategoriesUpdate={this.loadCategories}
+                                       onCategoriesUpdate={this.loadRooms}
                                        serverId={this.state.serverId}
                                        onChangeRoom={this.handleChangeRoom}/> : ""}
                     </Paper>
@@ -530,7 +530,7 @@ class Chat extends React.Component{
                             <TextField
                                 id="filled-textarea"
                                 label={labelText}
-                                disabled={!this.state.role.msg_send}
+                                disabled={!this.state.isChat && (!this.state.role.msg_send || room == null)}
                                 placeholder="Введите сообщение"
                                 onKeyDown={this.handleKeyDown}
                                 multiline
@@ -553,13 +553,13 @@ class Chat extends React.Component{
                 </Grid>
                 {!this.state.isChat ? <Grid justify="center" container item xs={2} spacing={0}>
                     <Paper className={classes.paperWrap} elevation={1} >
-                        <UsersList
+                        {room != null ? <UsersList
                             onWriteToUser={this.handleWriteToUserClick}
                             onUsersUpdate={this.loadUsers}
                             onMessagesUpdate={this.loadMessages}
                             server={curServer}
                             role={this.state.role}
-                            users={this.state.users}/>
+                            users={this.state.users}/> : ""}
                     </Paper>
                 </Grid> : ""}
 

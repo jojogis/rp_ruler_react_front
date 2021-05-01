@@ -4,13 +4,14 @@ import * as React from "react";
 import Auth from "./Auth";
 import Reg from "./Reg";
 import Chat from "./Chat";
-import {createMuiTheme} from "@material-ui/core";
+import {createMuiTheme, Snackbar} from "@material-ui/core";
 import {ThemeProvider} from "@material-ui/core";
 import {Route, Switch, Redirect} from "react-router";
 import {BrowserRouter as Router} from "react-router-dom";
 import TokenContext from "./AppContext";
 import Restore from "./Restore";
 import ParticlesBg from "particles-bg";
+import {Alert} from "@material-ui/lab";
 
 
 
@@ -42,14 +43,12 @@ export class App extends React.Component{
         });
 
 
-
-
-
         const cookies = new Cookies();
         const token = cookies.get("token");
         const user_id = cookies.get("user_id");
         const user_type = cookies.get("user_type");
         const isDarkTheme = cookies.get("is_dark_theme") == "1";
+        const isAnimationEnable = cookies.get("is_animation_enable") !== "0";
         this.handleLogin = this.handleLogin.bind(this);
         this.toggleTheme = this.toggleTheme.bind(this);
         this.logout = this.logout.bind(this);
@@ -60,10 +59,20 @@ export class App extends React.Component{
             isDarkTheme:isDarkTheme,
             toggleTheme:this.toggleTheme,
             logout:this.logout,
-            isAnimationEnable:true,
-            toggleAnimation: () => {this.setState(
+            snackBarOpen:false,
+            alertMessage:"",
+            alertStatus:"success",
+            showMessage:(message,status) => {
+                this.setState({alertMessage:message,snackBarOpen:true,alertStatus:status});
+            },
+            isAnimationEnable:isAnimationEnable,
+            toggleAnimation: () => {
+                const cookies = new Cookies();
+                cookies.set("is_animation_enable",!this.state.isAnimationEnable ? "1" : "0");
+                this.setState(
                 (state)=>{return {isAnimationEnable:!state.isAnimationEnable}
-                })},
+                });
+            },
             theme:isDarkTheme ? darkTheme : lightTheme
         };
         if(this.state.token != null){
@@ -177,6 +186,11 @@ export class App extends React.Component{
                     </Route>
                     <PrivateRoute token={this.state.token} path="/">
                         <Chat isDarkTheme={this.state.isDarkTheme}/>
+                        <Snackbar open={this.state.snackBarOpen} autoHideDuration={3000} onClose={()=>this.setState({snackBarOpen:false})}>
+                            <Alert severity={this.state.alertStatus} variant="filled" elevation={6}>
+                                {this.state.alertMessage}
+                            </Alert>
+                        </Snackbar>
                     </PrivateRoute>
                 </Switch>
             </Router>

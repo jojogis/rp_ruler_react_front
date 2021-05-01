@@ -27,7 +27,6 @@ class ServerName extends React.Component{
             isAddRoomOpen:false,
             isConfirmDeleteOpen:false,
             isAddCategoryOpen:false,
-            snackBarOpen:false,
             editOpen:false,
             usersListOpen:false,
             users:[]
@@ -84,7 +83,8 @@ class ServerName extends React.Component{
         fetch("https://rp-ruler.ru/api/delete_server.php",requestOptions)
             .then(response => response.json())
             .then((data)=>{
-                this.setState({isConfirmDeleteOpen:false,snackBarOpen:true});
+                this.setState({isConfirmDeleteOpen:false});
+                this.context.showMessage("Сервер удален","success");
                 this.props.updateServers();
             })
     }
@@ -154,11 +154,6 @@ class ServerName extends React.Component{
                             </Button>
                         </DialogActions>
                     </Dialog>
-                    <Snackbar open={this.state.snackBarOpen} autoHideDuration={3000} onClose={()=>this.setState({snackBarOpen:false})}>
-                        <Alert severity="success" variant="filled" elevation={6}>
-                            Сервер удален
-                        </Alert>
-                    </Snackbar>
                     <Dialog maxWidth="md" open={this.state.usersListOpen} onClose={() => this.setState({usersListOpen:false})}>
                         <UsersList  users={this.state.users}
                                     role={this.props.role}

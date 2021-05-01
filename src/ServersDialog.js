@@ -63,7 +63,7 @@ class ServersDialog extends React.Component {
         fetch("https://rp-ruler.ru/api/connect_to_server.php",requestOptions).then(response => response.json())
             .then((data)=>{
                 if(data.error === undefined){
-                    this.handleClose();
+                    this.props.onClose();
                     this.props.onServerConnect();
                 }
             });
