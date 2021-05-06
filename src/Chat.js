@@ -17,6 +17,7 @@ import Messages from "./Messages";
 import InputReplyMessage from "./InputReplyMessage";
 import UsersList from "./UsersList";
 import Emoji from "./Emoji";
+import socketIOClient from "socket.io-client";
 import {
     Bookmark,
     ChangeHistory,
@@ -41,6 +42,7 @@ import {
 
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import Utils from "./Utils";
+import Api from "./Api";
 
 
 
@@ -89,53 +91,29 @@ class Chat extends React.Component{
     }
 
     handleWriteToUserClick(event,user_id){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&user_id="+user_id
-        };
-        fetch("https://rp-ruler.ru/api/get_chat_with_user.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=> {
-                if (data.error === undefined) {
-                    this.state.room_id = data.result;
-                    this.state.isChat = true;
-                    this.loadRooms(data.result);
-                }
-            });
+        Api.getRoomWithUser(this.context.token,user_id).then((data)=>{
+            if (data.error === undefined) {
+                this.state.room_id = data.roomId;
+                this.state.isChat = true;
+                this.loadRooms(data.roomId);
+            }
+        })
+
     }
 
 
 
     handleServerDisconnect(){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&server_id="+this.state.serverId
-        };
-        fetch("https://rp-ruler.ru/api/disconnect_from_server.php",requestOptions).then(response => response.json())
-            .then(()=>{
-                this.setState({roomId:null,serverId:null,rooms:[],messages:[],categories:[],users:[]});
-                this.loadServers();
-            });
+        Api.disconnectFromServer(this.context.token,this.state.serverId).then((data)=>{
+            this.setState({roomId:null,serverId:null,categories:[],rooms:[],messages:[],users:[]});
+            this.loadServers();
+        })
     }
 
     loadRole(){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&server_id="+this.state.serverId
-        };
-        fetch("https://rp-ruler.ru/api/get_user_role.php",requestOptions).then(response => response.json())
-            .then((data)=>{
-                this.setState({role:data.role});
-            });
+        Api.getRole(this.context.token,this.state.serverId).then((data)=>{
+            this.setState({role:data.role});
+        })
     }
 
     handleChangeServer(serverId){
@@ -144,6 +122,7 @@ class Chat extends React.Component{
     }
 
     handleChangeRoom(roomId){
+
         this.setState({roomId:roomId},() => {
             this.loadMessages();
             if(this.state.isChat)this.connectSocket();
@@ -157,56 +136,40 @@ class Chat extends React.Component{
     }
 
 
-    loadRooms(choosedRoom){
+    loadRooms(choosedRoom,justUpdate){
         const serverId = this.state.isChat ? 0 : this.state.serverId;
         if(serverId === null)return;
-        this.setState({isLoading:true});
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&server_id="+serverId
-        };
-        fetch("https://rp-ruler.ru/api/get_rooms.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
+
+        Api.getRooms(this.context.token,serverId).then((data)=>{
+            if(data.error === undefined){
+                if(justUpdate === undefined || !justUpdate){
                     let roomId = this.state.roomId;
                     if(Utils.getElById(data.rooms,this.state.roomId) == null && data.rooms.length > 0)roomId = data.rooms[0].id;
                     else if(data.rooms.length == 0)roomId = null;
                     if(choosedRoom == null){
-                        this.setState({rooms:data.rooms,categories:data.categories,roomId:roomId,isLoading:false},() => this.connectSocket());
+                        this.setState({rooms:data.rooms,categories:data.categories,roomId:roomId},() => this.connectSocket());
                     }else{
-                        this.setState({rooms:data.rooms,categories:data.categories,roomId:choosedRoom,isLoading:false},() => this.connectSocket());
+                        this.setState({rooms:data.rooms,categories:data.categories,roomId:choosedRoom},() => this.connectSocket());
                     }
                     this.loadMessages();
                     this.loadUsers();
-                }else if(data.error === "invalid token")this.context.logout();
+                }else{
+                    this.setState({rooms:data.rooms,categories:data.categories});
+                }
 
-            })
+            }else if(data.error === "invalid token")this.context.logout();
+        })
+
 
     }
 
     loadServers(){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token
-        };
-        fetch("https://rp-ruler.ru/api/get_users_servers.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    let serverId = null;
-                    if(data.length > 0)serverId = data[0].id;
-                    //this.handleChangeServer(serverId);
-                    this.setState({servers:data});
-                }
+        Api.getServers(this.context.token).then((data)=>{
+            if(data.error === undefined){
+                this.setState({servers:data});
+            }
+        })
 
-            })
     }
 
     loadUsers(){
@@ -214,21 +177,13 @@ class Chat extends React.Component{
             this.setState({users:[]})
             return;
         }
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&room_id="+this.state.roomId
-        };
-        fetch("https://rp-ruler.ru/api/get_users_in_room.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    this.setState({users:data.users});
-                    this.connectSocket();
-                }
-            })
+        Api.getUsersInRoom(this.context.token,this.state.roomId).then((data)=>{
+            if(data.error === undefined){
+                this.setState({users:data.users});
+                this.connectSocket();
+            }
+        })
+
     }
 
     handleLoadMoreMessages(){
@@ -242,29 +197,19 @@ class Chat extends React.Component{
         }
         this.isLoadingMessages = true;
         this.setState({isLoading:true});
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&room_id="+this.state.roomId+"&offset="+offset
-        };
-        fetch("https://rp-ruler.ru/api/get_messages.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    let newReplyTo = null;
-                    if(offset != 0){
-                        let newMessages = this.state.messages;
-                        newMessages.unshift(...data.messages);
-                        this.setState({messages:newMessages,lastReadMsg:data.last_read,replyTo:newReplyTo,isLoading:false});
-                    }else{
-                        this.setState({messages:data.messages,lastReadMsg:data.last_read,replyTo:newReplyTo,isLoading:false});
-                    }
-                    this.isLoadingMessages = false;
+        Api.getMessages(this.context.token,this.state.roomId,offset).then((data)=>{
+            if(data.error === undefined){
+                let newReplyTo = null;
+                if(offset != 0){
+                    let newMessages = this.state.messages;
+                    newMessages.unshift(...data.messages);
+                    this.setState({messages:newMessages,lastReadMsg:data.lastRead,replyTo:newReplyTo,isLoading:false});
+                }else{
+                    this.setState({messages:data.messages,lastReadMsg:data.lastRead,replyTo:newReplyTo,isLoading:false});
                 }
-
-            })
+                this.isLoadingMessages = false;
+            }
+        })
     }
 
     handleFocus(){
@@ -276,26 +221,12 @@ class Chat extends React.Component{
         if(this.state.messages != null && this.state.messages.length !== 0 && this.state.lastReadMsg !== this.state.messages.slice(-1)[0].id) {
             const id = this.state.messages.slice(-1)[0].id;
             this.setState({lastReadMsg: id});
-            const requestOptions = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: "token=" + this.context.token + "&room_id=" + this.state.roomId + "&msg_id=" + id
-            };
-            fetch("https://rp-ruler.ru/api/read_message.php", requestOptions)
-                .then(response => response.json())
-                .then((data) => {
-                })
+            Api.readMessage(this.context.token,this.state.roomId,id).then((data)=>{})
             Utils.getElById(this.state.rooms,this.state.roomId).is_unread = 0;
         }
     }
 
 
-
-    onSocketOpen(){
-        console.log("socket connected");
-    }
     onSocketMessage(message){
         let data = JSON.parse(message.data);
 
@@ -304,15 +235,13 @@ class Chat extends React.Component{
             if(Utils.getElById(this.state.messages,data.message.id) == null){
                 newMessages.push(data.message);
             }
-            console.log(data.message.sender_id);
-            console.log(this.context.user_id*1);
             if(data.message.sender_id != this.context.user_id*1)this.popsound.play();
             this.setState({messages: newMessages});
         }
         if(data.left_user != null){
             this.setState((state) => {
                 let newUsers = [...state.users];
-                this.removeElById(newUsers,data.left_user);
+                Utils.removeElById(newUsers,data.left_user);
                 return {
                     users:newUsers
                 }
@@ -332,7 +261,7 @@ class Chat extends React.Component{
 
             this.setState((state) => {
                 let newMessages = [...state.messages];
-                this.removeElById(newMessages,data.remove_message);
+                Utils.removeElById(newMessages,data.remove_message);
                 return {
                     messages:newMessages
                 }
@@ -358,9 +287,62 @@ class Chat extends React.Component{
             this.client.close();
             this.client = null;
         }
-        this.client = new W3CWebSocket('wss://rp-ruler.ru:8084?token='+this.context.token+"&room_id="+this.state.roomId);
-        this.client.onopen = this.onSocketOpen;
-        this.client.onmessage = this.onSocketMessage;
+        this.client = socketIOClient("https://rp-ruler.ru:8084",{
+            query:{
+                token:this.context.token,roomId:this.state.roomId
+            }
+        });
+
+        this.client.emit("login",{token:this.context.token,roomId:this.state.roomId});
+
+        this.client.on("message",(message)=>{
+            let newMessages = [...this.state.messages];
+            if(Utils.getElById(this.state.messages,message.id) == null){
+                newMessages.push(message);
+            }
+            if(message.sender_id != this.context.user_id*1)this.popsound.play();
+            this.setState({messages: newMessages});
+        })
+
+        this.client.on("delete_message",(data)=>{
+            this.setState((state) => {
+                let newMessages = [...state.messages];
+                Utils.removeElById(newMessages,data.messageId);
+                return {
+                    messages:newMessages
+                }
+            });
+        })
+
+        this.client.on("new_user",(user)=>{
+            this.setState((state) => {
+                let newUsers = [...state.users];
+                if(Utils.getElById(newUsers,user.id) == null)newUsers.unshift(user);
+                return {
+                    users:newUsers
+                }
+            });
+        })
+
+        this.client.on("left_user",(user)=>{
+            this.setState((state) => {
+                let newUsers = [...state.users];
+                Utils.removeElById(newUsers,user.id);
+                return {
+                    users:newUsers
+                }
+            });
+        })
+        this.client.on("updateRooms",(data)=>{
+            this.loadRooms(null,true);
+        })
+        this.client.on("updateUsers",(data)=>{
+            this.loadUsers();
+            this.loadMessages();
+        })
+        this.client.on("updateServers",(data)=>{
+            this.loadServers();
+        })
     }
 
     componentDidMount() {
@@ -373,38 +355,18 @@ class Chat extends React.Component{
     }
 
 
-    removeElById(arr,id){
-        for(let i=0;i<arr.length;i++){
-            if(arr[i].id === id){
-                arr.splice(i,1);
-                return arr;
-            }
-        }
-    }
+
 
 
     handleRemoveMessage(id){
         let newMessages = [...this.state.messages];
-        newMessages = this.removeElById(newMessages,id);
+        newMessages = Utils.removeElById(newMessages,id);
         let newReplyTo = id != this.state.replyTo ? this.state.replyTo : null;
         this.setState({messages:newMessages,replyTo:newReplyTo});
         if(this.client != null){
-            this.client.send(JSON.stringify({
-                removeMsg:id
-            }));
-        }else {//фолбек до POST, нужно ли?
-
-            const requestOptions = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: "token=" + this.context.token + "&msg_id=" + id
-            };
-            fetch("https://rp-ruler.ru/api/remove_message.php", requestOptions)
-                .then(response => response.json())
-                .then((data) => {
-                })
+            this.client.emit("delete_message",{messageId:id});
+        }else{
+            this.context.showMessage("Ошибка соединения","error");
         }
     }
 
@@ -421,35 +383,16 @@ class Chat extends React.Component{
 
     sendMessage(msg){
         if(this.client != null){
-            this.client.send(JSON.stringify({
-                text:msg,
-                reply_id:this.state.replyTo
-            }));
+            this.client.emit("message",{text:msg,reply_id:this.state.replyTo});
             this.setState({replyTo: null});
             this.messageInput.current.value = null;
-
-        }else {//фолбек до POST, нужно ли?
-            const requestOptions = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: "token=" + this.context.token + "&room_id=" + this.state.roomId + "&text=" + msg + "&reply_id=" + this.state.replyTo
-            };
-            fetch("https://rp-ruler.ru/api/send_message.php", requestOptions)
-                .then(response => response.json())
-                .then((data) => {
-                    let newMessages = [...this.state.messages];
-                    newMessages.push(data);
-                    this.setState({lastReadMsg: data.id, messages: newMessages, replyTo: null});
-                    this.messageInput.current.value = null;
-                })
+        }else {
+            this.context.showMessage("Ошибка соединения","error");
         }
     }
 
     handleSelectEmoji(emoji){
         this.messageInput.current.value += emoji.native;
-
         this.setState({inputFocused:true});
     }
 
@@ -481,7 +424,7 @@ class Chat extends React.Component{
             roomName = room.login != null ? room.login : room.name;
             labelText = this.state.replyTo==null ? writeTo + roomName.toLowerCase() :
                 "Написать в ответ "+Utils.getElById(this.state.messages,this.state.replyTo).login;
-            bg = "url(https://rp-ruler.ru/upload/" + room.bg+")";
+            bg = "url("+Utils.uploadDir + room.bg+")";
             roomDescription = room.description;
         }
         const replyText = this.state.replyTo==null ? null : Utils.getElById(this.state.messages,this.state.replyTo).text;
@@ -511,8 +454,8 @@ class Chat extends React.Component{
                                     onMessagesUpdate={this.loadMessages}
                                     server={curServer}
                                     updateServers={this.loadServers}
-                                    onRoomCreate={this.loadRooms}
-                                    onCategoryCreate={this.loadRooms}
+                                    onRoomCreate={()=>this.loadRooms(null,true)}
+                                    onCategoryCreate={()=>this.loadRooms(null,true)}
                                     admin={adminId == this.context.user_id*1}
                                     role={this.state.role}
                                     onServerDisconnect={this.handleServerDisconnect}/> : ""}
@@ -523,8 +466,8 @@ class Chat extends React.Component{
                                        isChat={this.state.isChat}
                                        role={this.state.role}
                                        categories={this.state.categories}
-                                       onRoomsUpdate={this.loadRooms}
-                                       onCategoriesUpdate={this.loadRooms}
+                                       onRoomsUpdate={()=>this.loadRooms(null,true)}
+                                       onCategoriesUpdate={()=>this.loadRooms(null,true)}
                                        serverId={this.state.serverId}
                                        onChangeRoom={this.handleChangeRoom}/> : ""}
                     </Paper>

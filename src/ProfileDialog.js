@@ -15,7 +15,8 @@ import {
 import {Close, ExpandMore} from "@material-ui/icons";
 import TokenContext from "./AppContext";
 import FormDialog from "./FormDialog";
-import {Alert} from "@material-ui/lab";
+import Api from "./Api";
+import Utils from "./Utils";
 
 
 
@@ -47,19 +48,11 @@ class ProfileDialog extends React.Component {
     }
 
     componentDidMount() {
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&server_id="+this.state.serverId
-        };
-        fetch("https://rp-ruler.ru/api/get_profile.php",requestOptions).then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    this.setState({...data.user})
-                }
-            });
+        Api.getProfile(this.context.token).then((data)=>{
+            if(data.error === undefined){
+                this.setState({...data.user})
+            }
+        })
     }
 
     handleClose(){
@@ -77,22 +70,14 @@ class ProfileDialog extends React.Component {
             this.context.showMessage("Логин не может быть пустым","error");
             return;
         }
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&login="+newLogin
-        };
-        fetch("https://rp-ruler.ru/api/save_profile.php",requestOptions).then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    this.setState({login:newLogin});
-                    this.context.showMessage("Логин успешно изменен.","success");
-                }else{
-                    this.context.showMessage(data.error,"error");
-                }
-            });
+        Api.editProfile(this.context.token,newLogin).then((data)=>{
+            if(data.error === undefined){
+                this.setState({login:newLogin});
+                this.context.showMessage("Логин успешно изменен.","success");
+            }else{
+                this.context.showMessage(data.error,"error");
+            }
+        })
         this.setState({loginFormOpen:false});
     }
 
@@ -101,22 +86,15 @@ class ProfileDialog extends React.Component {
     handleSaveStatus(data){
         let newStatus = data == null ? " " : data.status;
         this.setState({statusFormOpen:false});
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&status="+newStatus
-        };
-        fetch("https://rp-ruler.ru/api/save_profile.php",requestOptions).then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    this.context.showMessage("Статус успешно изменен.","success");
-                    this.setState({status:newStatus});
-                }else{
-                    this.context.showMessage(data.error,"error");
-                }
-            });
+        Api.editProfile(this.context.token,null,newStatus).then((data)=>{
+            if(data.error === undefined){
+                this.context.showMessage("Статус успешно изменен.","success");
+                this.setState({status:newStatus});
+            }else{
+                this.context.showMessage(data.error,"error");
+            }
+        })
+
     }
 
     handleSavePassword(data){
@@ -124,21 +102,14 @@ class ProfileDialog extends React.Component {
         this.setState({passFormOpen:false});
         let prevPass = data.prev_password;
         let newPass = data.new_password;
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&prev_pass="+prevPass+"&new_pass="+newPass
-        };
-        fetch("https://rp-ruler.ru/api/save_profile.php",requestOptions).then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    this.context.showMessage("Пароль успешно изменен.","success");
-                }else{
-                    this.context.showMessage(data.error,"error");
-                }
-            });
+        Api.editProfile(this.context.token,null,null,prevPass,newPass).then((data)=>{
+            if(data.error === undefined){
+                this.context.showMessage("Пароль успешно изменен.","success");
+            }else{
+                this.context.showMessage(data.error,"error");
+            }
+        })
+
     }
 
     handleAccordionChange = (panel) => (event, isExpanded) => {
@@ -147,36 +118,19 @@ class ProfileDialog extends React.Component {
     handleFileUploaded(event){
         if(event.target.files != null && event.target.files.length != 0){
             let file = event.target.files[0];
-            const formData = new FormData();
-            formData.append('avatar', file);
-            formData.append("token",this.context.token);
-            const requestOptions = {
-                method: 'POST',
-                body: formData
-            };
-            fetch("https://rp-ruler.ru/api/upload_avatar.php",requestOptions).then(response => response.json())
-                .then((data)=>{
-                    this.setState({avatar:data.avatar});
-                });
-
+            Api.uploadAvatar(this.context.token,file).then((data)=>{
+                this.setState({avatar:data.avatar});
+            })
         }
 
     }
 
     handleAccountDelete(){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token
-        };
-        fetch("https://rp-ruler.ru/api/delete_account.php",requestOptions).then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    this.context.logout();
-                }
-            });
+        Api.deleteAccount(this.context.token).then((data)=>{
+            if(data.error === undefined){
+                this.context.logout();
+            }
+        })
     }
 
     render(){
@@ -232,7 +186,7 @@ class ProfileDialog extends React.Component {
                     <List className={classes.list}>
                         <ListItem button>
                             <ListItemAvatar>
-                                <Avatar alt={this.state.login} src={"https://rp-ruler.ru/upload/"+this.state.avatar}/>
+                                <Avatar alt={this.state.login} src={Utils.uploadDir+this.state.avatar}/>
                             </ListItemAvatar>
                             <input onChange={this.handleFileUploaded} name="avatar" accept="image/*" className={classes.inputFile} id="button-file" type="file"/>
                             <label htmlFor="button-file">

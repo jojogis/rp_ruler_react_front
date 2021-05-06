@@ -1,21 +1,21 @@
 import * as React from "react";
 import {
     AppBar,
-    Dialog, fade, Grid,
+    Dialog, fade,
     IconButton,
-    InputBase, makeStyles, OutlinedInput,
+    InputBase,
     Slide,
-    TextField,
     Toolbar,
     Typography,
     withStyles
 } from "@material-ui/core";
 import {Close, Search} from "@material-ui/icons";
-import clsx from "clsx";
+
 import ServerCard from "./ServerCard";
 import TokenContext from "./AppContext";
 import Masonry from 'react-masonry-css'
 import Utils from "./Utils";
+import Api from "./Api";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="right" ref={ref} {...props} />;
@@ -42,66 +42,43 @@ class ServersDialog extends React.Component {
     componentDidUpdate(prevProps) {
         if(!prevProps.open && this.props.open){
             this.setState({search:""})
-            fetch("https://rp-ruler.ru/api/get_servers.php").then(response => response.json())
-                .then((data)=>{
-                    if(data.error === undefined){
-                        this.setState({...data})
-                    }
-                });
+            Api.getAllServers(this.context.token,"").then((data)=>{
+                if(data.error === undefined){
+                    this.setState({...data})
+                }
+            });
         }
     }
 
 
-    handleConnect(id){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&server_id="+id
-        };
-        fetch("https://rp-ruler.ru/api/connect_to_server.php",requestOptions).then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    this.props.onClose();
-                    this.props.onServerConnect();
-                }
-            });
+    handleConnect(serverId){
+        Api.connectToServer(this.context.token,serverId).then((data)=>{
+            if(data.error === undefined){
+                this.props.onClose();
+                this.props.onServerConnect();
+            }
+        })
+
+
     }
 
     handleSearchChange(event){
         const search = event.target.value;
         this.setState({search:search});
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "s="+search
-        };
-        fetch("https://rp-ruler.ru/api/get_servers.php",requestOptions).then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    this.setState({...data})
-                }
-            });
+        Api.getAllServers(this.context.token,search).then((data)=>{
+            if(data.error === undefined){
+                this.setState({...data})
+            }
+        });
     }
 
     findTag(tag){
         this.setState({search:"#"+tag});
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "s=#"+tag
-        };
-        fetch("https://rp-ruler.ru/api/get_servers.php",requestOptions).then(response => response.json())
-            .then((data)=>{
-                if(data.error === undefined){
-                    this.setState({...data})
-                }
-            });
+        Api.getAllServers(this.context.token,"#"+tag).then((data)=>{
+            if(data.error === undefined){
+                this.setState({...data})
+            }
+        });
     }
 
     render() {

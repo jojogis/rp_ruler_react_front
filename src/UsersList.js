@@ -54,7 +54,7 @@ class UsersList extends React.Component{
                                  }}
                                  overlap="circle"
                                  invisible={user.online == 0}>
-                        <Avatar alt={user.login} src={"https://rp-ruler.ru/upload/"+user.avatar} />
+                        <Avatar alt={user.login} src={Utils.uploadDir+user.avatar} />
                     </StyledBadge>
                 </ListItemAvatar>
                 <ListItemText className={user.color != null ? classes[user.color+"Text"] : ""} primary={user.login}/>

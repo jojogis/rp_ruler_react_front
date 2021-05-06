@@ -10,6 +10,7 @@ import {
     Typography,
     withStyles
 } from "@material-ui/core";
+import Utils from "./Utils";
 
 class ServerCard extends React.Component{
     render() {
@@ -19,9 +20,9 @@ class ServerCard extends React.Component{
                 <CardActionArea>
                     <CardMedia
                         className={classes.media}
-                        image={"https://rp-ruler.ru/upload/"+this.props.bg}
+                        image={Utils.uploadDir+this.props.bg}
                     />
-                    <Avatar className={classes.avatar}  src={"https://rp-ruler.ru/upload/"+this.props.avatar}>
+                    <Avatar className={classes.avatar}  src={Utils.uploadDir+this.props.avatar}>
                         <Fab className={classes.serverElem}>{this.props.name.substr(0,2)}</Fab>
                     </Avatar>
                     <CardContent>

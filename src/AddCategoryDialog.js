@@ -2,6 +2,7 @@ import * as React from "react";
 import TokenContext from "./AppContext";
 import {Button, Dialog, DialogContent, FormControlLabel, Grid, Switch, TextField, withStyles} from "@material-ui/core";
 import DialogTitleWithClose from "./DialogTitleWithClose";
+import Api from "./Api";
 
 class AddRoomDialog extends React.Component {
     static contextType = TokenContext;
@@ -28,28 +29,27 @@ class AddRoomDialog extends React.Component {
             this.setState({isNameError:"Максимальная длина - 35 символов"});
             return;
         }
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&name="+this.state.name+"&server_id="+this.props.serverId
-        };
-        fetch("https://rp-ruler.ru/api/add_category.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
+        if(this.props.categoryId == null) {
+            Api.addCategory(this.context.token, this.state.name, this.props.serverId).then((data) => {
                 this.props.onCreate();
                 this.props.onClose();
             })
+        }else{
+            Api.editCategory(this.context.token,this.state.name,this.props.categoryId).then((data)=>{
+                this.props.onCreate();
+                this.props.onClose();
+            })
+        }
     }
 
 
     render() {
         const {classes} = this.props;
+        const title = this.props.categoryId == null ? "Добавление категории" : "Редактирование категории";
         return (<Dialog maxWidth="sm" fullWidth open={this.props.open} onClose={this.props.onClose}
                         aria-labelledby="form-dialog-title">
             <DialogTitleWithClose id="customized-dialog-title" onClose={this.props.onClose}>
-                Добавление категории
+                {title}
             </DialogTitleWithClose>
             <DialogContent dividers>
 
@@ -68,7 +68,7 @@ class AddRoomDialog extends React.Component {
 
                 <Grid container justify="center">
                     <Button variant="contained" color="primary" onClick={this.handleSubmit} component="span">
-                        Создать категорию
+                        Сохранить
                     </Button>
                 </Grid>
             </DialogContent>

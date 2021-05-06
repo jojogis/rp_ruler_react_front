@@ -12,10 +12,7 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import {Copyright} from "./Copyright";
 import {withRouter} from "react-router-dom";
-
-
-
-
+import Api from "./Api";
 
 
 class Auth extends React.Component{
@@ -49,23 +46,14 @@ class Auth extends React.Component{
 
     handleSubmit(e){
         e.preventDefault();
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "login="+this.state.login+"&pass="+this.state.pass
-        };
-        fetch("https://rp-ruler.ru/api/login.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
-                if(data["token"] !== undefined){
-                    this.props.onLogin(data["token"],data["user_id"],data["user_type"]);
-                    this.routingFunction();
-                }else if( data["error"] === 1){
-                    this.setState({wrongLoginPass:true});
-                }
-            })
+        Api.login(this.state.login,this.state.pass).then((data)=>{
+            if(data["token"] !== undefined){
+                this.props.onLogin(data["token"],data["user_id"],data["user_type"]);
+                this.routingFunction();
+            }else if( data["error"] === 1){
+                this.setState({wrongLoginPass:true});
+            }
+        })
     }
 
     render() {

@@ -13,20 +13,16 @@ import {
     withStyles
 } from "@material-ui/core";
 import {
-    AlternateEmail,
     Delete,
-    Edit,
-    ExitToApp, ExpandMore,
-    Language,
-    More,
+    Edit, ExpandMore,
     Notifications,
     NotificationsOff
 } from "@material-ui/icons";
 import AddRoomDialog from "./AddRoomDialog";
-import {Alert} from "@material-ui/lab";
-import {AlertWarning} from "material-ui/svg-icons/index.es";
 import Reorder, {reorder} from "react-reorder";
 import Utils from "./Utils";
+import Api from "./Api";
+import AddCategoryDialog from "./AddCategoryDialog";
 
 
 class RoomsList extends React.Component{
@@ -38,7 +34,9 @@ class RoomsList extends React.Component{
             anchorEl:null,
             clickedRoomId:null,
             isEditOpen:false,
+            isEditCatOpen:false,
             clickedRoom:null,
+            clickedCategory:null,
             categoryAnchorEl:null,
             clickedCategoryId:null
         };
@@ -47,6 +45,7 @@ class RoomsList extends React.Component{
         this.handleChangeNotifications = this.handleChangeNotifications.bind(this);
         this.handleReorder = this.handleReorder.bind(this);
         this.deleteCategory = this.deleteCategory.bind(this);
+        this.handleCatContext = this.handleCatContext.bind(this);
     }
 
     handleRoomClick(roomId){
@@ -54,19 +53,10 @@ class RoomsList extends React.Component{
     }
 
     deleteRoom(){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&room_id="+this.state.clickedRoomId
-        };
-        fetch("https://rp-ruler.ru/api/delete_room.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
-                this.setState({anchorEl:null,clickedRoomId:null});
-                this.props.onRoomsUpdate();
-            })
+        Api.deleteRoom(this.context.token,this.state.clickedRoomId).then((data)=>{
+            this.setState({anchorEl:null,clickedRoomId:null});
+            this.props.onRoomsUpdate();
+        })
     }
 
     handleRoomContext(event,id){
@@ -77,43 +67,32 @@ class RoomsList extends React.Component{
             clickedRoomId:id,
             clickedRoom:clickedRoom
         });
+    }
 
-
+    handleCatContext(event,id){
+        let clickedCategory = Utils.getElById(this.props.categories,id);
+        this.setState({
+            categoryAnchorEl:event.currentTarget,
+            clickedCategoryId:id,
+            clickedCategory:clickedCategory
+        });
     }
 
     handleChangeNotifications(){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&room_id="+this.state.clickedRoomId
-        };
-        fetch("https://rp-ruler.ru/api/change_alert.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
-                this.setState({anchorEl:null,clickedRoomId:null});
-                this.props.onRoomsUpdate();
-            })
+        Api.changeAlert(this.context.token,this.state.clickedRoomId).then((data)=>{
+            this.setState({anchorEl:null,clickedRoomId:null});
+            this.props.onRoomsUpdate();
+        })
     }
 
 
 
     deleteCategory(){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&category_id="+this.state.clickedCategoryId
-        };
-        fetch("https://rp-ruler.ru/api/delete_category.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
-                this.setState({categoryAnchorEl:null,clickedCategoryId:null});
-                this.props.onCategoriesUpdate();
-                this.props.onRoomsUpdate();
-            })
+        Api.deleteCategory(this.context.token,this.state.clickedCategoryId).then((data)=>{
+            this.setState({categoryAnchorEl:null,clickedCategoryId:null});
+            this.props.onCategoriesUpdate();
+            this.props.onRoomsUpdate();
+        })
     }
 
     handleReorder (event, previousIndex, nextIndex, fromId, toId) {
@@ -126,19 +105,11 @@ class RoomsList extends React.Component{
 
         let roomId = this.props.rooms.filter(room => room.category_id == fromCat)[previousIndex].id;
 
+        Api.setRoomCategory(this.context.token,roomId,toCat,nextIndex).then((data)=>{
+            this.props.onRoomsUpdate(null,true);
+        })
 
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&room_id="+roomId+"&category_id="+toCat+"&order="+nextIndex
-        };
-        fetch("https://rp-ruler.ru/api/set_room_category.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
-                this.props.onRoomsUpdate();
-            })
+
 
 
     }
@@ -153,9 +124,10 @@ class RoomsList extends React.Component{
                 {this.props.categories.map((category) => (
                     <Accordion>
                         <AccordionSummary
-                            onContextMenu={(e) => this.setState({categoryAnchorEl:e.currentTarget,clickedCategoryId:category.id})}
+                            onContextMenu={(e) => this.handleCatContext(e,category.id)}
                             expandIcon={<ExpandMore />}
-                        ><Typography>{category.name}</Typography>
+                        >
+                          <Typography> {category.name}</Typography>
                         </AccordionSummary>
                         <AccordionDetails style={{padding:"5px 0px"}}>
 
@@ -278,6 +250,8 @@ class RoomsList extends React.Component{
                 >
                      <MenuItem className={classes.delete} onClick={this.deleteCategory}>
                         Удалить категорию<Delete className={classes.icon}/></MenuItem>
+                    <MenuItem className={classes.edit} onClick={() => this.setState({isEditCatOpen:true})}>
+                        Редактировать<Edit className={classes.icon}/></MenuItem>
                 </Menu>: ""}
                 {this.state.clickedRoom != null ? <AddRoomDialog
                     open={this.state.isEditOpen}
@@ -287,8 +261,15 @@ class RoomsList extends React.Component{
                     name={this.state.clickedRoom.name}
                     description={this.state.clickedRoom.description}
                     bg={this.state.clickedRoom.bg}
-                    isGlobal={this.state.clickedRoom.is_global === 1}
+                    icon={this.state.clickedRoom.icon}
                     onClose={() => this.setState({isEditOpen:false})}
+                /> : ""}
+                {this.state.clickedCategory != null ? <AddCategoryDialog
+                    open={this.state.isEditCatOpen}
+                    name={this.state.clickedCategory.name}
+                    onCreate={this.props.onRoomsUpdate}
+                    onClose={() => this.setState({isEditCatOpen:false})}
+                    categoryId={this.state.clickedCategoryId}
                 /> : ""}
             </div>);
         }

@@ -38,6 +38,8 @@ import Reorder, {
 } from 'react-reorder';
 import {Check, DeleteOutline} from "@material-ui/icons";
 import {blue, cyan, deepPurple, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
+import Api from "./Api";
+import Utils from "./Utils";
 
 
 function TabPanel(props) {
@@ -140,23 +142,13 @@ class AddServerDialog extends React.Component {
     handleFileUploaded(event){
         if(event.target.files != null && event.target.files.length != 0){
             let file = event.target.files[0];
-            const formData = new FormData();
-            formData.append('avatar', file);
-            formData.append("token",this.context.token);
-            const requestOptions = {
-                method: 'POST',
-                body: formData
-            };
-            fetch("https://rp-ruler.ru/api/upload_file.php",requestOptions).then(response => response.json())
-                .then((data)=>{
-                    if(event.target.name=="bg"){
-                        this.setState({bg:data.filename});
-                    }else{
-                        this.setState({avatar:data.filename});
-                    }
-
-                });
-
+            Api.uploadFile(this.context.token,file).then((data)=>{
+                if(event.target.name=="bg"){
+                    this.setState({bg:data.filename});
+                }else{
+                    this.setState({avatar:data.filename});
+                }
+            })
         }
 
     }
@@ -178,22 +170,20 @@ class AddServerDialog extends React.Component {
             this.setState({isNameError:"Максимальная длина - 20 символов"});
             return;
         }
-        let url = this.props.serverId == null ? "https://rp-ruler.ru/api/create_server.php" : "https://rp-ruler.ru/api/edit_server.php";
-        let serverId = this.props.serverId == null ? "" : "&server_id="+this.props.serverId;
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&age="+this.state.age+"&name="+this.state.name+"&description="+this.state.description+"&avatar="+this.state.avatar+
-                "&is_private="+this.state.isPrivate*1+"&bg="+this.state.bg+"&tags="+this.state.tags+serverId+"&roles="+encodeURI(JSON.stringify(this.state.roles))
-        };
-        fetch(url,requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
+        if(this.props.serverId == null){
+            Api.addServer(this.context.token,this.state.age,this.state.name,this.state.description,this.state.avatar,
+                this.state.isPrivate,this.state.bg,this.state.tags,this.state.roles).then((data)=>{
+                    if(this.props.onCreate != null)this.props.onCreate(this.props.serverId ?? data.id);
+                    this.props.onClose();
+            })
+        }else {
+            Api.editServer(this.context.token,this.props.serverId,this.state.age,this.state.name,this.state.description,this.state.avatar,
+                this.state.isPrivate,this.state.bg,this.state.tags,this.state.roles).then((data)=>{
                 if(this.props.onCreate != null)this.props.onCreate(this.props.serverId ?? data.id);
                 this.props.onClose();
             })
+        }
+
     }
 
     handleRoleSwitchChange(name,value){
@@ -261,7 +251,7 @@ class AddServerDialog extends React.Component {
                 <TabPanel value={this.state.tab} index={0}>
                 <Grid container justify="center">
 
-                    <Avatar item src={"https://rp-ruler.ru/upload/"+this.state.avatar} className={classes.avatar}>
+                    <Avatar item src={Utils.uploadDir+this.state.avatar} className={classes.avatar}>
                         <Fab>{this.state.name.substr(0,2)}</Fab>
                     </Avatar>
                     <input onChange={this.handleFileUploaded} disabled={cantEditServer} name="avatar" accept="image/*" className={classes.inputFile} id="button-file" type="file"/>
@@ -272,7 +262,7 @@ class AddServerDialog extends React.Component {
                     </label>
                 </Grid><br/>
                 <Grid container alignItems="center" direction="column">
-                    {this.state.bg != null ? <img className={classes.bg} src={"https://rp-ruler.ru/upload/"+this.state.bg}/> : ""}
+                    {this.state.bg != null ? <img className={classes.bg} src={Utils.uploadDir+this.state.bg}/> : ""}
                     <br/>
                     <input onChange={this.handleFileUploaded} name="bg" accept="image/*" className={classes.inputFile} id="bg-file" type="file"/>
                     <label htmlFor="bg-file">

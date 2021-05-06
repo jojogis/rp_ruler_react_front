@@ -108,7 +108,7 @@ class Messages extends React.Component{
                                      }}
                                      overlap="circle"
                                      invisible={Utils.getElById(this.props.online, item.sender_id) == null}>
-                            <Avatar alt={item.login} src={"https://rp-ruler.ru/upload/" + item.avatar}/>
+                            <Avatar alt={item.login} src={Utils.uploadDir + item.avatar}/>
                         </StyledBadge>
 
                     </ListItemAvatar>

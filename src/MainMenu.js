@@ -8,6 +8,7 @@ import ProfileDialog from "./ProfileDialog";
 import ServersDialog from "./ServersDialog";
 import AddServerDialog from "./AddServerDialog";
 import UsersList from "./UsersList";
+import Utils from "./Utils";
 
 
 
@@ -43,7 +44,8 @@ class MainMenu extends React.Component{
                 <Divider className={classes.divider}/>
             {this.props.servers.map((item)=>(
                 <ListItem key={item.id}>
-                    <Avatar className={classes.avatar + (this.props.currentServer===item.id ? " " + classes.current : "")} onClick={() => this.props.onChangeServer(item.id)} src={"https://rp-ruler.ru/upload/"+item.avatar}>
+                    <Avatar className={classes.avatar + (this.props.currentServer===item.id ? " " + classes.current : "")} onClick={() => this.props.onChangeServer(item.id)}
+                            src={Utils.uploadDir+item.avatar}>
                         <Fab className={classes.serverElem + (this.props.currentServer===item.id ? " "+classes.current : "")}>{item.name.substr(0,2)}</Fab>
                     </Avatar></ListItem>
             ))}

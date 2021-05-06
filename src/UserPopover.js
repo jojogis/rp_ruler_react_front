@@ -63,7 +63,7 @@ class UserPopover extends React.Component {
             }}
         >
             <div className={classes.rootUser}>
-            <Avatar className={classes.avatar} alt={this.props.user.login} src={"https://rp-ruler.ru/upload/"+this.props.user.avatar}/>
+            <Avatar className={classes.avatar} alt={this.props.user.login} src={Utils.uploadDir+this.props.user.avatar}/>
             <Typography variant="h6">{this.props.user.login}</Typography>
                 {curRole != null ? <Typography variant="subtitle1" className={classes[curRole.color+"Text"]}>{curRole.name}</Typography>: ""}
             <Typography paragraph={true} variant="caption" >{this.props.user.status}</Typography>

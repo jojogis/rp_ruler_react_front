@@ -13,6 +13,7 @@ import {
 import {Copyright} from "./Copyright";
 import {Link as RouterLink, withRouter} from 'react-router-dom';
 import ParticlesBg from "particles-bg";
+import Api from "./Api";
 
 
 
@@ -47,11 +48,11 @@ class Reg extends React.Component{
 
     handleSubmit(e){
         e.preventDefault();
-        if(this.state.login == ""){
+        if(this.state.login === ""){
             this.setState({isWrongLogin:"Введите логин"});
             return;
         }
-        if(this.state.email == ""){
+        if(this.state.email === ""){
             this.setState({isWrongMail:"Введите email"});
             return;
         }
@@ -65,25 +66,17 @@ class Reg extends React.Component{
             return;
         }
 
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "login="+this.state.login+"&pass="+this.state.pass+"&email="+this.state.email
-        };
-        fetch("https://rp-ruler.ru/api/registration.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
-                if(data["token"] !== undefined){
-                    this.props.onReg(data["token"],data["user_id"],data["user_type"]);
-                    this.routingFunction();
-                }else if( data["error"] === 1){
-                    this.setState({isWrongLogin:"Логин занят"});
-                }else if( data["error"] === 2) {
-                    this.setState({isWrongMail:"Email занят"});
-                }
-            })
+        Api.register(this.state.login,this.state.pass,this.state.email).then((data)=>{
+            if(data["token"] !== undefined){
+                this.props.onReg(data["token"],data["user_id"],data["user_type"]);
+                this.routingFunction();
+            }else if( data["error"] === 1){
+                this.setState({isWrongLogin:"Логин занят"});
+            }else if( data["error"] === 2) {
+                this.setState({isWrongMail:"Email занят"});
+            }
+        })
+
     }
 
     render() {

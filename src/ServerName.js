@@ -6,17 +6,15 @@ import {
     DialogTitle,
     Menu,
     MenuItem,
-    Paper,
-    Snackbar,
     withStyles
 } from "@material-ui/core";
 import {Add, Delete, Edit, ExitToApp, ExpandMore, ListAlt, Remove} from "@material-ui/icons";
 import AddRoomDialog from "./AddRoomDialog";
 import TokenContext from "./AppContext";
-import {Alert} from "@material-ui/lab";
 import AddServerDialog from "./AddServerDialog";
 import UsersList from "./UsersList";
 import AddCategoryDialog from "./AddCategoryDialog";
+import Api from "./Api";
 
 class ServerName extends React.Component{
     static contextType = TokenContext;
@@ -44,7 +42,6 @@ class ServerName extends React.Component{
 
     handleServerMenuClose(){
         this.setState({anchorEl:null});
-
     }
 
     handleServerDisconnectClick(){
@@ -54,18 +51,9 @@ class ServerName extends React.Component{
     }
 
     loadUsers(){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token=" + this.context.token + "&server_id=" + this.props.serverId
-        };
-        fetch("https://rp-ruler.ru/api/get_users_on_server.php", requestOptions)
-            .then(response => response.json())
-            .then((data) => {
-                this.setState({users:data.users});
-            })
+        Api.getUsersOnServer(this.context.token,this.props.serverId).then((data)=>{
+            this.setState({users:data.users});
+        })
     }
 
     openUsersList(){
@@ -73,20 +61,11 @@ class ServerName extends React.Component{
         this.loadUsers();
     }
     deleteServer(){
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token="+this.context.token+"&server_id="+this.props.serverId
-        };
-        fetch("https://rp-ruler.ru/api/delete_server.php",requestOptions)
-            .then(response => response.json())
-            .then((data)=>{
-                this.setState({isConfirmDeleteOpen:false});
-                this.context.showMessage("Сервер удален","success");
-                this.props.updateServers();
-            })
+        Api.deleteServer(this.context.token,this.props.serverId).then((data)=>{
+            this.setState({isConfirmDeleteOpen:false});
+            this.context.showMessage("Сервер удален","success");
+            this.props.updateServers();
+        })
     }
 
     render() {
