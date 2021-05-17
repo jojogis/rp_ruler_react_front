@@ -8,13 +8,16 @@ import {
     MenuItem,
     withStyles
 } from "@material-ui/core";
-import {Add, Delete, Edit, ExitToApp, ExpandMore, ListAlt, Remove} from "@material-ui/icons";
+import {Add, Delete, Edit, ExitToApp, ExpandMore, ListAlt, People, PermIdentity, Remove} from "@material-ui/icons";
 import AddRoomDialog from "./AddRoomDialog";
 import TokenContext from "./AppContext";
 import AddServerDialog from "./AddServerDialog";
 import UsersList from "./UsersList";
 import AddCategoryDialog from "./AddCategoryDialog";
 import Api from "./Api";
+import AddCharacter from "./AddCharacterDialog";
+import AddCharacterDialog from "./AddCharacterDialog";
+import CharactersListDialog from "./CharactersListDialog";
 
 class ServerName extends React.Component{
     static contextType = TokenContext;
@@ -25,8 +28,10 @@ class ServerName extends React.Component{
             isAddRoomOpen:false,
             isConfirmDeleteOpen:false,
             isAddCategoryOpen:false,
+            isAddCharacterOpen:false,
             editOpen:false,
             usersListOpen:false,
+            isCharactersListOpen:false,
             users:[]
         };
         this.handleServerMenuClick       = this.handleServerMenuClick.bind(this);
@@ -99,7 +104,7 @@ class ServerName extends React.Component{
                 >
                     <MenuItem className={classes.exitServer} onClick={this.handleServerDisconnectClick}>
                         Покинуть сервер <ExitToApp className={classes.icon}/></MenuItem>
-                    <MenuItem className={classes.edit} onClick={() => {this.setState({editOpen:true});this.handleServerMenuClose()} }>
+                    <MenuItem className={classes.edit} onClick={() => this.setState({editOpen:true,anchorEl:null}) }>
                         Настройки <Edit className={classes.icon}/></MenuItem>
                     {this.props.admin || this.props.role.room_edit ? <MenuItem className={classes.add} onClick={() => this.setState({isAddRoomOpen:true,anchorEl:false})}>
                         Добавить комнату <Add className={classes.icon}/></MenuItem> : ""}
@@ -109,7 +114,25 @@ class ServerName extends React.Component{
                         Удалить сервер <Delete className={classes.icon}/></MenuItem> : ""}
                     <MenuItem className={classes.edit} onClick={this.openUsersList}>
                         Список участников <ListAlt className={classes.icon}/></MenuItem>
+                    {this.props.character == null ?
+                    <MenuItem className={classes.add} onClick={()=>this.setState({isAddCharacterOpen:true,anchorEl:null})}>
+                        Создать персонажа<Add className={classes.icon}/></MenuItem>:
+                        <MenuItem className={classes.edit} onClick={()=>this.setState({isAddCharacterOpen:true,anchorEl:null})}>
+                            Персонаж <PermIdentity className={classes.icon}/></MenuItem>}
+                    {this.props.admin || this.props.role.control_playing ? <MenuItem className={classes.edit} onClick={()=>this.setState({isCharactersListOpen:true,anchorEl:null})}>
+                        Анкеты игроков <People className={classes.icon}/></MenuItem> :""}
                 </Menu>
+                    <AddCharacterDialog
+                        open={this.state.isAddCharacterOpen}
+                        serverId={this.props.serverId}
+                        character={this.props.character}
+                        onClose={()=>{this.setState({isAddCharacterOpen:false});this.props.onUpdateCharacter(); }}
+                />
+                <CharactersListDialog
+                    open={this.state.isCharactersListOpen}
+                    serverId={this.props.serverId}
+                    onClose={()=>{this.setState({isCharactersListOpen:false});this.props.updateServers(); }}
+                />
                 <AddRoomDialog
                     open={this.state.isAddRoomOpen}
                     serverId={this.props.serverId}

@@ -227,7 +227,7 @@ class Api{
                 'Authorization' : 'Bearer '+token
             },
             body:"&age="+age+"&name="+name+"&description="+description+"&avatar="+avatar+
-                "&is_private="+isPrivate*1+"&bg="+bg+"&tags="+tags+"&roles="+encodeURI(JSON.stringify(roles))
+                "&isPrivate="+(isPrivate ? 1 : 0)+"&bg="+bg+"&tags="+tags+"&roles="+encodeURI(JSON.stringify(roles))
         };
         return await fetch(this.location+"servers",requestOptions).then(response => response.json());
     }
@@ -349,6 +349,87 @@ class Api{
             },
         };
         return await fetch(this.location+"check_token",requestOptions).then(response => response.json());
+    }
+
+    async addCharacter(token,name,biography,temper,extra,age,serverId){
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization' : 'Bearer '+token
+            },
+            body:"name="+name+"&biography="+biography+"&temper="+temper+"&extra="+extra+"&age="+age+"&serverId="+serverId
+        };
+        return await fetch(this.location+"characters",requestOptions).then(response => response.json());
+    }
+
+    async updateCharacter(token,name,biography,temper,extra,age,characterId){
+        const requestOptions = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization' : 'Bearer '+token
+            },
+            body:"name="+name+"&biography="+biography+"&temper="+temper+"&extra="+extra+"&age="+age+"&characterId="+characterId
+        };
+        return await fetch(this.location+"characters",requestOptions).then(response => response.json());
+    }
+
+    async getCharacter(token,serverId){
+        const requestOptions = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization' : 'Bearer '+token
+            },
+        };
+        return await fetch(this.location+"characters?serverId="+serverId,requestOptions).then(response => response.json());
+    }
+
+    async getCharacters(token,serverId){
+        const requestOptions = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization' : 'Bearer '+token
+            },
+        };
+        return await fetch(this.location+"characters_all?serverId="+serverId,requestOptions).then(response => response.json());
+    }
+
+    async deleteCharacter(token,characterId){
+        const requestOptions = {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization' : 'Bearer '+token
+            },
+        };
+        return await fetch(this.location+"characters?characterId="+characterId,requestOptions).then(response => response.json());
+    }
+
+    async addCommentToCharacter(token,characterId,comment){
+        const requestOptions = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization' : 'Bearer '+token
+            },
+            body: "characterId="+characterId+"&comment="+comment
+        };
+        return await fetch(this.location+"characters_comment",requestOptions).then(response => response.json());
+    }
+
+    async confirmCharacter(token,characterId){
+        const requestOptions = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization' : 'Bearer '+token
+            },
+            body: "characterId="+characterId
+        };
+        return await fetch(this.location+"characters_confirm",requestOptions).then(response => response.json());
     }
 
 

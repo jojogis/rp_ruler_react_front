@@ -63,6 +63,7 @@ class Chat extends React.Component{
             users:[],
             isChat:true,
             isLoading:false,
+            character:null,
             messageText:"",
             inputFocused:false,
             role:{color:"default",msg_delete:0,msg_send:0,role_edit:0,role_order:1,server_edit:0,room_edit:0}
@@ -87,6 +88,8 @@ class Chat extends React.Component{
         this.handleBlur = this.handleBlur.bind(this);
         this.onSocketMessage = this.onSocketMessage.bind(this);
         this.loadRole = this.loadRole.bind(this);
+        this.loadCharacter = this.loadCharacter.bind(this);
+
 
     }
 
@@ -101,7 +104,11 @@ class Chat extends React.Component{
 
     }
 
-
+    loadCharacter(){
+        Api.getCharacter(this.context.token,this.state.serverId).then((data)=>{
+            this.setState({character:data.character});
+        })
+    }
 
     handleServerDisconnect(){
         Api.disconnectFromServer(this.context.token,this.state.serverId).then((data)=>{
@@ -117,7 +124,7 @@ class Chat extends React.Component{
     }
 
     handleChangeServer(serverId){
-        this.setState({serverId:serverId,isChat:false,categories:[],rooms:[]},() => {this.loadRooms();this.loadRole()});
+        this.setState({serverId:serverId,isChat:false,categories:[],rooms:[]},() => {this.loadRooms();this.loadRole();this.loadCharacter()});
 
     }
 
@@ -451,6 +458,8 @@ class Chat extends React.Component{
                                     name={serverName}
                                     onWriteToUser={this.handleWriteToUserClick}
                                     onUsersUpdate={this.loadUsers}
+                                    onUpdateCharacter={this.loadCharacter}
+                                    character={this.state.character}
                                     onMessagesUpdate={this.loadMessages}
                                     server={curServer}
                                     updateServers={this.loadServers}
@@ -491,7 +500,7 @@ class Chat extends React.Component{
                             <TextField
                                 id="filled-textarea"
                                 label={labelText}
-                                disabled={!this.state.isChat && (!this.state.role.msg_send || room == null)}
+                                disabled={!this.state.isChat && (!this.state.role?.msg_send || room == null)}
                                 placeholder="Введите сообщение"
                                 onKeyDown={this.handleKeyDown}
                                 multiline

@@ -118,7 +118,7 @@ class Messages extends React.Component{
                     {item.reply_message != null ? <InputReplyMessage replyLogin={item.reply_message.login}
                                                                 replyText={item.reply_message.text}/> : null}</div>}>
                     {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<span className={classes.login + " " + item.color != null ? classes[item.color+"Text"] : ""}>{item.login}</span>}
-                    {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<l className={classes.messageTime}> {item.datetime}</l>}
+                    {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<l className={classes.messageTime}> Недавно</l>}
 
 
                 </ListItemText>

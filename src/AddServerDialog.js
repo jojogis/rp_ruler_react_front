@@ -201,6 +201,8 @@ class AddServerDialog extends React.Component {
             role_edit: 0,
             server_edit: 0,
             room_edit:0,
+            playing:0,
+            control_playing:0,
             color:"default",
             immutable:0,
             server_id:this.props.serverId });
@@ -531,6 +533,34 @@ class AddServerDialog extends React.Component {
                                             disabled={cantEditRoles || immutableRole}
                                             onChange={(e,value) => this.handleRoleSwitchChange("room_edit",value)}
                                             checked={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].room_edit === 1 : false}
+                                        />
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                                <Divider/>
+                                <ListItem>
+                                    <ListItemText
+                                        primary="Участие в игровом процессе"
+                                        secondary="Дает право принимать участие в игровом процессе"/>
+                                    <ListItemSecondaryAction>
+                                        <Switch
+                                            edge="end"
+                                            disabled={cantEditRoles || immutableRole}
+                                            onChange={(e,value) => this.handleRoleSwitchChange("playing",value)}
+                                            checked={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].playing === 1 : false}
+                                        />
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                                <Divider/>
+                                <ListItem>
+                                    <ListItemText
+                                        primary="Управление игровым процессом"
+                                        secondary="Дает право одобрять анкеты персонажей, удалять персонажей"/>
+                                    <ListItemSecondaryAction>
+                                        <Switch
+                                            edge="end"
+                                            disabled={cantEditRoles || immutableRole}
+                                            onChange={(e,value) => this.handleRoleSwitchChange("control_playing",value)}
+                                            checked={this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].control_playing === 1 : false}
                                         />
                                     </ListItemSecondaryAction>
                                 </ListItem>

@@ -60,7 +60,7 @@ class AddRoomDialog extends React.Component {
                     fullWidth
                     helperText={this.state.isNameError}
                     error={this.state.isNameError.length != 0}
-                    onChange={(e)=>this.setState({name:e.target.value})}
+                    onChange={(e)=>this.setState({name:e.target.value,isNameError:""})}
                     label="Название категории"
                     autoFocus
                     value={this.state.name}

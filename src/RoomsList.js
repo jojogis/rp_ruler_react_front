@@ -116,7 +116,7 @@ class RoomsList extends React.Component{
 
     render() {
         const {classes} = this.props;
-        let canEditRooms = (this.props.admin || this.props.role.room_edit) && !this.props.isChat;
+        let canEditRooms = (this.props.admin || this.props.role?.room_edit) && !this.props.isChat;
         if((this.props.rooms == null || this.props.rooms.length === 0) && (this.props.categories == null || this.props.categories.length === 0)){
             return(<Typography variant="subtitle2" align="center">Комнат пока нет...</Typography>);
         }else {
