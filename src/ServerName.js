@@ -76,6 +76,14 @@ class ServerName extends React.Component{
     render() {
 
         const {classes} = this.props;
+        let characterBtn = "";
+        if(this.props.character == null && this.props.role?.playing){
+            characterBtn = <MenuItem className={classes.add} onClick={()=>this.setState({isAddCharacterOpen:true,anchorEl:null})}>
+                Создать персонажа<Add className={classes.icon}/></MenuItem>;
+        }else if(this.props.character != null){
+            characterBtn = <MenuItem className={classes.edit} onClick={()=>this.setState({isAddCharacterOpen:true,anchorEl:null})}>
+                Персонаж <PermIdentity className={classes.icon}/></MenuItem>;
+        }
         if(this.props.isChat){
             return(<div><Button fullWidth onContextMenu={this.handleServerMenuClick} onClick={this.handleServerMenuClick}
                                 aria-controls="fade-menu" aria-haspopup="true">
@@ -114,11 +122,7 @@ class ServerName extends React.Component{
                         Удалить сервер <Delete className={classes.icon}/></MenuItem> : ""}
                     <MenuItem className={classes.edit} onClick={this.openUsersList}>
                         Список участников <ListAlt className={classes.icon}/></MenuItem>
-                    {this.props.character == null ?
-                    <MenuItem className={classes.add} onClick={()=>this.setState({isAddCharacterOpen:true,anchorEl:null})}>
-                        Создать персонажа<Add className={classes.icon}/></MenuItem>:
-                        <MenuItem className={classes.edit} onClick={()=>this.setState({isAddCharacterOpen:true,anchorEl:null})}>
-                            Персонаж <PermIdentity className={classes.icon}/></MenuItem>}
+                    {characterBtn}
                     {this.props.admin || this.props.role.control_playing ? <MenuItem className={classes.edit} onClick={()=>this.setState({isCharactersListOpen:true,anchorEl:null})}>
                         Анкеты игроков <People className={classes.icon}/></MenuItem> :""}
                 </Menu>

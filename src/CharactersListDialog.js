@@ -34,7 +34,7 @@ class CharactersListDialog extends React.Component {
         ];
         this.handleDeleteCharacter = this.handleDeleteCharacter.bind(this);
         this.loadCharacters = this.loadCharacters.bind(this);
-        this.handleComment = this.handleComment.bind(this);
+        this.handleCommentChange = this.handleCommentChange.bind(this);
     }
 
     componentDidMount() {
@@ -66,7 +66,7 @@ class CharactersListDialog extends React.Component {
         }
     }
 
-    handleComment(param){
+    handleCommentChange(param){
         Api.addCommentToCharacter(this.context.token,param.id,param.props.value).then((data)=>{
             this.loadCharacters();
         })
@@ -85,20 +85,11 @@ class CharactersListDialog extends React.Component {
                         rows={this.state.characters}
                         columns={this.columns}
                         pageSize={8}
-                        onEditCellChangeCommitted={this.handleComment}
+                        onEditCellChangeCommitted={this.handleCommentChange}
                         disableSelectionOnClick={true}
                         disableColumnSelector={true}
                         disableColumnFilter={true}
-                        localeText={{
-                            noRowsLabel:"Нет анкет",
-                            columnMenuFilter: 'Фильтр',
-                            columnMenuHideColumn: 'Скрыть',
-                            columnMenuShowColumns: 'Показать все',
-                            columnMenuUnsort: 'Отключить сортировку',
-                            columnMenuSortAsc: 'Сортировать по возрастанию',
-                            columnMenuSortDesc: 'Сортировать по убыванию',
-                        }}
-
+                        localeText={Utils.dataGridLocale}
                     />
                 </div>
             </DialogContent>

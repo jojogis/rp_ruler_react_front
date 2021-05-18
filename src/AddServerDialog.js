@@ -36,10 +36,12 @@ import Reorder, {
     reorderFromToImmutable
 
 } from 'react-reorder';
-import {Check, DeleteOutline} from "@material-ui/icons";
+import {Add, Check, Delete, DeleteOutline} from "@material-ui/icons";
 import {blue, cyan, deepPurple, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
 import Api from "./Api";
 import Utils from "./Utils";
+import {DataGrid} from "@material-ui/data-grid";
+import {number} from "prop-types";
 
 
 function TabPanel(props) {
@@ -93,8 +95,18 @@ class AddServerDialog extends React.Component {
             bg:this.props.bg == null || this.props.bg === "null" ? null : this.props.bg,
             isNameError:"",
             tab:0,
-            currentRole:0
+            currentRole:0,
+            levels:this.props.levels ?? []
         };
+
+        this.levelsColumns = [
+            { field: 'number', headerName: 'Номер', width: 130,sortable: true,editable:false },
+            { field: 'hp', headerName: 'HP', width: 130,sortable: false,editable:true },
+            { field: 'mp', headerName: 'MP', width: 130,sortable: false,editable:true },
+            { field: 'exp', headerName: 'EXP', width: 130,sortable: false,editable:true },
+            { field: 'actions',headerName: " ",width:170,sortable: false,renderCell: (params) =>
+                    (<Button onClick={() => this.handleDeleteLevel(params.getValue("id"))} variant="contained" color="secondary"><Delete/></Button>)}
+        ];
 
         this.handleDeleteRole = this.handleDeleteRole.bind(this);
         this.handleReorder = this.handleReorder.bind(this);
@@ -104,6 +116,15 @@ class AddServerDialog extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleColorChange = this.handleColorChange.bind(this);
         this.handleRoleNameChange = this.handleRoleNameChange.bind(this);
+        this.handleAddLevel = this.handleAddLevel.bind(this);
+        this.handleLevelEdit = this.handleLevelEdit.bind(this);
+        this.handleDeleteLevel = this.handleDeleteLevel.bind(this);
+    }
+
+    componentDidMount() {
+        Api.getLevels(this.context.token,this.props.serverId).then((data)=>{
+            this.setState({levels:data.levels});
+        })
     }
 
     componentDidUpdate(prevProps) {
@@ -117,8 +138,6 @@ class AddServerDialog extends React.Component {
             let tagsArr = this.props.tags.split(",");
             if(tagsArr == null || tagsArr[0] == "")tagsArr = [];
             if(!(tagsArr instanceof Array))tagsArr = [tagsArr];
-
-
             this.setState({tags:tagsArr});
         }
         if (prevProps.isPrivate !== this.props.isPrivate) {
@@ -136,7 +155,60 @@ class AddServerDialog extends React.Component {
         if (prevProps.roles !== this.props.roles) {
             this.setState({roles:this.props.roles ?? []});
         }
+        if(prevProps.serverId != this.props.serverId && this.props.serverId != null){
+            Api.getLevels(this.context.token,this.props.serverId).then((data)=>{
+                this.setState({levels:data.levels});
+            })
+        }
 
+    }
+
+    handleAddLevel(){
+        let maxNumber = 0;
+        this.state.levels.forEach((level)=>{
+            if(level.number > maxNumber)maxNumber = level.number;
+        })
+        let newLevels = [...this.state.levels];
+        let prevExp = newLevels.find((level) => level.number === maxNumber)?.exp ?? 0;
+        newLevels.push({id:"new"+(maxNumber+1),number:maxNumber+1,hp:1,mp:1,exp:prevExp + 1,serverId:this.props.serverId});
+        this.setState({levels:newLevels});
+
+    }
+
+    handleDeleteLevel(id){
+        let newLevels = [...this.state.levels];
+        let deletedNumber = Utils.getElById(newLevels,id).number;
+
+        Utils.removeElById(newLevels,id);
+        newLevels.forEach((level)=>{
+            if(level.number > deletedNumber){
+                level.number--;
+                if(level.id.indexOf("new") != -1)level.id = "new" + level.number;
+            }
+        })
+        this.setState({levels:newLevels});
+    }
+
+    handleLevelEdit(params){
+        let newLevels = [...this.state.levels];
+        let newValue = params.props.value;
+        let level = Utils.getElById(newLevels,params.id);
+        if(params.field === "exp" ){
+            let prevLevel = newLevels.find((l) => l.number === level.number - 1);
+            let nextLevel = newLevels.find((l) => l.number === level.number + 1);
+            if(prevLevel != null && prevLevel.exp >= newValue){
+                this.context.showMessage("Опыт для последующего уровня, должен быть больше, чем опыт для предыдущего.","error");
+                this.setState({levels:newLevels});
+                return;
+            }
+            if(nextLevel != null && nextLevel.exp <= newValue){
+                this.context.showMessage("Опыт для последующего уровня, должен быть больше, чем опыт для предыдущего.","error");
+                this.setState({levels:newLevels});
+                return;
+            }
+        }
+        level[params.field] = parseInt(newValue);
+        this.setState({levels:newLevels});
     }
 
     handleFileUploaded(event){
@@ -178,7 +250,7 @@ class AddServerDialog extends React.Component {
             })
         }else {
             Api.editServer(this.context.token,this.props.serverId,this.state.age,this.state.name,this.state.description,this.state.avatar,
-                this.state.isPrivate,this.state.bg,this.state.tags,this.state.roles).then((data)=>{
+                this.state.isPrivate,this.state.bg,this.state.tags,this.state.roles,this.state.levels).then((data)=>{
                 if(this.props.onCreate != null)this.props.onCreate(this.props.serverId ?? data.id);
                 this.props.onClose();
             })
@@ -246,6 +318,7 @@ class AddServerDialog extends React.Component {
                       textColor="primary" onChange={(e,value) => this.setState({tab:value})}>
                     <Tab value={0} label="Основные" className={classes.tabs} />
                     {this.props.serverId != null ? <Tab label="Роли" value={1}  className={classes.tabs}/>: ""}
+                    {this.props.serverId != null ? <Tab label="Уровни персонажей" value={2}  className={classes.tabs}/>: ""}
                 </Tabs>
                 </Paper>
             </DialogTitleWithClose>
@@ -567,6 +640,29 @@ class AddServerDialog extends React.Component {
                             </List>
                         </Grid>
                     </Grid>
+                </TabPanel>
+                <TabPanel value={this.state.tab} index={2}>
+                    <div style={{ height: 400, width: '100%' }}>
+                        <DataGrid
+                            rows={this.state.levels}
+                            columns={this.levelsColumns}
+                            pageSize={100}
+                            onEditCellChangeCommitted={this.handleLevelEdit}
+                            hideFooterRowCount={true}
+                            sortModel={[
+                                {
+                                    field: 'number',
+                                    sort: 'asc',
+                                },
+                            ]}
+                            hideFooter={true}
+                            disableSelectionOnClick={true}
+                            disableColumnSelector={true}
+                            disableColumnFilter={true}
+                            localeText={{...Utils.dataGridLocale,noRowsLabel:"Нет уровней"}}
+                        />
+                    </div><br/>
+                    <Button variant="contained" color="primary" onClick={this.handleAddLevel}><Add/></Button>
                 </TabPanel>
                 <Grid container justify="center">
                     <Button variant="contained" color="primary" onClick={this.handleSubmit} component="span">

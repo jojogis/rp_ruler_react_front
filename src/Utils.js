@@ -2,6 +2,16 @@ class Utils{
 
     static uploadDir = "https://rp-ruler.ru/upload/";
 
+    static dataGridLocale = {
+        noRowsLabel:"Нет анкет",
+        columnMenuFilter: 'Фильтр',
+        columnMenuHideColumn: 'Скрыть',
+        columnMenuShowColumns: 'Показать все',
+        columnMenuUnsort: 'Отключить сортировку',
+        columnMenuSortAsc: 'Сортировать по возрастанию',
+        columnMenuSortDesc: 'Сортировать по убыванию',
+    };
+
     static getElById(arr,id){
         if(arr === undefined)return null;
         for(let i=0;i<arr.length;i++){

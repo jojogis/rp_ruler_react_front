@@ -3,6 +3,7 @@ import TokenContext from "./AppContext";
 import {Button, Dialog, DialogContent, Grid, TextField, Typography, withStyles} from "@material-ui/core";
 import DialogTitleWithClose from "./DialogTitleWithClose";
 import Api from "./Api";
+import {blue, green, yellow} from "@material-ui/core/colors";
 
 
 class AddCharacterDialog extends React.Component {
@@ -148,10 +149,25 @@ class AddCharacterDialog extends React.Component {
                     autoFocus
                     value={this.state.extra}
                 />
+
+                {this.props.character?.state == "2" ? <div>
+                    <br/>
+                    <Typography variant="body1" className={classes.hp}>HP: {this.props.character.hp}</Typography><br/>
+                    <Typography variant="body1" className={classes.mp}>MP: {this.props.character.mp}</Typography><br/>
+                    <Typography variant="body1" className={classes.exp}>EXP: {this.props.character.exp}</Typography><br/>
+                    <Typography variant="body1">Уровень: {this.props.character.level}</Typography><br/>
+
+                </div> : ""}
+
+
                 {this.props.character != null && this.props.character.comment?.length > 0 ? <div><br/><Typography variant="body1">Комментарий: </Typography>
                     <Typography variant="body2">{this.props.character.comment}</Typography></div> : ""}
                 {this.props.character?.state == "1" ? <Typography align="center" color="primary" variant="h6">На проверке<br/><br/></Typography> : ""}
                 {this.props.character?.state == "2" ? <Typography align="center" color="primary" variant="h6">Активен<br/><br/></Typography> : ""}
+
+
+
+
                 {this.props.character?.state != "2" ?
                 <Grid container justify="center">
                     <Button variant="contained" color="primary" onClick={this.handleSubmit} component="span">
@@ -165,7 +181,15 @@ class AddCharacterDialog extends React.Component {
 }
 
 const styles = {
-
+    hp:{
+        color:green[400]
+    },
+    mp:{
+        color:blue[400]
+    },
+    exp:{
+        color:yellow[400]
+    }
 };
 
 export default withStyles(styles)(AddCharacterDialog);

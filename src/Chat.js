@@ -1,14 +1,13 @@
 import * as React from "react";
 import {
-    Avatar, Button,
+    Button,
     CssBaseline,
-    Grid, LinearProgress, List, ListItem, ListItemAvatar, ListItemText,
+    Grid, LinearProgress,
     Paper, TextField,
     withStyles,
 } from "@material-ui/core";
 import MainMenu from "./MainMenu";
 import TokenContext from "./AppContext";
-import { Picker } from 'emoji-mart'
 import 'emoji-mart/css/emoji-mart.css'
 import RoomsList from "./RoomsList";
 import ServerName from "./ServerName";
@@ -18,29 +17,8 @@ import InputReplyMessage from "./InputReplyMessage";
 import UsersList from "./UsersList";
 import Emoji from "./Emoji";
 import socketIOClient from "socket.io-client";
-import {
-    Bookmark,
-    ChangeHistory,
-    ChatBubble,
-    ChatBubbleOutline,
-    ChildCare,
-    ChildFriendly,
-    Code,
-    DirectionsRun,
-    DirectionsWalk,
-    Drafts,
-    Eco,
-    EmojiFlags,
-    EmojiFoodBeverage,
-    Explore,
-    Favorite,
-    FavoriteBorder, Fireplace, Grade, Group, Home, MonetizationOn, Person, QuestionAnswer, School,
-    Send, SmokingRooms, Spa, Terrain, Waves, Work
-} from "@material-ui/icons";
+import {Send} from "@material-ui/icons";
 
-
-
-import { w3cwebsocket as W3CWebSocket } from "websocket";
 import Utils from "./Utils";
 import Api from "./Api";
 
@@ -85,8 +63,6 @@ class Chat extends React.Component{
         this.handleWriteToUserClick = this.handleWriteToUserClick.bind(this);
         this.handleLoadMoreMessages = this.handleLoadMoreMessages.bind(this);
         this.handleSelectEmoji = this.handleSelectEmoji.bind(this);
-        this.handleBlur = this.handleBlur.bind(this);
-        this.onSocketMessage = this.onSocketMessage.bind(this);
         this.loadRole = this.loadRole.bind(this);
         this.loadCharacter = this.loadCharacter.bind(this);
 
@@ -125,11 +101,9 @@ class Chat extends React.Component{
 
     handleChangeServer(serverId){
         this.setState({serverId:serverId,isChat:false,categories:[],rooms:[]},() => {this.loadRooms();this.loadRole();this.loadCharacter()});
-
     }
 
     handleChangeRoom(roomId){
-
         this.setState({roomId:roomId},() => {
             this.loadMessages();
             if(this.state.isChat)this.connectSocket();
@@ -176,7 +150,6 @@ class Chat extends React.Component{
                 this.setState({servers:data});
             }
         })
-
     }
 
     loadUsers(){
@@ -190,7 +163,6 @@ class Chat extends React.Component{
                 this.connectSocket();
             }
         })
-
     }
 
     handleLoadMoreMessages(){
@@ -233,59 +205,6 @@ class Chat extends React.Component{
         }
     }
 
-
-    onSocketMessage(message){
-        let data = JSON.parse(message.data);
-
-        if(data.message != null){
-            let newMessages = [...this.state.messages];
-            if(Utils.getElById(this.state.messages,data.message.id) == null){
-                newMessages.push(data.message);
-            }
-            if(data.message.sender_id != this.context.user_id*1)this.popsound.play();
-            this.setState({messages: newMessages});
-        }
-        if(data.left_user != null){
-            this.setState((state) => {
-                let newUsers = [...state.users];
-                Utils.removeElById(newUsers,data.left_user);
-                return {
-                    users:newUsers
-                }
-            });
-        }
-        if(data.joined_user != null){
-
-            this.setState((state) => {
-                let newUsers = [...state.users];
-                if(Utils.getElById(newUsers,data.joined_user.id) == null)newUsers.unshift(data.joined_user);
-                return {
-                    users:newUsers
-                }
-            });
-        }
-        if(data.remove_message != null){
-
-            this.setState((state) => {
-                let newMessages = [...state.messages];
-                Utils.removeElById(newMessages,data.remove_message);
-                return {
-                    messages:newMessages
-                }
-            });
-        }
-        if(data.unread_room != null){
-            let newRooms = [...this.state.rooms];
-            let unreadRoom = Utils.getElById(newRooms,data.unread_room*1);
-            console.log(unreadRoom.is_unread);
-            if(unreadRoom != null)unreadRoom.is_unread = (unreadRoom.is_unread*1 || 0) + 1;
-            this.setState( {
-                    rooms:newRooms
-                });
-            if(!unreadRoom.is_muted)this.popsound.play();
-        }
-
-    }
 
 
 
@@ -403,12 +322,6 @@ class Chat extends React.Component{
         this.setState({inputFocused:true});
     }
 
-    handleBlur(){
-        if(this.messageInput.current.value.length === 0){
-///this.setState({inputFocused:null});
-        }
-        this.setState({inputFocused:null});
-    }
 
 
     render() {
@@ -506,7 +419,7 @@ class Chat extends React.Component{
                                 multiline
                                 onFocus={this.handleFocus}
                                 fullWidth
-                                onBlur={this.handleBlur}
+                                onBlur={() => this.setState({inputFocused:null})}
                                 focused={this.state.inputFocused}
                                 rowsMax={8}
                                 color="black"
