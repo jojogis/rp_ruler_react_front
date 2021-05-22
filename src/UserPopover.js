@@ -13,7 +13,10 @@ import {
 import {blue, cyan, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
 import TokenContext from "./AppContext";
 import Utils from "./Utils";
+import Api from "./Api";
 
+
+//DEPRECATED
 class UserPopover extends React.Component {
     static contextType = TokenContext;
 
@@ -24,21 +27,11 @@ class UserPopover extends React.Component {
 
     handleRoleChange(e){
 
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: "token=" + this.context.token + "&server_id=" + this.props.server.id + "&user_id="+this.props.user.id+"&role_id="+e.target.value
-        };
-        fetch("https://rp-ruler.ru/api/set_user_role.php", requestOptions)
-            .then(response => response.json())
-            .then((data) => {
-                this.props.onClose();
-                this.props.onMessagesUpdate();
-                this.props.onUsersUpdate();
-            })
-
+        Api.setUserRole(this.context.token,this.props.server.id,this.props.user.id,e.target.value).then((data)=>{
+            this.props.onClose();
+            this.props.onMessagesUpdate();
+            this.props.onUsersUpdate();
+        })
 
     }
 
@@ -84,6 +77,8 @@ class UserPopover extends React.Component {
 
                     </Select>
                 </FormControl> : ""}
+                <br/><br/>
+                <Button variant="contained" color="primary">Персонаж</Button>
 
             </div>
         </Popover>);

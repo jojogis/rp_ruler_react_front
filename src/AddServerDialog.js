@@ -708,57 +708,7 @@ const styles = {
         width:"35px",
         marginRight:"10px"
     },
-    red:{
-        background:"#e53935"
-    },
-    pink:{
-        background:pink[600],
-        '&:hover':{
-            background:pink[800],
-        }
-    },
-    purple:{
-        background:purple[600],
-        '&:hover':{
-            background:purple[800],
-        }
-    },
-    lime:{
-        background:lime[600],
-        '&:hover':{
-            background:lime[800],
-        }
-    },
-    blue:{
-        background:blue[600],
-        '&:hover':{
-            background:blue[800],
-        }
-    },
-    cyan:{
-        background:cyan[600],
-        '&:hover':{
-            background:cyan[800],
-        }
-    },
-    green:{
-        background:green[600],
-        '&:hover':{
-            background:green[800],
-        }
-    },
-    yellow:{
-        background:yellow[600],
-        '&:hover':{
-            background:yellow[800],
-        }
-    },
-    orange:{
-        background:orange[600],
-        '&:hover':{
-            background:orange[800],
-        }
-    },
+    ...Utils.colors,
     redText:{
         color:red[400]
     },

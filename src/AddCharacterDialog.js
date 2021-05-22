@@ -1,9 +1,10 @@
 import * as React from "react";
 import TokenContext from "./AppContext";
-import {Button, Dialog, DialogContent, Grid, TextField, Typography, withStyles} from "@material-ui/core";
+import {Button, Chip, Dialog, DialogContent, Grid, TextField, Typography, withStyles} from "@material-ui/core";
 import DialogTitleWithClose from "./DialogTitleWithClose";
 import Api from "./Api";
 import {blue, green, yellow} from "@material-ui/core/colors";
+import {Explore, Favorite, FlashOn, Grade} from "@material-ui/icons";
 
 
 class AddCharacterDialog extends React.Component {
@@ -152,10 +153,33 @@ class AddCharacterDialog extends React.Component {
 
                 {this.props.character?.state == "2" ? <div>
                     <br/>
-                    <Typography variant="body1" className={classes.hp}>HP: {this.props.character.hp}</Typography><br/>
-                    <Typography variant="body1" className={classes.mp}>MP: {this.props.character.mp}</Typography><br/>
-                    <Typography variant="body1" className={classes.exp}>EXP: {this.props.character.exp}</Typography><br/>
-                    <Typography variant="body1">Уровень: {this.props.character.level}</Typography><br/>
+                    <div className={classes.chips}>
+                    <Chip
+                        avatar={<Favorite style={{ color: green[400] }}/>}
+                        label={this.props.character.hp}
+                        variant="outlined"
+                        className={classes.hp + " " + classes.chip}
+                    />
+                    <Chip
+                        avatar={<FlashOn style={{ color: blue[400] }}/>}
+                        label={this.props.character.mp}
+                        variant="outlined"
+                        className={classes.mp+ " " + classes.chip}
+                    />
+                        <Chip
+                            avatar={<Grade/>}
+                            label={this.props.character.level}
+                            variant="outlined"
+                            className={classes.chip}
+                        />
+                        <Chip
+                            avatar={<Explore style={{ color: yellow[400] }}/>}
+                            label={this.props.character.exp}
+                            variant="outlined"
+                            className={classes.exp + " " + classes.chip}
+                        />
+                    </div>
+
 
                 </div> : ""}
 
@@ -181,6 +205,14 @@ class AddCharacterDialog extends React.Component {
 }
 
 const styles = {
+    chip:{
+      margin:"5px"
+    },
+    chips:{
+        display: 'flex',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+    },
     hp:{
         color:green[400]
     },

@@ -5,6 +5,7 @@ import UserPopover from "./UserPopover";
 import StyledBadge from "./StyledBadge";
 import {blue, cyan, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
 import Utils from "./Utils";
+import UserInfoDialog from "./UserInfoDialog";
 
 
 
@@ -61,7 +62,7 @@ class UsersList extends React.Component{
             </ListItem>
             ))}
         </List>
-        <UserPopover open={this.state.popoverOpen}
+        <UserInfoDialog open={this.state.popoverOpen}
                      onClose={this.handleClose}
                      onWriteToUser={(event)=>this.handleWriteClick(event,this.state.clickedUser.id)}
                      anchorEl={this.state.anchorEl}

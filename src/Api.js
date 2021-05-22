@@ -376,7 +376,7 @@ class Api{
         return await fetch(this.location+"characters",requestOptions).then(response => response.json());
     }
 
-    async getCharacter(token,serverId){
+    async getCharacter(token,serverId,userId){
         const requestOptions = {
             method: 'GET',
             headers: {
@@ -384,7 +384,8 @@ class Api{
                 'Authorization' : 'Bearer '+token
             },
         };
-        return await fetch(this.location+"characters?serverId="+serverId,requestOptions).then(response => response.json());
+        let userIdStr = userId != null ? "&userId="+userId : "";
+        return await fetch(this.location+"characters?serverId="+serverId+userIdStr,requestOptions).then(response => response.json());
     }
 
     async getCharacters(token,serverId){
@@ -421,6 +422,18 @@ class Api{
         return await fetch(this.location+"characters_comment",requestOptions).then(response => response.json());
     }
 
+    async changeCharactersExp(token,characterId,exp){
+        const requestOptions = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization' : 'Bearer '+token
+            },
+            body: "characterId="+characterId+"&exp="+exp
+        };
+        return await fetch(this.location+"characters_exp",requestOptions).then(response => response.json());
+    }
+
     async confirmCharacter(token,characterId){
         const requestOptions = {
             method: 'PUT',
@@ -442,6 +455,18 @@ class Api{
             },
         };
         return await fetch(this.location+"levels?serverId="+serverId,requestOptions).then(response => response.json());
+    }
+
+    async setUserRole(token,serverId,userId,roleId){
+        const requestOptions = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization' : 'Bearer '+token
+            },
+            body: "serverId="+serverId+"&userId="+userId+"&roleId="+roleId
+        };
+        return await fetch(this.location+"users_role",requestOptions).then(response => response.json());
     }
 
 

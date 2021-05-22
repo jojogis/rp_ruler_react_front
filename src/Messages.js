@@ -1,7 +1,7 @@
 import * as React from "react";
 import {
 
-    Avatar, IconButton, LinearProgress, List,
+    Avatar, Button, IconButton, LinearProgress, List,
     ListItem,
     ListItemAvatar, ListItemIcon,
     ListItemText, Menu, MenuItem, Typography,
@@ -14,7 +14,7 @@ import InputReplyMessage from "./InputReplyMessage";
 import StyledBadge from "./StyledBadge";
 import {blue, cyan, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
 import Utils from "./Utils";
-
+const reactStringReplace = require('react-string-replace')
 
 class Messages extends React.Component{
     static contextType = TokenContext;
@@ -90,6 +90,7 @@ class Messages extends React.Component{
 
     render(){
         const {classes} = this.props;
+        let reg = /@@{[\w|\d|:|,|А-Я|а-я|\s]*}/g;
         return(<div><div className={classes.roomBg} style={{"background-image":this.props.bg}}/><List onScroll={this.handleScroll} className={classes.messagesWrap}>
 
             {this.props.messages.map((item,i,msgs)=>(
@@ -114,7 +115,12 @@ class Messages extends React.Component{
                     </ListItemAvatar>
                 }
                 <ListItemText
-                    secondary={<div>{item.text}
+                    secondary={<div>{reactStringReplace(item.text,/@@({[\w|\d|:|,|А-Я|а-я|\s|"]*})/mg,(match,i)=> {
+
+                        let data = JSON.parse(match);
+                        return (<Button variant="contained" style={{margin:"0px 10px"}} className={classes[data.color]}>{data.name}</Button>);
+                    })}
+
                     {item.reply_message != null ? <InputReplyMessage replyLogin={item.reply_message.login}
                                                                 replyText={item.reply_message.text}/> : null}</div>}>
                     {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<span className={classes.login + " " + item.color != null ? classes[item.color+"Text"] : ""}>{item.login}</span>}
@@ -162,6 +168,7 @@ class Messages extends React.Component{
 
 
 const styles = {
+    ...Utils.colors,
     roomBg:{
         position:"absolute",
         top:0,

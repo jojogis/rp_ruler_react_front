@@ -77,3 +77,94 @@ input:-webkit-autofill:active  {
     backdrop-filter: blur(7px);
     background: #4445;
 }
+
+#filled-textarea b{
+    padding:5px;
+    border-radius:5px;
+    text-transform: uppercase;
+    margin: 0px 10px;
+    cursor: default;
+    transition:.3s;
+    box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
+}
+#filled-textarea b:hover{
+    box-shadow: 0px 2px 4px -1px rgb(0 0 0 / 20%), 0px 4px 5px 0px rgb(0 0 0 / 14%), 0px 1px 10px 0px rgb(0 0 0 / 12%);
+}
+#filled-textarea .red{
+    background: #e53935;
+    color:rgba(0, 0, 0, 0.87);
+}
+#filled-textarea .red:hover{
+    background: #c62828;
+}
+
+#filled-textarea .blue{
+    background: #1e88e5;
+    color:rgba(0, 0, 0, 0.87);
+}
+#filled-textarea .blue:hover{
+    background: #1565c0;
+}
+
+#filled-textarea .lime{
+    background: #c0ca33;
+    color:rgba(0, 0, 0, 0.87);
+}
+
+#filled-textarea .lime:hover{
+    background: #9e9d24;
+}
+
+#filled-textarea .orange{
+    background: #fb8c00;
+    color:rgba(0, 0, 0, 0.87);
+}
+
+#filled-textarea .orange:hover{
+    background: #ef6c00;
+}
+
+#filled-textarea .pink{
+    background: #d81b60;
+    color:rgba(0, 0, 0, 0.87);
+}
+
+#filled-textarea .pink:hover{
+    background: #ad1457;
+}
+
+#filled-textarea .purple{
+    background: #8e24aa;
+    color:rgba(0, 0, 0, 0.87);
+}
+
+#filled-textarea .purple:hover{
+    background: #6a1b9a;
+}
+
+#filled-textarea .cyan{
+    background: #00acc1;
+    color:rgba(0, 0, 0, 0.87);
+}
+
+#filled-textarea .cyan:hover{
+    background: #00838f;
+}
+
+#filled-textarea .green{
+    background: #43a047;
+    color:rgba(0, 0, 0, 0.87);
+}
+
+#filled-textarea .green:hover{
+    background: #2e7d32;
+}
+
+#filled-textarea .yellow{
+    background: #fdd835;
+    color:rgba(0, 0, 0, 0.87);
+}
+
+#filled-textarea .yellow:hover{
+    background: #f9a825;
+}

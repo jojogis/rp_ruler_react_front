@@ -124,7 +124,7 @@ class ServerName extends React.Component{
                         Список участников <ListAlt className={classes.icon}/></MenuItem>
                     {characterBtn}
                     {this.props.admin || this.props.role.control_playing ? <MenuItem className={classes.edit} onClick={()=>this.setState({isCharactersListOpen:true,anchorEl:null})}>
-                        Анкеты игроков <People className={classes.icon}/></MenuItem> :""}
+                        Персонажи<People className={classes.icon}/></MenuItem> :""}
                 </Menu>
                     <AddCharacterDialog
                         open={this.state.isAddCharacterOpen}

@@ -20,8 +20,9 @@ class CharactersListDialog extends React.Component {
             { field: 'name', headerName: 'Имя', width: 130,sortable: false, },
             { field: 'age', headerName: 'Возраст', width: 140,sortable: false, },
             { field: 'biography', headerName: 'Биография', width: 300,sortable: false, },
-            { field: 'temper', headerName: 'Характер', width: 300,sortable: false },
+            { field: 'temper', headerName: 'Характер', width: 200,sortable: false },
             { field: 'extra', headerName: 'Дополнительно', width: 200,sortable: false, },
+            { field: 'exp', headerName: 'Опыт', width: 130,sortable: false,editable: true },
             { field: 'comment', headerName: 'Комментарий', width: 200,sortable: false,editable: true  },
             { field: 'state1', headerName: 'Состояние', width: 130,
                 valueGetter: (params) =>
@@ -34,7 +35,7 @@ class CharactersListDialog extends React.Component {
         ];
         this.handleDeleteCharacter = this.handleDeleteCharacter.bind(this);
         this.loadCharacters = this.loadCharacters.bind(this);
-        this.handleCommentChange = this.handleCommentChange.bind(this);
+        this.handleCharacterChange = this.handleCharacterChange.bind(this);
     }
 
     componentDidMount() {
@@ -66,11 +67,17 @@ class CharactersListDialog extends React.Component {
         }
     }
 
-    handleCommentChange(param){
-        Api.addCommentToCharacter(this.context.token,param.id,param.props.value).then((data)=>{
-            this.loadCharacters();
-        })
-    }
+    handleCharacterChange(param){
+        if(param.field === "comment") {
+            Api.addCommentToCharacter(this.context.token, param.id, param.props.value).then((data) => {
+                this.loadCharacters();
+            })
+        }else if(param.field === "exp"){
+            Api.changeCharactersExp(this.context.token, param.id, param.props.value).then((data) => {
+                this.loadCharacters();
+            })
+        }}
+
 
     render() {
         const {classes} = this.props;
@@ -85,7 +92,7 @@ class CharactersListDialog extends React.Component {
                         rows={this.state.characters}
                         columns={this.columns}
                         pageSize={8}
-                        onEditCellChangeCommitted={this.handleCommentChange}
+                        onEditCellChangeCommitted={this.handleCharacterChange}
                         disableSelectionOnClick={true}
                         disableColumnSelector={true}
                         disableColumnFilter={true}

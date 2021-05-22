@@ -1,6 +1,6 @@
 import * as React from "react";
 import {
-    Button,
+    Button, Chip,
     CssBaseline,
     Grid, LinearProgress,
     Paper, TextField,
@@ -17,10 +17,11 @@ import InputReplyMessage from "./InputReplyMessage";
 import UsersList from "./UsersList";
 import Emoji from "./Emoji";
 import socketIOClient from "socket.io-client";
-import {Send} from "@material-ui/icons";
+import {Send, VideogameAsset} from "@material-ui/icons";
 
 import Utils from "./Utils";
 import Api from "./Api";
+import AbilitiesPopup from "./AbilitiesPopup";
 
 
 
@@ -44,6 +45,7 @@ class Chat extends React.Component{
             character:null,
             messageText:"",
             inputFocused:false,
+            isAbilitiesOpen:false,
             role:{color:"default",msg_delete:0,msg_send:0,role_edit:0,role_order:1,server_edit:0,room_edit:0}
         }
         this.messageInput = React.createRef();
@@ -65,6 +67,7 @@ class Chat extends React.Component{
         this.handleSelectEmoji = this.handleSelectEmoji.bind(this);
         this.loadRole = this.loadRole.bind(this);
         this.loadCharacter = this.loadCharacter.bind(this);
+        this.handleAddAbility = this.handleAddAbility.bind(this);
 
 
     }
@@ -300,26 +303,45 @@ class Chat extends React.Component{
         this.readMessages();
         if(event.key === "Enter" && !event.shiftKey){
             event.preventDefault();
-            const msgText = encodeURIComponent(event.target.value);
-            if(msgText.length > 0) {
+
+            let msgText = event.target.innerHTML;
+            if(msgText?.length > 0) {
                 this.sendMessage(msgText);
+                event.target.innerHTML = "";
             }
         }
     }
 
+    handleAddAbility(ability){
+        let msg = "";
+        if(this.state.messageText.length === 0){
+            msg = '<b contenteditable="false" class="'+ability.color+'" data-id="'+ability.id+'">'+ability.name+'</b>';
+        }else{
+            msg = document.getElementById("filled-textarea").innerHTML += '<b contenteditable="false" class="'+ability.color+'" data-id="'+ability.id+'">'+ability.name+'</b>';
+        }
+
+        this.setState({messageText:msg})
+
+    }
+
     sendMessage(msg){
         if(this.client != null){
-            this.client.emit("message",{text:msg,reply_id:this.state.replyTo});
-            this.setState({replyTo: null});
-            this.messageInput.current.value = null;
+            let reg = /<b contenteditable="false" class="([a-z]*)" data-id="(\d+)">([\W|\d]*)<\/b>/gm;
+            let replacedMsg = msg.replace(reg,'@@{"id":"$2","name":"$3","color":"$1"}');
+            replacedMsg = replacedMsg.replace(/&nbsp;/g," ");
+            replacedMsg = encodeURIComponent(replacedMsg);
+            this.client.emit("message",{text:replacedMsg,reply_id:this.state.replyTo});
+            this.setState({replyTo: null,messageText:""});
+
         }else {
             this.context.showMessage("Ошибка соединения","error");
         }
     }
 
     handleSelectEmoji(emoji){
-        this.messageInput.current.value += emoji.native;
-        this.setState({inputFocused:true});
+
+        let newText = this.state.messageText+emoji.native;
+        this.setState({inputFocused:true,messageText:newText});
     }
 
 
@@ -408,32 +430,38 @@ class Chat extends React.Component{
                                   online={this.state.users}
                                   role={this.state.role}
                                   lastRead={this.state.lastReadMsg}/>
-                        <Paper elevation={4} className={classes.messageInputWrap}>
+                        <Paper elevation={this.state.inputFocused ? 10 : 4} className={classes.messageInputWrap}>
                             <InputReplyMessage onCancel={() => this.setState({replyTo:null})} replyText={replyText} replyLogin={replyLogin}/>
-                            <TextField
+                            <div
                                 id="filled-textarea"
-                                label={labelText}
-                                disabled={!this.state.isChat && (!this.state.role?.msg_send || room == null)}
+
                                 placeholder="Введите сообщение"
                                 onKeyDown={this.handleKeyDown}
-                                multiline
+
                                 onFocus={this.handleFocus}
-                                fullWidth
-                                onBlur={() => this.setState({inputFocused:null})}
-                                focused={this.state.inputFocused}
-                                rowsMax={8}
+                                contentEditable={!(!this.state.isChat && (!this.state.role?.msg_send || room == null))}
+                                onBlur={(e) => this.setState({inputFocused:null,messageText:e.target.innerHTML})}
+                                style={{outline:"none",minHeight:"60px",width:"100%",padding:"10px 20px "}}
                                 color="black"
                                 className={classes.messageInput}
-                                variant="filled"
-                                inputRef={this.messageInput}
+                                dangerouslySetInnerHTML={{__html:this.state.messageText.length === 0 && !this.state.inputFocused ? '<div contentEditable="false" style="opacity:0.5">Введите сообщение</div>'
+                                        :  this.state.messageText}}
                             />
+                            <Button id="abilitiesBtn" onClick={() => this.setState({isAbilitiesOpen:true})} className={classes.playBtn}><VideogameAsset/></Button>
                             <Emoji isDarkTheme={this.props.isDarkTheme} onSelect={this.handleSelectEmoji}/>
-                            <Button onClick={() => {if(this.messageInput.current)this.sendMessage(this.messageInput.current.value)}} className={classes.sendBtn}><Send/></Button>
+                            <Button onClick={() => {if(this.state.messageText?.length > 0)this.sendMessage(this.state.messageText)}} className={classes.sendBtn}><Send/></Button>
                         </Paper>
 
                     </Paper>
 
                 </Grid>
+
+                <AbilitiesPopup
+                    open={this.state.isAbilitiesOpen}
+                    anchorEl={document.getElementById("abilitiesBtn")}
+                    onClose={() => this.setState({isAbilitiesOpen:false})}
+                    onAddAbility={this.handleAddAbility}
+                />
 
 
                 {!this.state.isChat ? <Grid justify="center" container item xs={2} spacing={0}>
@@ -454,12 +482,33 @@ class Chat extends React.Component{
     }
 }
 
+function MyInputComponent(props) {
+    const { component: Component, inputRef, ...other } = props;
+
+    // implement `InputElement` interface
+    React.useImperativeHandle(inputRef, () => ({
+        focus: () => {
+            // logic to focus the rendered component from 3rd party belongs here
+        },
+        // hiding the value e.g. react-stripe-elements
+    }));
+
+    // `Component` will be your `SomeThirdPartyComponent` from below
+    return <Component {...other} />;
+}
+
 
 const styles = {
         sendBtn:{
             position:"absolute",
             bottom:"10px",
             right:"5px",
+            opacity:0.7
+        },
+        playBtn:{
+            position:"absolute",
+            bottom:"10px",
+            right:"130px",
             opacity:0.7
         },
         loading:{
