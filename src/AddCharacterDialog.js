@@ -215,6 +215,8 @@ class AddCharacterDialog extends React.Component {
                             <Button variant="contained" color="primary" onClick={this.startUpdatingFields} item style={{marginBottom:10}}>
                                 Редактировать
                             </Button>
+
+
                             <Button variant="contained" color="primary" item>
                                 Удалить
                             </Button>
