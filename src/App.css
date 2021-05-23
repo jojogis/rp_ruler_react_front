@@ -168,3 +168,6 @@ input:-webkit-autofill:active  {
 #filled-textarea .yellow:hover{
     background: #f9a825;
 }
+.characterClassInput input{
+    min-height:51px
+}

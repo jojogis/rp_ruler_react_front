@@ -13,10 +13,10 @@ import {
     IconButton,
     List,
     ListItem,
-    ListItemSecondaryAction, ListItemText,
+    ListItemSecondaryAction, ListItemText, MenuItem,
     Paper,
     Radio,
-    RadioGroup,
+    RadioGroup, Select,
     Switch,
     TextField,
     Typography,
@@ -36,11 +36,11 @@ import Reorder, {
     reorderFromToImmutable
 
 } from 'react-reorder';
-import {Add, Check, Delete, DeleteOutline} from "@material-ui/icons";
+import {Add, Check, Delete, DeleteOutline, Edit} from "@material-ui/icons";
 import {blue, cyan, deepPurple, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
 import Api from "./Api";
 import Utils from "./Utils";
-import {DataGrid} from "@material-ui/data-grid";
+import {DataGrid, isNumber} from "@material-ui/data-grid";
 import {number} from "prop-types";
 
 
@@ -96,7 +96,10 @@ class AddServerDialog extends React.Component {
             isNameError:"",
             tab:0,
             currentRole:0,
-            levels:this.props.levels ?? []
+            levels:this.props.levels ?? [],
+            characterClasses:this.props.characterClasses ?? [],
+            abilities:this.props.abilities ?? [],
+            effects:this.props.effects ?? [],
         };
 
         this.levelsColumns = [
@@ -106,6 +109,90 @@ class AddServerDialog extends React.Component {
             { field: 'exp', headerName: 'EXP', width: 130,sortable: false,editable:true },
             { field: 'actions',headerName: " ",width:170,sortable: false,renderCell: (params) =>
                     (<Button onClick={() => this.handleDeleteLevel(params.getValue("id"))} variant="contained" color="secondary"><Delete/></Button>)}
+        ];
+
+        this.effectsColumns = [
+            { field: 'name', headerName: 'Название', width: 170,sortable: true,editable:true },
+            { field: 'description', headerName: 'Описание', width: 200,sortable: true,editable:true },
+            { field: 'time', headerName: 'Длительность', width: 200,sortable: true,editable:true },
+            { field:"dhp",headerName: "ΔHP",description: "Изменение HP (отрицательное или положительное число)",sortable: true,editable:true},
+            { field:"dmp",headerName: "ΔMP",description: "Изменение MP (отрицательное или положительное число)",sortable: true,editable:true},
+        ];
+
+
+
+        this.abilityColumns = [
+            { field: 'name', headerName: 'Название', width: 170,sortable: true,editable:true },
+            { field: 'description', headerName: 'Описание', width: 200,sortable: true,editable:true },
+            { field: 'level', headerName: 'Доступно с уровня', width: 180,sortable: true,editable:true },
+            { field: 'color', headerName: 'Цвет', width: 180,sortable: true,editable:false,renderCell:(params => (
+                    <Select value={params.getValue("color")} onChange={(event)=>this.handleChangeAbilityColor(event,params.getValue("id"))}>
+                        <MenuItem value={"default"}>Белый</MenuItem>
+                        <MenuItem value={"red"}>Красный</MenuItem>
+                        <MenuItem value={"blue"}>Синий</MenuItem>
+                        <MenuItem value={"green"}>Зеленый</MenuItem>
+                        <MenuItem value={"lime"}>Лайм</MenuItem>
+                        <MenuItem value={"orange"}>Оранжевый</MenuItem>
+                        <MenuItem value={"pink"}>Розовый</MenuItem>
+                        <MenuItem value={"purple"}>Фиолетовый</MenuItem>
+                        <MenuItem value={"cyan"}>Сине-зеленый</MenuItem>
+                        <MenuItem value={"yellow"}>Желтый</MenuItem>
+                    </Select>
+                )) },
+            { field: 'classesNeeded', headerName: 'Доступно для классов',description:"Способность будет доступна для игрока, если у него есть один из выбранных классов, начиная с выбранного уровня",
+                width: 350,sortable: true,editable:false,renderCell:(params)=>(
+                    <Autocomplete
+                        multiple
+                        options={this.state.characterClasses}
+                        getOptionLabel={(o)=>o.name}
+                        value={params.getValue("classesNeeded")}
+                        name="tags"
+                        clearText="Очистить"
+                        fullWidth
+                        noOptionsText="Нет классов"
+                        filterSelectedOptions={true}
+                        getOptionSelected={(o,v)=>o.id===v.id}
+                        onChange={(e,value)=>this.handleNeededClassesChange(e,value,params.getValue("id"))}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                className={"characterClassInput"}
+                            />
+                        )}
+                    />
+                ) },
+            {field:"dhp",headerName: "ΔHP",description: "Изменение HP (отрицательное или положительное число)",sortable: true,editable:true},
+            {field:"dmp",headerName: "ΔMP",description: "Изменение MP (отрицательное или положительное число)",sortable: true,editable:true},
+            {field:"effects",headerName: "Эффекты",sortable: true,editable:false,width:200,renderCell:(params)=>(
+                    <Autocomplete
+                        multiple
+                        options={this.state.effects}
+                        getOptionLabel={(o)=>o.name}
+                        value={params.getValue("effects")}
+                        name="tags"
+                        clearText="Очистить"
+                        fullWidth
+                        noOptionsText="Нет эффектов"
+                        filterSelectedOptions={true}
+                        getOptionSelected={(o,v)=>o.id===v.id}
+                        onChange={(e,value)=>this.handleNeededClassesChange(e,value,params.getValue("id"))}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                className={"characterClassInput"}
+                            />
+                        )}
+                    />
+                )},
+            {field: 'actions',headerName: " ",width:80,sortable: false,renderCell: (params) =>
+                    (<Button onClick={() => this.handleDeleteLevel(params.getValue("id"))} variant="contained" color="secondary"><Delete/></Button>)}
+        ];
+
+        this.classesColumns = [
+            { field: 'name', headerName: 'Название', width: 170,sortable: true,editable:true },
+            { field: 'description', headerName: 'Описание', width: 300,sortable: true,editable:true },
+            { field: 'actions',headerName: " ",width:80,sortable: false,renderCell: (params) =>
+                    (<Button onClick={() => this.handleDeleteClass(params.getValue("id"))} variant="contained" color="secondary"><Delete/></Button>)}
         ];
 
         this.handleDeleteRole = this.handleDeleteRole.bind(this);
@@ -119,11 +206,21 @@ class AddServerDialog extends React.Component {
         this.handleAddLevel = this.handleAddLevel.bind(this);
         this.handleLevelEdit = this.handleLevelEdit.bind(this);
         this.handleDeleteLevel = this.handleDeleteLevel.bind(this);
+        this.handleAddClass = this.handleAddClass.bind(this);
+        this.handleClassEdit = this.handleClassEdit.bind(this);
+        this.handleNeededClassesChange = this.handleNeededClassesChange.bind(this);
+        this.handleAddAbility = this.handleAddAbility.bind(this);
+        this.handleAbilityEdit = this.handleAbilityEdit.bind(this);
+        this.handleChangeAbilityColor = this.handleChangeAbilityColor.bind(this);
+        this.handleAddEffect = this.handleAddEffect.bind(this);
     }
 
     componentDidMount() {
         Api.getLevels(this.context.token,this.props.serverId).then((data)=>{
             this.setState({levels:data.levels});
+        })
+        Api.getClasses(this.context.token,this.props.serverId).then((data)=>{
+            this.setState({characterClasses:data.classes});
         })
     }
 
@@ -159,9 +256,82 @@ class AddServerDialog extends React.Component {
             Api.getLevels(this.context.token,this.props.serverId).then((data)=>{
                 this.setState({levels:data.levels});
             })
+            Api.getClasses(this.context.token,this.props.serverId).then((data)=>{
+                this.setState({characterClasses:data.classes});
+            })
         }
 
     }
+
+    handleNeededClassesChange(e,value,id){
+        let newAbilities = [...this.state.abilities];
+        let ability = Utils.getElById(newAbilities,id);
+        ability.classesNeeded = [];
+        value.forEach((v)=>{
+            ability.classesNeeded.push({id:v.id,name:v.name});
+        })
+        this.setState({abilities:newAbilities});
+
+    }
+
+    handleAddAbility(){
+        let maxId = 0;
+        this.state.abilities.forEach((ability)=>{
+            let prevId = (ability.id+"").replace("new","")*1;
+            if(prevId > maxId)maxId = prevId;
+        })
+        let newAbilities = [...this.state.abilities];
+        newAbilities.push({id:"new"+(maxId+1),name:"Новая способность",level:0,description:"",color:"default",classesNeeded:[],effect:[]});
+        this.setState({abilities:newAbilities});
+    }
+
+    handleChangeAbilityColor(event,id){
+        let newAbilities = [...this.state.abilities];
+        let ability = Utils.getElById(newAbilities,id);
+        ability.color = event.target.value;
+        this.setState({abilities:newAbilities});
+    }
+
+    handleAbilityEdit(params){
+
+        let newAbilities = [...this.state.abilities];
+        if(params.field === "level" && !Number.isInteger(params.props.value*1)){
+            this.setState({abilities:newAbilities});
+            return;
+        }
+        let ability = Utils.getElById(newAbilities,params.id);
+        ability[params.field] = params.props.value;
+        this.setState({abilities:newAbilities});
+        console.log(newAbilities);
+    }
+
+    handleAddClass(){
+        let maxId = 0;
+        this.state.characterClasses.forEach((characterClass)=>{
+            let prevId = (characterClass.id+"").replace("new","")*1;
+            if(prevId > maxId)maxId = prevId;
+        })
+        let newClasses = [...this.state.characterClasses];
+        newClasses.push({id:"new"+(maxId+1),name:"Новый класс",description:""});
+        this.setState({characterClasses:newClasses});
+    }
+
+    handleDeleteClass(id){
+        let newClasses = [...this.state.characterClasses];
+        Utils.removeElById(newClasses,id);
+        this.setState({characterClasses:newClasses});
+    }
+
+    handleClassEdit(params){
+
+        let newClasses = [...this.state.characterClasses];
+        let oldClass = Utils.getElById(newClasses,params.id);
+
+        oldClass[params.field] = params.props.value;
+        this.setState({characterClasses:newClasses});
+        console.log(newClasses);
+    }
+
 
     handleAddLevel(){
         let maxNumber = 0;
@@ -172,6 +342,12 @@ class AddServerDialog extends React.Component {
         let prevExp = newLevels.find((level) => level.number === maxNumber)?.exp ?? 0;
         newLevels.push({id:"new"+(maxNumber+1),number:maxNumber+1,hp:1,mp:1,exp:prevExp + 1,serverId:this.props.serverId});
         this.setState({levels:newLevels});
+
+    }
+
+    handleAddEffect(){
+        //let newEffects = [...this.state.effects];
+
 
     }
 
@@ -250,7 +426,7 @@ class AddServerDialog extends React.Component {
             })
         }else {
             Api.editServer(this.context.token,this.props.serverId,this.state.age,this.state.name,this.state.description,this.state.avatar,
-                this.state.isPrivate,this.state.bg,this.state.tags,this.state.roles,this.state.levels).then((data)=>{
+                this.state.isPrivate,this.state.bg,this.state.tags,this.state.roles,this.state.levels,this.state.characterClasses).then((data)=>{
                 if(this.props.onCreate != null)this.props.onCreate(this.props.serverId ?? data.id);
                 this.props.onClose();
             })
@@ -307,10 +483,11 @@ class AddServerDialog extends React.Component {
         if(this.state.roles[this.state.currentRole] == null)this.state.currentRole = 0;
         let cantEditServer = this.props.role != null && !this.props.role.server_edit;
         let cantEditRoles = (this.props.role != null && !this.props.role.role_edit);
+        let canControlPlaying = (this.props.role != null && this.props.role.control_playing);
         let immutableRole = (this.state.roles[this.state.currentRole] != null && this.state.roles[this.state.currentRole].immutable == 1);
         let roleColor = this.state.roles.length > this.state.currentRole ? this.state.roles[this.state.currentRole].color : "default";
         let btnText = this.props.serverId == null ? "Создать сервер" :  "Сохранить";
-        return (<Dialog maxWidth="md" fullWidth open={this.props.open} onClose={this.props.onClose}
+        return (<Dialog maxWidth="xl" fullWidth open={this.props.open} onClose={this.props.onClose}
                         aria-labelledby="form-dialog-title">
             <DialogTitleWithClose id="customized-dialog-title" noPadding={true} onClose={this.props.onClose}>
                 <Paper square>
@@ -318,7 +495,10 @@ class AddServerDialog extends React.Component {
                       textColor="primary" onChange={(e,value) => this.setState({tab:value})}>
                     <Tab value={0} label="Основные" className={classes.tabs} />
                     {this.props.serverId != null ? <Tab label="Роли" value={1}  className={classes.tabs}/>: ""}
-                    {this.props.serverId != null ? <Tab label="Уровни персонажей" value={2}  className={classes.tabs}/>: ""}
+                    {this.props.serverId != null && canControlPlaying ? <Tab label="Уровни персонажей" value={2}  className={classes.tabs}/>: ""}
+                    {this.props.serverId != null && canControlPlaying ? <Tab label="Классы персонажей" value={3}  className={classes.tabs}/>: ""}
+                    {this.props.serverId != null && canControlPlaying ? <Tab label="Способности" value={4}  className={classes.tabs}/>: ""}
+                    {this.props.serverId != null && canControlPlaying ? <Tab label="Эффекты" value={5}  className={classes.tabs}/>: ""}
                 </Tabs>
                 </Paper>
             </DialogTitleWithClose>
@@ -663,6 +843,58 @@ class AddServerDialog extends React.Component {
                         />
                     </div><br/>
                     <Button variant="contained" color="primary" onClick={this.handleAddLevel}><Add/></Button>
+                </TabPanel>
+                <TabPanel value={this.state.tab} index={3}>
+                    <div style={{ height: 400, width: '100%' }}>
+                        <DataGrid
+                            rows={this.state.characterClasses}
+                            columns={this.classesColumns}
+                            pageSize={100}
+                            onEditCellChangeCommitted={this.handleClassEdit}
+                            hideFooterRowCount={true}
+                            hideFooter={true}
+
+                            disableSelectionOnClick={true}
+                            disableColumnSelector={true}
+                            disableColumnFilter={true}
+                            localeText={{...Utils.dataGridLocale,noRowsLabel:"Нет классов"}}
+                        />
+                    </div><br/>
+                    <Button variant="contained" color="primary" onClick={this.handleAddClass}><Add/></Button>
+                </TabPanel>
+                <TabPanel value={this.state.tab} index={4}>
+                    <div style={{ height: 400, width: '100%' }}>
+                        <DataGrid
+                            rows={this.state.abilities}
+                            columns={this.abilityColumns}
+                            pageSize={100}
+                            onEditCellChangeCommitted={this.handleAbilityEdit}
+                            hideFooterRowCount={true}
+                            hideFooter={true}
+                            disableSelectionOnClick={true}
+                            disableColumnSelector={true}
+                            disableColumnFilter={true}
+                            localeText={{...Utils.dataGridLocale,noRowsLabel:"Нет способностей"}}
+                        />
+                    </div><br/>
+                    <Button variant="contained" color="primary" onClick={this.handleAddAbility}><Add/></Button>
+                </TabPanel>
+                <TabPanel value={this.state.tab} index={5}>
+                    <div style={{ height: 400, width: '100%' }}>
+                        <DataGrid
+                            rows={this.state.abilities}
+                            columns={this.effectsColumns}
+                            pageSize={100}
+                            onEditCellChangeCommitted={this.handleAbilityEdit}
+                            hideFooterRowCount={true}
+                            hideFooter={true}
+                            disableSelectionOnClick={true}
+                            disableColumnSelector={true}
+                            disableColumnFilter={true}
+                            localeText={{...Utils.dataGridLocale,noRowsLabel:"Нет эффектов"}}
+                        />
+                    </div><br/>
+                    <Button variant="contained" color="primary" onClick={this.handleAddEffect}><Add/></Button>
                 </TabPanel>
                 <Grid container justify="center">
                     <Button variant="contained" color="primary" onClick={this.handleSubmit} component="span">

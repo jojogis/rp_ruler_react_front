@@ -232,7 +232,7 @@ class Api{
         return await fetch(this.location+"servers",requestOptions).then(response => response.json());
     }
 
-    async editServer(token,serverId,age,name,description,avatar,isPrivate,bg,tags,roles,levels){
+    async editServer(token,serverId,age,name,description,avatar,isPrivate,bg,tags,roles,levels,classes){
         const requestOptions = {
             method: 'PUT',
             headers: {
@@ -241,7 +241,7 @@ class Api{
             },
             body:"&age="+age+"&name="+name+"&description="+description+"&avatar="+avatar+
                 "&isPrivate="+isPrivate*1+"&bg="+bg+"&tags="+tags+"&serverId="+serverId+"&roles="+encodeURI(JSON.stringify(roles))+
-                "&levels="+encodeURI(JSON.stringify(levels))
+                "&levels="+encodeURI(JSON.stringify(levels))+"&classes="+encodeURI(JSON.stringify(classes))
         };
         return await fetch(this.location+"servers",requestOptions).then(response => response.json());
     }
@@ -455,6 +455,17 @@ class Api{
             },
         };
         return await fetch(this.location+"levels?serverId="+serverId,requestOptions).then(response => response.json());
+    }
+
+    async getClasses(token,serverId){
+        const requestOptions = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization' : 'Bearer '+token
+            },
+        };
+        return await fetch(this.location+"classes?serverId="+serverId,requestOptions).then(response => response.json());
     }
 
     async setUserRole(token,serverId,userId,roleId){
