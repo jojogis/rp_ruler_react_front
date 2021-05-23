@@ -27,6 +27,7 @@ class AddCharacterDialog extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.startUpdatingFields = this.startUpdatingFields.bind(this);
         this.finishUpdatingFields = this.finishUpdatingFields.bind(this);
+        this.deleteCharacter = this.deleteCharacter.bind(this);
     }
 
     componentDidUpdate(prevProps) {
@@ -51,6 +52,14 @@ class AddCharacterDialog extends React.Component {
      */
     finishUpdatingFields() {
         this.setState({isEditable:false})
+    }
+
+    /**
+     * После нажатия "Удалить" анкета пользователя удаляется
+     * @param id - id анкеты пользователя
+     */
+    deleteCharacter(id) {
+        Api.deleteCharacter(this.context.token,id);
     }
 
     handleSubmit(){
@@ -217,7 +226,7 @@ class AddCharacterDialog extends React.Component {
                             </Button>
 
 
-                            <Button variant="contained" color="primary" item>
+                            <Button variant="contained" color="primary" onClick={this.deleteCharacter(this.props.id)} item>
                                 Удалить
                             </Button>
                         </Grid> :
