@@ -9,6 +9,7 @@ import {
     withStyles
 } from "@material-ui/core";
 import {ExpandMore} from "@material-ui/icons";
+import Utils from "./Utils";
 
 class RoomAppBar extends React.Component{
     constructor(props) {
@@ -31,7 +32,7 @@ class RoomAppBar extends React.Component{
                                 {this.props.name}
                             </Typography>
                             {!this.state.open ? <Typography className={classes.description} variant="body2">
-                                {this.truncateString(this.props.description,100)}
+                                {Utils.truncateString(this.props.description,100)}
                             </Typography> : ""}
                         </AccordionSummary>
                         <AccordionDetails>
@@ -51,7 +52,7 @@ class RoomAppBar extends React.Component{
                         {this.props.name}
                     </Typography>
                     <Typography className={classes.description} variant="body2" noWrap>
-                        {this.truncateString(this.props.description,100)}
+                        {Utils.truncateString(this.props.description,100)}
                     </Typography>
 
                 </Toolbar>
@@ -59,13 +60,7 @@ class RoomAppBar extends React.Component{
         }
 
     }
-    truncateString(str, num) {
-        if(str == null)return  null;
-        if (str.length <= num) {
-            return str
-        }
-        return str.slice(0, num) + '...'
-    }
+
 
 }
 

@@ -1,7 +1,7 @@
 import * as React from "react";
 import {
 
-    Avatar, IconButton, LinearProgress, List,
+    Avatar, Button, IconButton, LinearProgress, List,
     ListItem,
     ListItemAvatar, ListItemIcon,
     ListItemText, Menu, MenuItem, Typography,
@@ -12,7 +12,9 @@ import {Delete, Reply} from "@material-ui/icons";
 import TokenContext from "./AppContext";
 import InputReplyMessage from "./InputReplyMessage";
 import StyledBadge from "./StyledBadge";
-
+import {blue, cyan, green, lime, orange, pink, purple, red, yellow} from "@material-ui/core/colors";
+import Utils from "./Utils";
+const reactStringReplace = require('react-string-replace')
 
 class Messages extends React.Component{
     static contextType = TokenContext;
@@ -52,13 +54,6 @@ class Messages extends React.Component{
         this.scrollToBottom();
     }
 
-    getElById(arr,id){
-        if(arr === undefined)return null;
-        for(let i=0;i<arr.length;i++){
-            if(arr[i].id === id)return arr[i];
-        }
-        return null;
-    }
 
     handleCloseMenu(event){
         event.preventDefault();
@@ -95,6 +90,7 @@ class Messages extends React.Component{
 
     render(){
         const {classes} = this.props;
+        let reg = /@@{[\w|\d|:|,|А-Я|а-я|\s]*}/g;
         return(<div><div className={classes.roomBg} style={{"background-image":this.props.bg}}/><List onScroll={this.handleScroll} className={classes.messagesWrap}>
 
             {this.props.messages.map((item,i,msgs)=>(
@@ -112,18 +108,23 @@ class Messages extends React.Component{
                                          horizontal: 'right',
                                      }}
                                      overlap="circle"
-                                     invisible={this.getElById(this.props.online, item.sender_id) == null}>
-                            <Avatar alt={item.login} src={"https://rp-ruler.ru/upload/" + item.avatar}/>
+                                     invisible={Utils.getElById(this.props.online, item.sender_id) == null}>
+                            <Avatar alt={item.login} src={Utils.uploadDir + item.avatar}/>
                         </StyledBadge>
 
                     </ListItemAvatar>
                 }
                 <ListItemText
-                    secondary={<div>{item.text}
+                    secondary={<div>{reactStringReplace(item.text,/@@({[\w|\d|:|,|А-Я|а-я|\s|"]*})/mg,(match,i)=> {
+
+                        let data = JSON.parse(match);
+                        return (<Button variant="contained" style={{margin:"0px 10px"}} className={classes[data.color]}>{data.name}</Button>);
+                    })}
+
                     {item.reply_message != null ? <InputReplyMessage replyLogin={item.reply_message.login}
                                                                 replyText={item.reply_message.text}/> : null}</div>}>
-                    {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<span className={classes.login}>{item.login}</span>}
-                    {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<l className={classes.messageTime}> {item.datetime}</l>}
+                    {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<span className={classes.login + " " + item.color != null ? classes[item.color+"Text"] : ""}>{item.login}</span>}
+                    {(i != 0 && msgs[i - 1].sender_id == item.sender_id) ? "" :<l className={classes.messageTime}> Недавно</l>}
 
 
                 </ListItemText>
@@ -141,8 +142,9 @@ class Messages extends React.Component{
                         : undefined
                 }
             >
-                {this.getMessageById(this.state.menuMessageId) != null &&
-                this.getMessageById(this.state.menuMessageId).sender_id == this.context.user_id ?
+                {this.getMessageById(this.state.menuMessageId) != null && (
+                this.getMessageById(this.state.menuMessageId).sender_id == this.context.user_id ||
+                    (this.props.role.msg_delete && this.props.role.role_order < this.getMessageById(this.state.menuMessageId).role_order) )?
                     <MenuItem onClick={this.handleDeleteMsg}>
                     <ListItemIcon>
                         <Delete fontSize="small" />
@@ -166,6 +168,7 @@ class Messages extends React.Component{
 
 
 const styles = {
+    ...Utils.colors,
     roomBg:{
         position:"absolute",
         top:0,
@@ -193,14 +196,40 @@ const styles = {
         "background-color":"#ff572209"
     },
     login:{
-        color:"#ff5722",
         "font-weight":"400"
     },
     noAvatar:{
         paddingLeft:"72px",
         paddingTop:"0px",
         paddingBlock:"0px"
-    }
+    },
+        redText:{
+            color:red[400]
+        },
+        pinkText:{
+            color:pink[400],
+        },
+        purpleText:{
+            color:purple[400],
+        },
+        limeText:{
+            color:lime[400],
+        },
+        blueText:{
+            color:blue[400],
+        },
+        cyanText:{
+            color:cyan[400],
+        },
+        greenText:{
+            color:green[400],
+        },
+        yellowText:{
+            color:yellow[400],
+        },
+        orangeText:{
+            color:orange[400],
+        }
 }
 
 

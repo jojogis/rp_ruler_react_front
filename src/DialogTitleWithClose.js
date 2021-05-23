@@ -7,6 +7,10 @@ const styles = (theme) => ({
         margin: 0,
         padding: theme.spacing(2),
     },
+    rootNoPadding:{
+        margin:0,
+        padding: 0
+    },
     closeButton: {
         position: 'absolute',
         right: theme.spacing(1),
@@ -18,7 +22,7 @@ const styles = (theme) => ({
 const DialogTitleWithClose = withStyles(styles)((props) => {
     const { children, classes, onClose, ...other } = props;
     return (
-        <DialogTitle disableTypography className={classes.root} {...other}>
+        <DialogTitle disableTypography className={props.noPadding ? classes.rootNoPadding : classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
             {onClose ? (
                 <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>

@@ -50,6 +50,7 @@ class Emoji extends React.Component {
                 color="#ff5722"
                 defaultSkin={6}
                 title=""
+                disableSkinTonePicker={true}
                 onSelect={this.props.onSelect}
                 emoji='point_up'
                 showPreview={false}

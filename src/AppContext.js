@@ -7,6 +7,7 @@ const AppContext = React.createContext({
     toggleTheme: () => {},
     logout:() => {},
     isAnimationEnabled:true,
-    toggleAnimation:()=>{}
+    toggleAnimation:()=>{},
+    showMessage:(message,status)=>{}
 });
 export default AppContext;

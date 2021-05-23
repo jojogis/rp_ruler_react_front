@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Avatar, Fab, List, ListItem, withStyles} from "@material-ui/core";
+import {Avatar, Dialog, Fab, List, ListItem, withStyles} from "@material-ui/core";
 import {AssignmentInd, Add, Settings, Explore, Forum} from "@material-ui/icons";
 
 import {Divider} from "@material-ui/core";
@@ -7,6 +7,8 @@ import AppContext from "./AppContext.js";
 import ProfileDialog from "./ProfileDialog";
 import ServersDialog from "./ServersDialog";
 import AddServerDialog from "./AddServerDialog";
+import UsersList from "./UsersList";
+import Utils from "./Utils";
 
 
 
@@ -17,19 +19,19 @@ class MainMenu extends React.Component{
         this.state = {
             profileDialogOpen:false,
             serversDialogOpen:false,
-            addServerDialogOpen:false
+            addServerDialogOpen:false,
+
         };
 
         this.handleServerCreate = this.handleServerCreate.bind(this);
-    }
-    handleServerClick(id,name){
-        this.props.onChangeServer(id,name);
+
     }
 
-    handleServerCreate(id,name){
+    handleServerCreate(id){
         this.props.onServerConnect();
-        this.props.onChangeServer(id,name);
+        this.props.onChangeServer(id);
     }
+
 
     render() {
         const {classes} = this.props;
@@ -42,7 +44,8 @@ class MainMenu extends React.Component{
                 <Divider className={classes.divider}/>
             {this.props.servers.map((item)=>(
                 <ListItem key={item.id}>
-                    <Avatar className={classes.avatar + (this.props.currentServer===item.id ? " " + classes.current : "")} onClick={() => this.handleServerClick(item.id)} src={"https://rp-ruler.ru/upload/"+item.avatar}>
+                    <Avatar className={classes.avatar + (this.props.currentServer===item.id ? " " + classes.current : "")} onClick={() => this.props.onChangeServer(item.id)}
+                            src={Utils.uploadDir+item.avatar}>
                         <Fab className={classes.serverElem + (this.props.currentServer===item.id ? " "+classes.current : "")}>{item.name.substr(0,2)}</Fab>
                     </Avatar></ListItem>
             ))}
@@ -53,8 +56,14 @@ class MainMenu extends React.Component{
                     <Explore/></Fab></ListItem>
 
             </List><ProfileDialog open={this.state.profileDialogOpen} onClose={() =>this.setState({profileDialogOpen:false})}/>
-                    <ServersDialog open={this.state.serversDialogOpen} connectedServers={this.props.servers} onServerConnect={this.props.onServerConnect} onClose={() => this.setState({serversDialogOpen:false})}/>
-                    <AddServerDialog open={this.state.addServerDialogOpen} onCreate={this.handleServerCreate} onClose={() => this.setState({addServerDialogOpen:false})}/>
+                    <ServersDialog open={this.state.serversDialogOpen}
+                                   connectedServers={this.props.servers}
+                                   onServerConnect={this.props.onServerConnect}
+                                   onClose={() => this.setState({serversDialogOpen:false})}/>
+                    <AddServerDialog open={this.state.addServerDialogOpen}
+                                     onCreate={this.handleServerCreate}
+                                     onClose={() => this.setState({addServerDialogOpen:false})}/>
+
         </div>
         );
     }
