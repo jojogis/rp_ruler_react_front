@@ -21,9 +21,12 @@ class AddCharacterDialog extends React.Component {
             isNameError:"",
             isAgeError:"",
             isBiographyError:"",
-            isTemperError:""
+            isTemperError:"",
+            isEditable:false
         }
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.startUpdatingFields = this.startUpdatingFields.bind(this);
+        this.finishUpdatingFields = this.finishUpdatingFields.bind(this);
     }
 
     componentDidUpdate(prevProps) {
@@ -34,6 +37,20 @@ class AddCharacterDialog extends React.Component {
                 extra:this.props.character?.extra,
                 temper:this.props.character?.temper});
         }
+    }
+
+    /**
+     * После нажатия "Редактировать" открывает доступность полей для редактирования
+     */
+    startUpdatingFields() {
+        this.setState({isEditable:true})
+    }
+
+    /**
+     * После нажатия "Сохранить" закрывает доступность полей для редактирования
+     */
+    finishUpdatingFields() {
+        this.setState({isEditable:false})
     }
 
     handleSubmit(){
@@ -71,7 +88,7 @@ class AddCharacterDialog extends React.Component {
 
     render() {
         const {classes} = this.props;
-        const isDisabled = this.props.character?.state == "2";
+        const isDisabled = this.props.character?.state == "2" || !this.state.isEditable;
         const title = this.props.character != null ? "Персонаж" : "Добавление персонажа";
         return(<Dialog maxWidth="sm" fullWidth open={this.props.open} onClose={this.props.onClose}
                        aria-labelledby="form-dialog-title">
@@ -193,11 +210,21 @@ class AddCharacterDialog extends React.Component {
 
 
                 {this.props.character?.state != "2" ?
-                <Grid container justify="center">
-                    <Button variant="contained" color="primary" onClick={this.handleSubmit} component="span">
-                        Сохранить
-                    </Button>
-                </Grid>:""}
+                    (this.state.isEditable == false ?
+                        <Grid container direction="column" justify="center" alignItems="flex-end">
+                            <Button variant="contained" color="primary" onClick={this.startUpdatingFields} item style={{marginBottom:10}}>
+                                Редактировать
+                            </Button>
+                            <Button variant="contained" color="primary" item>
+                                Удалить
+                            </Button>
+                        </Grid> :
+                        <Grid container direction="column" justify="center" alignItems="flex-end">
+                            <Button variant="contained" color="primary" onClick={() => {this.handleSubmit();this.finishUpdatingFields()}} component="span" style={{marginBottom:10}}>
+                                Сохранить
+                            </Button>
+                        </Grid>)
+                    :""}
             </DialogContent>
         </Dialog>)
     }

@@ -163,7 +163,7 @@ class AddServerDialog extends React.Component {
                 ) },
             {field:"dhp",headerName: "ΔHP",description: "Изменение HP (отрицательное или положительное число)",sortable: true,editable:true},
             {field:"dmp",headerName: "ΔMP",description: "Изменение MP (отрицательное или положительное число)",sortable: true,editable:true},
-            {field:"effects",headerName: "Эффекты",sortable: true,editable:false,width:200,renderCell:(params)=>(
+            {field:"effects",headerName: "Эффекты",sortable: true,editable:false,width:300,renderCell:(params)=>(
                     <Autocomplete
                         multiple
                         options={this.state.effects}
@@ -175,7 +175,7 @@ class AddServerDialog extends React.Component {
                         noOptionsText="Нет эффектов"
                         filterSelectedOptions={true}
                         getOptionSelected={(o,v)=>o.id===v.id}
-                        onChange={(e,value)=>this.handleNeededClassesChange(e,value,params.getValue("id"))}
+                        onChange={(e,value)=>this.handleEffectsOfAbilityChange(e,value,params.getValue("id"))}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -213,6 +213,8 @@ class AddServerDialog extends React.Component {
         this.handleAbilityEdit = this.handleAbilityEdit.bind(this);
         this.handleChangeAbilityColor = this.handleChangeAbilityColor.bind(this);
         this.handleAddEffect = this.handleAddEffect.bind(this);
+        this.handleEditEffect = this.handleEditEffect.bind(this);
+        this.handleEffectsOfAbilityChange = this.handleEffectsOfAbilityChange.bind(this);
     }
 
     componentDidMount() {
@@ -274,6 +276,16 @@ class AddServerDialog extends React.Component {
 
     }
 
+    handleEffectsOfAbilityChange(e,value,id){
+        let newAbilities = [...this.state.abilities];
+        let ability = Utils.getElById(newAbilities,id);
+        ability.effects = [];
+        value.forEach((v)=>{
+            ability.effects.push({id:v.id,name:v.name});
+        })
+        this.setState({abilities:newAbilities});
+    }
+
     handleAddAbility(){
         let maxId = 0;
         this.state.abilities.forEach((ability)=>{
@@ -281,7 +293,7 @@ class AddServerDialog extends React.Component {
             if(prevId > maxId)maxId = prevId;
         })
         let newAbilities = [...this.state.abilities];
-        newAbilities.push({id:"new"+(maxId+1),name:"Новая способность",level:0,description:"",color:"default",classesNeeded:[],effect:[]});
+        newAbilities.push({id:"new"+(maxId+1),name:"Новая способность",level:0,description:"",color:"default",classesNeeded:[],effects:[]});
         this.setState({abilities:newAbilities});
     }
 
@@ -346,9 +358,23 @@ class AddServerDialog extends React.Component {
     }
 
     handleAddEffect(){
-        //let newEffects = [...this.state.effects];
+        let maxId = 0;
+        this.state.effects.forEach((effect)=>{
+            let prevId = (effect.id+"").replace("new","")*1;
+            if(prevId > maxId)maxId = prevId;
+        })
+        let newEffects = [...this.state.effects];
+        newEffects.push({id:"new"+(maxId+1),name:"Новый эффект",description:"",time:0,dhp:0,dmp:0});
+        this.setState({effects:newEffects});
+    }
 
+    handleEditEffect(params){
+        let newEffects = [...this.state.effects];
+        let effect = Utils.getElById(newEffects,params.id);
 
+        effect[params.field] = params.props.value;
+        this.setState({effects:newEffects});
+        console.log(newEffects);
     }
 
     handleDeleteLevel(id){
@@ -882,10 +908,10 @@ class AddServerDialog extends React.Component {
                 <TabPanel value={this.state.tab} index={5}>
                     <div style={{ height: 400, width: '100%' }}>
                         <DataGrid
-                            rows={this.state.abilities}
+                            rows={this.state.effects}
                             columns={this.effectsColumns}
                             pageSize={100}
-                            onEditCellChangeCommitted={this.handleAbilityEdit}
+                            onEditCellChangeCommitted={this.handleEditEffect}
                             hideFooterRowCount={true}
                             hideFooter={true}
                             disableSelectionOnClick={true}
